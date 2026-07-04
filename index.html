@@ -169,6 +169,14 @@ textarea{resize:vertical;min-height:56px}
 .modal ol{padding-left:20px;font-size:13px;line-height:1.8;color:var(--text)}
 .modal .btns{display:flex;gap:8px;justify-content:flex-end}
 
+/* ============ LIGHTBOX ============ */
+#lightbox{position:fixed;inset:0;background:rgba(6,7,9,.92);display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;z-index:700;cursor:zoom-out}
+#lightbox.show{display:flex}
+#lightbox img{max-width:92vw;max-height:84vh;object-fit:contain;box-shadow:0 24px 80px rgba(0,0,0,.8);background:#111}
+#lbCap{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.4px}
+#lbClose{position:fixed;top:14px;right:18px;background:none;border:1px solid var(--line);color:var(--muted);border-radius:6px;font-size:16px;width:34px;height:34px}
+#lbClose:hover{color:var(--text);border-color:var(--accent)}
+
 /* ============ PRINT ============ */
 #printRoot{display:none}
 @media print{
@@ -291,7 +299,9 @@ textarea{resize:vertical;min-height:56px}
         <div class="row">
           <button class="btn" id="fitBtn">Fit</button>
           <button class="btn" id="fillBtn">Fill</button>
+          <button class="btn" id="recenterBtn" title="Re-center photo inside frame">Center</button>
         </div>
+        <div class="hint">⇧ Shift-drag the photo to position it inside its frame · double-click to view full size</div>
       </div>
       <div id="inspTxt" style="display:none;flex-direction:column;gap:8px">
         <textarea id="txtContent" rows="3" spellcheck="false"></textarea>
@@ -309,7 +319,7 @@ textarea{resize:vertical;min-height:56px}
         <button class="btn" id="dupBtn">Duplicate</button>
         <button class="btn danger" id="delBtn">Delete</button>
       </div>
-      <div class="hint">Drag to move · corners to resize · arrow keys nudge (⇧ = bigger step)</div>
+      <div class="hint">Drag to move anywhere on the page · corners to resize · arrow keys nudge · dbl-click photo = full view · ⇧ + drag = pan photo in frame</div>
     </div>
 
     <div class="sec">
@@ -358,6 +368,12 @@ textarea{resize:vertical;min-height:56px}
     <p class="mono">Panel numbers are printed faintly in the corner of each panel on screen preview only — they are not exported.</p>
     <div class="btns"><button class="btn primary" id="foldGo">Open print dialog</button><button class="btn" id="foldClose">Close</button></div>
   </div>
+</div>
+
+<div id="lightbox" role="dialog" aria-label="Full-size photo">
+  <button id="lbClose" title="Close (Esc)">×</button>
+  <img id="lbImg" alt="">
+  <div id="lbCap"></div>
 </div>
 
 <div id="printRoot"></div>
@@ -593,7 +609,9 @@ function renderPage(){
     d.style.left=(e.x*scale)+'px'; d.style.top=(e.y*scale)+'px';
     d.style.width=(e.w*scale)+'px'; d.style.height=(e.h*scale)+'px';
     d.style.zIndex=10+i; d.dataset.id=e.id;
-    if(e.type==='image'&&e.asset){ const im=document.createElement('img'); im.src=state.assets[e.asset].src; im.draggable=false; d.appendChild(im); }
+    if(e.type==='image'&&e.asset){ const im=document.createElement('img'); im.src=state.assets[e.asset].src; im.draggable=false;
+      im.style.objectPosition=(e.px==null?50:e.px)+'% '+(e.py==null?50:e.py)+'%'; d.appendChild(im);
+      d.addEventListener('dblclick',ev=>{ ev.stopPropagation(); openLightbox(e.asset); }); }
     if(e.type==='text'){ d.textContent=e.text;
       d.style.fontSize=(e.size/72*scale)+'px'; d.style.textAlign=e.align; d.style.fontWeight=e.weight;
       d.style.fontFamily='var(--sans)'; d.style.padding=(0.02*scale)+'px'; }
@@ -704,15 +722,23 @@ function renderAll(){
 let drag=null;
 function startDrag(ev, id, handle){
   ev.preventDefault();
-  selId=id; renderPage(); renderInspector();
+  if(selId!==id){ selId=id; renderPage(); renderInspector(); }
   const e=el(); if(!e)return;
-  drag={id, handle, sx:ev.clientX, sy:ev.clientY, ox:e.x, oy:e.y, ow:e.w, oh:e.h};
+  const pan = !handle && e.type==='image' && e.asset && (ev.shiftKey||ev.altKey);
+  drag={id, handle, pan, sx:ev.clientX, sy:ev.clientY, ox:e.x, oy:e.y, ow:e.w, oh:e.h,
+        opx:e.px==null?50:e.px, opy:e.py==null?50:e.py};
   window.addEventListener('pointermove',onDragMove);
   window.addEventListener('pointerup',endDrag,{once:true});
 }
 function onDragMove(ev){
   if(!drag)return; const e=page().elements.find(x=>x.id===drag.id); if(!e)return;
   const dx=(ev.clientX-drag.sx)/scale, dy=(ev.clientY-drag.sy)/scale;
+  if(drag.pan){ // reposition the photo inside its frame (drag left → reveal right side)
+    e.px=Math.max(0,Math.min(100, drag.opx - dx/e.w*100));
+    e.py=Math.max(0,Math.min(100, drag.opy - dy/e.h*100));
+    const im=document.querySelector(`.el[data-id="${e.id}"] img`);
+    if(im) im.style.objectPosition=e.px+'% '+e.py+'%';
+    return; }
   if(!drag.handle){ e.x=snapV(drag.ox+dx); e.y=snapV(drag.oy+dy); snapEdges(e); }
   else{
     let x=drag.ox,y=drag.oy,w=drag.ow,h=drag.oh;
@@ -770,7 +796,9 @@ function renderPrintPage(pg,W,H){
     x.style.left=e.x+'in'; x.style.top=e.y+'in'; x.style.width=e.w+'in'; x.style.height=e.h+'in';
     if(e.type==='image'){
       if(e.asset){ const im=document.createElement('img'); im.src=state.assets[e.asset].src;
-        im.style.objectFit=e.fit; x.appendChild(im); }
+        im.style.objectFit=e.fit;
+        im.style.objectPosition=(e.px==null?50:e.px)+'% '+(e.py==null?50:e.py)+'%';
+        x.appendChild(im); }
     } else {
       x.textContent=e.text; x.style.fontSize=e.size+'pt'; x.style.textAlign=e.align;
       x.style.fontWeight=e.weight; x.style.fontFamily='-apple-system,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif';
@@ -894,6 +922,23 @@ document.getElementById('bakInput').addEventListener('change',e=>{ if(e.target.f
 document.getElementById('dailyChk').addEventListener('change',e=>{ state.settings.daily=e.target.checked; touch(); if(!e.target.checked)hideBanner(); });
 document.getElementById('bannerBak').addEventListener('click',downloadBak);
 document.getElementById('bannerDismiss').addEventListener('click',hideBanner);
+
+/* lightbox */
+function openLightbox(assetId){
+  const a=state.assets[assetId]; if(!a)return;
+  document.getElementById('lbImg').src=a.src;
+  document.getElementById('lbCap').textContent=`${a.name} · ${a.w} × ${a.h}px — full resolution`;
+  document.getElementById('lightbox').classList.add('show');
+}
+function closeLightbox(){ document.getElementById('lightbox').classList.remove('show'); document.getElementById('lbImg').src=''; }
+document.getElementById('lightbox').addEventListener('click',ev=>{ if(ev.target.id!=='lbImg')closeLightbox(); });
+document.getElementById('lbClose').addEventListener('click',closeLightbox);
+window.addEventListener('keydown',ev=>{ if(ev.key==='Escape')closeLightbox(); });
+
+/* re-center photo inside its frame */
+document.getElementById('recenterBtn').addEventListener('click',()=>{
+  const e=el(); if(e&&e.type==='image'){ e.px=50; e.py=50; renderPage(); renderRail(); touch(); }
+});
 
 /* support */
 document.getElementById('copyMpesa').addEventListener('click',async()=>{
