@@ -1,4 +1,4 @@
-ZineIt v2.0 test run — 2026-07-05T16:17:11.010Z
+ZineIt v2.0 test run — 2026-07-05T16:18:13.836Z
 PASS  boots into a valid mini-zine project
 PASS  spread model: cover alone · 3 interior pairs · back alone
 PASS  forward/backward page navigation, no skips, covers included
