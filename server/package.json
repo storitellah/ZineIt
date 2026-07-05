@@ -1,0 +1,14 @@
+{
+  "name": "zineit-sync-api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Optional Phase-2 sync API for ZineIt by Storitellah (the client works fully offline without it)",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "dependencies": {
+    "argon2": "^0.41.0",
+    "express": "^4.19.0",
+    "jsonwebtoken": "^9.0.0",
+    "pg": "^8.12.0"
+  }
+}

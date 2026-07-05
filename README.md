@@ -33,7 +33,10 @@ Every project automatically includes a **front cover** and **back cover**; inter
 
 - Page templates: full bleed, single inside margins, two-up (stacked / side-by-side), four-grid — all built from the same margin so every page lines up identically.
 - ⅛″ snap grid and margin guides (⅛–½″ margins) keep everything perfectly consistent.
-- Text blocks with size, weight, and alignment; one-click **date/time stamps** (date, time, or both), plus a live clock in the header.
+- **Keep original aspect ratio** (toggle, on by default): photos dropped into layout frames reshape the frame to the photo's true proportions, and corner-resizing stays ratio-locked — turn it off for free cropping.
+- Text blocks with **40 Google Fonts** to choose from (Inter, Playfair Display, Bebas Neue, EB Garamond, Space Mono, Caveat, Permanent Marker and more — each previewed in its own face), plus size, weight, and alignment. Fonts load from Google's CDN and fall back to system faces offline, so field work never blocks.
+- One-click **date/time stamps** (date, time, or both), plus a live clock in the header.
+- A lively, colour-coded workspace — every panel section carries its own accent, with the canvas kept neutral so your photographs read true.
 
 ## Export & print
 
@@ -56,6 +59,16 @@ Nothing is ever sent anywhere. The `.bak` lives wherever your downloads go — m
 - Ko-fi: <https://ko-fi.com/kiberastories>
 - Patreon: <https://www.patreon.com/c/kiberastories>
 - M-Pesa: **0711 254 986**
+
+## Repository
+
+```
+index.html            the entire product — zero-build, works offline
+docs/ARCHITECTURE.md  system design, database schema, API endpoints, scaling plan
+server/               optional Phase-2 sync API scaffold (Express + PostgreSQL)
+```
+
+ZineIt is deliberately **local-first**: the editor never needs a server. `docs/ARCHITECTURE.md` documents how the same design scales to millions of users — static client on a CDN, with an optional stateless sync API (`server/`) for multi-device history when the time comes.
 
 ---
 

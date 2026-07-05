@@ -5,12 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ZineIt — by Storitellah</title>
 <meta name="description" content="ZineIt by Storitellah — a local, print-quality zine and photobook layout tool for photojournalists and photographers.">
-<style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter&family=Roboto&family=Open+Sans&family=Lato&family=Montserrat&family=Poppins&family=Raleway&family=Work+Sans&family=DM+Sans&family=Nunito&family=Rubik&family=Karla&family=Space+Grotesk&family=Archivo&family=Archivo+Black&family=IBM+Plex+Sans&family=Oswald&family=Bebas+Neue&family=Anton&family=Merriweather&family=Playfair+Display&family=Lora&family=PT+Serif&family=Libre+Baskerville&family=EB+Garamond&family=Cormorant+Garamond&family=Crimson+Text&family=DM+Serif+Display&family=Abril+Fatface&family=Source+Serif+4&family=Space+Mono&family=IBM+Plex+Mono&family=JetBrains+Mono&family=Inconsolata&family=Courier+Prime&family=Special+Elite&family=Amatic+SC&family=Caveat&family=Shadows+Into+Light&family=Permanent+Marker&display=swap"><style>
 /* ============ TOKENS ============ */
 :root{
   --bg:#141619; --panel:#1b1e23; --panel-2:#22262d; --line:#2d323b; --line-soft:#262b33;
   --text:#dde1e7; --muted:#8b93a0; --faint:#5c6470;
-  --accent:#4d8de8; --accent-deep:#2c5db3; --accent-ink:#0d1a30;
+  --accent:#3E8DFF; --accent-deep:#2c5db3; --accent-ink:#0d1a30;
+  --pop-pink:#F6407A; --pop-violet:#7C5CFF; --pop-teal:#14C7AE; --pop-amber:#FFB627; --pop-coral:#FF7059;
+  --grad:linear-gradient(90deg,#F6407A 0%,#FFB627 26%,#14C7AE 52%,#3E8DFF 76%,#7C5CFF 100%);
   --paper:#f6f4ee; --paper-shadow:rgba(0,0,0,.55);
   --ok:#4fae6e; --warn:#d9a13b; --danger:#e0564a;
   --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
@@ -31,10 +35,11 @@ a{color:var(--accent)}
 /* ============ APP FRAME ============ */
 #app{display:grid;grid-template-rows:52px 1fr 118px;grid-template-columns:264px 1fr 288px;height:100vh;
      grid-template-areas:"hdr hdr hdr" "left canvas right" "rail rail rail"}
-header{grid-area:hdr;display:flex;align-items:center;gap:16px;padding:0 16px;background:var(--panel);border-bottom:1px solid var(--line)}
+header{grid-area:hdr;display:flex;align-items:center;gap:16px;padding:0 16px;background:var(--panel);border-bottom:1px solid var(--line);position:relative}
+header::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:2.5px;background:var(--grad);z-index:2}
 .brand{display:flex;align-items:baseline;gap:8px;white-space:nowrap}
 .brand .mark{font-family:var(--mono);font-weight:700;font-size:19px;letter-spacing:-.5px}
-.brand .mark span{color:var(--accent)}
+.brand .mark span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
 .brand .by{font-size:12px;color:var(--muted)}
 .brand .by a{color:var(--muted);text-decoration:underline;text-underline-offset:3px}
 .brand .by a:hover{color:var(--accent)}
@@ -53,7 +58,16 @@ header{grid-area:hdr;display:flex;align-items:center;gap:16px;padding:0 16px;bac
 #left{grid-area:left;border-right:1px solid var(--line)}
 #right{grid-area:right;border-left:1px solid var(--line)}
 .sec{display:flex;flex-direction:column;gap:8px}
-.sec h3{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);padding-bottom:6px;border-bottom:1px solid var(--line-soft)}
+.sec h3{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);padding-bottom:6px;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;gap:7px}
+.sec h3::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--accent);flex:none}
+#left .sec:nth-of-type(1) h3::before{background:var(--pop-amber)}
+#left .sec:nth-of-type(2) h3::before{background:var(--pop-teal)}
+#left .sec:nth-of-type(3) h3::before{background:var(--pop-pink)}
+#right .sec:nth-of-type(1) h3::before{background:var(--pop-violet)}
+#right .sec:nth-of-type(2) h3::before{background:var(--pop-coral)}
+#right .sec:nth-of-type(3) h3::before{background:var(--pop-amber)}
+#right .sec:nth-of-type(4) h3::before{background:var(--pop-teal)}
+#right .sec:nth-of-type(5) h3::before{background:var(--pop-pink)}
 .row{display:flex;gap:8px;align-items:center}
 .row > *{flex:1}
 label.small{font-size:12px;color:var(--muted)}
@@ -61,8 +75,8 @@ select,input[type=text],input[type=number],textarea{background:var(--panel-2);bo
 textarea{resize:vertical;min-height:56px}
 .btn{background:var(--panel-2);border:1px solid var(--line);color:var(--text);border-radius:var(--radius);padding:7px 10px;font-size:12.5px;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background .12s,border-color .12s}
 .btn:hover{background:#2a2f37;border-color:#3a404b}
-.btn.primary{background:var(--accent-deep);border-color:var(--accent-deep);color:#fff}
-.btn.primary:hover{background:var(--accent)}
+.btn.primary{background:linear-gradient(120deg,var(--pop-pink),var(--pop-violet));border:none;color:#fff;font-weight:600}
+.btn.primary:hover{filter:brightness(1.12)}
 .btn.danger{color:var(--danger);border-color:#4b2a27}
 .btn.danger:hover{background:#2e1e1c}
 .btn.ghost{background:transparent}
@@ -75,7 +89,7 @@ textarea{resize:vertical;min-height:56px}
 
 /* dropzone + library */
 #dropzone{border:1.5px dashed var(--line);border-radius:var(--radius);padding:18px 10px;text-align:center;color:var(--muted);font-size:12px;cursor:pointer;transition:border-color .15s,background .15s;line-height:1.5}
-#dropzone.over{border-color:var(--accent);background:rgba(77,141,232,.07);color:var(--accent)}
+#dropzone.over{border-color:var(--pop-teal);background:rgba(20,199,174,.08);color:var(--pop-teal)}
 #dropzone b{color:var(--text)}
 #library{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .thumb{position:relative;aspect-ratio:1;border-radius:4px;overflow:hidden;border:1px solid var(--line);cursor:grab;background:#0d0f12}
@@ -100,6 +114,11 @@ textarea{resize:vertical;min-height:56px}
 .tpls{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
 .tpl{aspect-ratio:.78;border:1px solid var(--line);border-radius:4px;background:var(--panel-2);padding:4px;display:grid;gap:2px;cursor:pointer;transition:border-color .12s}
 .tpl:hover{border-color:var(--accent)}
+.tpl:nth-child(1):hover{border-color:var(--pop-pink)}
+.tpl:nth-child(2):hover{border-color:var(--pop-amber)}
+.tpl:nth-child(3):hover{border-color:var(--pop-teal)}
+.tpl:nth-child(4):hover{border-color:var(--pop-violet)}
+.tpl:nth-child(5):hover{border-color:var(--pop-coral)}
 .tpl i{background:var(--faint);border-radius:1px;display:block}
 .tpl[data-t=full]{grid-template:1fr/1fr}
 .tpl[data-t=inset]{padding:8px;grid-template:1fr/1fr}
@@ -109,6 +128,8 @@ textarea{resize:vertical;min-height:56px}
 
 /* ============ CANVAS ============ */
 #canvasWrap{grid-area:canvas;position:relative;overflow:auto;display:grid;place-items:center;background:
+  radial-gradient(ellipse at 18% 0%,rgba(124,92,255,.10) 0%,transparent 45%),
+  radial-gradient(ellipse at 85% 100%,rgba(246,64,122,.07) 0%,transparent 40%),
   radial-gradient(ellipse at 50% 0%,#191c21 0%,var(--bg) 65%);padding:34px}
 #pageHost{position:relative;flex:none}
 #page{position:relative;background:var(--paper);box-shadow:0 18px 50px -12px var(--paper-shadow),0 0 0 1px rgba(0,0,0,.4)}
@@ -228,6 +249,7 @@ textarea{resize:vertical;min-height:56px}
       </div>
       <input type="file" id="fileInput" accept="image/*" multiple hidden>
       <div id="library"></div>
+      <label class="toggle"><input type="checkbox" id="aspectChk" checked>Keep original aspect ratio</label>
       <div class="hint" id="libHint">Drag a photo onto the page, or onto a layout frame to fill it.</div>
     </div>
 
@@ -305,6 +327,7 @@ textarea{resize:vertical;min-height:56px}
       </div>
       <div id="inspTxt" style="display:none;flex-direction:column;gap:8px">
         <textarea id="txtContent" rows="3" spellcheck="false"></textarea>
+        <select id="txtFont" title="Font (Google Fonts)"></select>
         <div class="row">
           <input type="number" id="txtSize" min="5" max="120" step="1" title="Font size (pt)">
           <select id="txtAlign"><option value="left">Left</option><option value="center">Center</option><option value="right">Right</option></select>
@@ -399,6 +422,13 @@ const FORMATS = {
   'book-a4'    :{group:'Photobooks', name:'Photobook — A4 portrait',  w:8.27, h:11.69},
 };
 const GRID = 0.125;               // snap grid, inches
+const FONTS = ['Inter','Roboto','Open Sans','Lato','Montserrat','Poppins','Raleway','Work Sans','DM Sans','Nunito',
+  'Rubik','Karla','Space Grotesk','Archivo','Archivo Black','IBM Plex Sans','Oswald','Bebas Neue','Anton',
+  'Merriweather','Playfair Display','Lora','PT Serif','Libre Baskerville','EB Garamond','Cormorant Garamond',
+  'Crimson Text','DM Serif Display','Abril Fatface','Source Serif 4','Space Mono','IBM Plex Mono','JetBrains Mono',
+  'Inconsolata','Courier Prime','Special Elite','Amatic SC','Caveat','Shadows Into Light','Permanent Marker'];
+const fontStack=f=> f? `'${f}',${/Mono|Inconsolata|Courier/.test(f)?'monospace':/Serif|Garamond|Baskerville|Playfair|Lora|Merriweather|Crimson|Abril/.test(f)?'serif':'sans-serif'}`
+  : '-apple-system,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif';
 const LS_KEY='zineit_autosave', LS_BAK='zineit_lastbak', LS_DAILY='zineit_daily';
 
 /* ---------- state ---------- */
@@ -419,7 +449,7 @@ function newProject(formatKey){
   state={ app:'ZineIt', ver:1,
     meta:{name:'Untitled project', created:new Date().toISOString(), modified:new Date().toISOString()},
     format:formatKey, pages, assets:{},
-    settings:{snap:true, grid:true, margin:0.25, daily:true} };
+    settings:{snap:true, grid:true, margin:0.25, daily:true, keepAspect:true} };
   curPage=0; selId=null;
 }
 
@@ -551,9 +581,18 @@ function addImageEl(assetId, cx, cy){
 }
 function addTextEl(text, size){
   const f=fmt(), m=state.settings.margin;
-  const e={id:uid(), type:'text', text:text||'Caption', size:size||10, align:'left', weight:'400',
+  const e={id:uid(), type:'text', text:text||'Caption', size:size||10, align:'left', weight:'400', font:'Inter',
     x:m, y:snapV(f.h-m-0.6), w:f.w-2*m, h:0.5};
   page().elements.push(e); selId=e.id; renderPage(); renderInspector(); renderRail(); touch();
+}
+/* reshape a frame to its photo's original aspect ratio, centered where the frame was */
+function applyAspectToFrame(e){
+  const a=e.asset&&state.assets[e.asset]; if(!a)return;
+  const f=fmt(), ar=a.h/a.w, cx=e.x+e.w/2, cy=e.y+e.h/2;
+  let w=e.w, h=w*ar;
+  if(h>e.h){ h=e.h; w=h/ar; }               // stay inside the original frame area
+  if(w>f.w){ w=f.w; h=w*ar; } if(h>f.h){ h=f.h; w=h/ar; }
+  e.w=w; e.h=h; e.x=cx-w/2; e.y=cy-h/2; clampEl(e);
 }
 function clampEl(e){ const f=fmt();
   e.w=Math.max(0.3,Math.min(e.w,f.w)); e.h=Math.max(0.25,Math.min(e.h,f.h));
@@ -614,7 +653,7 @@ function renderPage(){
       d.addEventListener('dblclick',ev=>{ ev.stopPropagation(); openLightbox(e.asset); }); }
     if(e.type==='text'){ d.textContent=e.text;
       d.style.fontSize=(e.size/72*scale)+'px'; d.style.textAlign=e.align; d.style.fontWeight=e.weight;
-      d.style.fontFamily='var(--sans)'; d.style.padding=(0.02*scale)+'px'; }
+      d.style.fontFamily=fontStack(e.font); d.style.padding=(0.02*scale)+'px'; }
     if(e.id===selId){ d.classList.add('sel');
       ['nw','ne','sw','se'].forEach(h=>{ const hd=document.createElement('div'); hd.className='hd '+h;
         hd.addEventListener('pointerdown',ev=>startDrag(ev,e.id,h)); d.appendChild(hd); }); }
@@ -624,7 +663,9 @@ function renderPage(){
     d.addEventListener('dragleave',()=>d.classList.remove('dropTarget'));
     d.addEventListener('drop',ev=>{ d.classList.remove('dropTarget');
       const id=ev.dataTransfer.getData('text/zineit-asset');
-      if(id&&e.type==='image'){ ev.preventDefault(); ev.stopPropagation(); e.asset=id; renderPage(); renderRail(); touch(); }});
+      if(id&&e.type==='image'){ ev.preventDefault(); ev.stopPropagation(); e.asset=id;
+        if(state.settings.keepAspect!==false) applyAspectToFrame(e);
+        renderPage(); renderRail(); touch(); }});
     P.appendChild(d);
   });
   // page tag
@@ -700,7 +741,8 @@ function renderInspector(){
   if(e.type==='text'){ document.getElementById('txtContent').value=e.text;
     document.getElementById('txtSize').value=e.size;
     document.getElementById('txtAlign').value=e.align;
-    document.getElementById('txtWeight').value=e.weight; }
+    document.getElementById('txtWeight').value=e.weight;
+    document.getElementById('txtFont').value=e.font||'Inter'; }
 }
 function renderFormatInfo(){
   const f=fmt();
@@ -715,6 +757,7 @@ function renderAll(){
   document.getElementById('gridChk').checked=state.settings.grid;
   document.getElementById('marginSel').value=String(state.settings.margin);
   document.getElementById('dailyChk').checked=state.settings.daily;
+  document.getElementById('aspectChk').checked=state.settings.keepAspect!==false;
   renderFormatInfo(); renderLibrary(); renderPage(); renderRail(); renderInspector(); renderBakInfo();
 }
 
@@ -748,7 +791,14 @@ function onDragMove(ev){
     if(drag.handle.includes('n')){ h=drag.oh-dy; y=drag.oy+dy; }
     if(w<0.3){ if(drag.handle.includes('w')) x+= w-0.3; w=0.3; }
     if(h<0.25){ if(drag.handle.includes('n')) y+= h-0.25; h=0.25; }
-    e.x=snapV(x); e.y=snapV(y); e.w=snapV(w); e.h=snapV(h); snapEdges(e);
+    const locked = e.type==='image'&&e.asset&&state.settings.keepAspect!==false;
+    if(locked){
+      const a=state.assets[e.asset], ar=a.h/a.w;
+      w=snapV(w); h=w*ar;
+      if(drag.handle.includes('n')) y=drag.oy+drag.oh-h;
+      e.x=snapV(x); e.y=snapV(y); e.w=w; e.h=h;
+    } else { e.x=snapV(x); e.y=snapV(y); e.w=snapV(w); e.h=snapV(h); }
+    snapEdges(e);
   }
   clampEl(e); renderPage();
 }
@@ -801,7 +851,7 @@ function renderPrintPage(pg,W,H){
         x.appendChild(im); }
     } else {
       x.textContent=e.text; x.style.fontSize=e.size+'pt'; x.style.textAlign=e.align;
-      x.style.fontWeight=e.weight; x.style.fontFamily='-apple-system,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif';
+      x.style.fontWeight=e.weight; x.style.fontFamily=fontStack(e.font);
       x.style.color='#1b1b1b'; }
     d.appendChild(x);
   });
@@ -843,6 +893,9 @@ function initFormatSelect(){
 }
 function boot(){
   initFormatSelect();
+  const fs=document.getElementById('txtFont');
+  FONTS.forEach(f=>{ const o=document.createElement('option'); o.value=f; o.textContent=f;
+    o.style.fontFamily=fontStack(f); fs.appendChild(o); });
   const saved=store.get(LS_KEY);
   if(saved){ try{ const p=JSON.parse(saved); if(!validateProject(p)) state=p; }catch(e){} }
   if(!state) newProject('mini-zine');
@@ -901,6 +954,9 @@ document.getElementById('txtContent').addEventListener('input',e=>{ const t=el()
 document.getElementById('txtSize').addEventListener('input',e=>{ const t=el(); if(t){t.size=Math.max(5,Math.min(120,+e.target.value||10));renderPage();touch();} });
 document.getElementById('txtAlign').addEventListener('change',e=>{ const t=el(); if(t){t.align=e.target.value;renderPage();touch();} });
 document.getElementById('txtWeight').addEventListener('change',e=>{ const t=el(); if(t){t.weight=e.target.value;renderPage();touch();} });
+document.getElementById('txtFont').addEventListener('change',e=>{ const t=el(); if(t){t.font=e.target.value;renderPage();renderRail();touch();} });
+document.getElementById('aspectChk').addEventListener('change',e=>{ state.settings.keepAspect=e.target.checked; touch();
+  toast(e.target.checked?'Photos will keep their original aspect ratio when placed and resized.':'Free cropping on — frames can be any shape.'); });
 
 /* export */
 document.getElementById('pdfBtn').addEventListener('click',()=>{
