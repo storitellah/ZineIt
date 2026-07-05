@@ -1,0 +1,46 @@
+ZineIt v2.0 test run — 2026-07-05T10:08:54.522Z
+PASS  boots into a valid mini-zine project
+PASS  spread model: cover alone · 3 interior pairs · back alone
+PASS  forward/backward page navigation, no skips, covers included
+PASS  spread navigation lands on each spread in order
+PASS  arrow keys navigate when nothing is selected, nudge when selected
+PASS  nav buttons in the view bar work
+PASS  spread view shows both facing pages side by side with a fold guide
+PASS  single view shows one page
+PASS  zoom: 100% / in / out / fit stays capped (reduced preview)
+PASS  preview page numbers: interiors only, toggleable
+PASS  template g4 places four frames inside margins
+PASS  photo placed with aspect lock adopts its true proportions
+PASS  Fit / Fill / Centre buttons act instantly
+PASS  reset crop re-centres; reset frame restores photo proportions
+PASS  coverExtent math: crop percentage and full-image ghost bounds
+PASS  plain drag moves the frame (grid-snapped)
+PASS  SHIFT+drag pans the photo inside its frame (the v1 bug)
+PASS  Pan mode button enables panning without a modifier key
+PASS  all 8 resize handles exist on a selected frame
+PASS  corner resize grows the frame; edge resize changes one axis; nothing stretches
+PASS  resize never collapses below minimum size
+PASS  bleed OFF: elements are hard-clamped at the trim edge
+PASS  bleed ON: exactly ⅛″ of controlled spill, never more
+PASS  margin-crossing warning fires on the offending sides
+PASS  dropping a placed photo onto an empty frame snaps it in
+PASS  make double-page spread: photo spans both facing pages from the left page
+PASS  spread photo renders once across the fold in spread view
+PASS  in single view each half shows correctly and is locked (aligned across the fold)
+PASS  spread prints on BOTH sequential pages, halves aligned at the gutter
+PASS  return to single page restores a one-page photo
+PASS  text editor lists every text block with page, spread, type, live-preview link
+PASS  editing in the text editor updates the element and flags save state
+PASS  "Show →" jumps to the layout view with the block selected
+PASS  zine title is editable from the text editor and add-to-cover works
+PASS  add-text control creates a block with the chosen role on the chosen page
+PASS  timeline: one item per spread, page thumbs, numbers, indicators, empty warning
+PASS  timeline click selects the page; audio indicator appears when attached
+PASS  print page numbers obey the print toggle and skip covers
+PASS  mini-zine imposition builds one sheet of 8 panels, top row rotated
+PASS  backup JSON round-trips through the validator (verified test restore)
+PASS  validator blocks corrupt backups with a reason
+PASS  v1 .bak files migrate cleanly into v2
+PASS  no page errors or uncaught exceptions across the whole run
+
+43 passed · 0 failed

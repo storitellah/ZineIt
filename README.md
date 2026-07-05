@@ -31,6 +31,20 @@ Every project automatically includes a **front cover** and **back cover**; inter
 
 ## Clean, consistent layout system
 
+
+### New in v2.0 — a proper visual layout tool
+
+- **Facing-page spreads**: Single/Spread view toggle — left and right pages always preview together, with a centre-fold guide, exactly as they'll sit in the reader's hands.
+- **Double-page spread photos**: one photograph spans both facing pages, aligned across the fold in the editor, the preview, the print export, and the mini-zine imposition. Gutter bleed supported; one click returns it to a single page.
+- **Text Editor tab**: every word in the zine in one place — titles, captions, quotes, names, bios, reflections, notes, credits, copyright — each row showing its page and spread number, content type, a live-preview jump, and save status.
+- **A real timeline**: large page thumbnails grouped by spread, page numbers, drag-and-drop reordering, and at-a-glance indicators for spreads, photos, text, audio notes, and empty pages.
+- **Precision image control**: 8 resize handles, a live crop ghost showing the full uncropped image while you pan or resize, crop-% readout, Fit / Fill / Centre, and Reset crop / Reset frame. Resizing crops — it never stretches.
+- **Guides & bleed**: margin, safe-area, bleed, fold, and grid guides with snap; bleed mode allows a controlled ⅛″ spill past trim (with it off, nothing can pass the trim edge, ever); warnings when a photo crosses the margins.
+- **Navigation that never breaks**: page and spread stepping, arrow keys, timeline clicks — covers included, no skips.
+- **Page numbers** with separate preview and print toggles (covers stay unnumbered).
+- **Page audio notes**: attach field audio to a page for editing context — editor-only, never printed.
+- Tested before render: a 43-test automated suite (`tests/`) drives the real HTML through drags, resizes, spreads, navigation, print DOM, and backups. See `TESTING.md`.
+
 - Page templates: full bleed, single inside margins, two-up (stacked / side-by-side), four-grid — all built from the same margin so every page lines up identically.
 - ⅛″ snap grid and margin guides (⅛–½″ margins) keep everything perfectly consistent.
 - **Keep original aspect ratio** (toggle, on by default): photos dropped into layout frames reshape the frame to the photo's true proportions, and corner-resizing stays ratio-locked — turn it off for free cropping.
@@ -64,6 +78,10 @@ Nothing is ever sent anywhere. The `.bak` lives wherever your downloads go — m
 
 ```
 index.html            the entire product — zero-build, works offline
+PROMPT.md             the full build prompt, requirements, and version record
+CHANGELOG.md          release history (v1.0 → v2.0)
+TESTING.md            v2.0 test report — 43 automated tests, all passing
+tests/                the jsdom test-suite (npm test)
 docs/ARCHITECTURE.md  system design, database schema, API endpoints, scaling plan
 server/               optional Phase-2 sync API scaffold (Express + PostgreSQL)
 ```

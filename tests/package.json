@@ -1,0 +1,1 @@
+{"name":"zineit-tests","private":true,"description":"Automated DOM test-suite for ZineIt (jsdom)","scripts":{"test":"node run-tests.js"},"dependencies":{"jsdom":"^29.1.1"}}

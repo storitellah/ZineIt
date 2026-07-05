@@ -1,0 +1,36 @@
+# Changelog — ZineIt by Storitellah
+
+## v2.0 — 2026-07-05
+A visual-layout-tool release: spreads, a text pipeline, and a tested render.
+
+### Added
+- **Facing-page preview**: Single/Spread view toggle; left and right pages always shown together with a centre-fold guide; pagination model (cover alone → interior pairs → back alone).
+- **Double-page spread photos**: one image spans both facing pages, stored once, aligned across the fold in editor, preview, print, and mini-zine imposition; gutter bleed when bleed mode is on; one-click return to single-page mode.
+- **Text Editor tab**: every text block in the zine in one list — page number, spread number, content type (13 roles: title, page-title, caption, quote, name, bio, reflection, note, credits, back-cover, copyright, page-number, custom), inline editing, "Show →" live-preview jump, per-row save status; zine title editing with add-to-cover.
+- **Enlarged timeline** (178 px): 96 px page thumbnails grouped by spread, page numbers, drag-and-drop page reorder, current-spread highlight, ⇔ spread / ▣ photo / T text / ♪ audio / empty-page indicators; photos draggable from timeline thumbs onto the page.
+- **Zoom controls**: Fit (capped for a calmer, centred preview), 100%, +/− stepping with a live percentage readout.
+- **8-way resize** (4 corners + 4 edges) with a live **crop ghost** showing the full uncropped image extent plus a crop-% readout; Reset crop and Reset frame.
+- **Guides & bleed system**: margin, safe-area, bleed, centre-fold, and grid guides with snap; bleed mode allowing a controlled ⅛″ spill past trim (hard clamp at trim when off); margin-crossing warnings on the offending sides.
+- **Navigation**: prev/next page and prev/next spread buttons; arrow keys navigate when nothing is selected and nudge when something is; timeline click; covers included, no skips.
+- **Page numbers**: independent preview and print toggles; covers always unnumbered; outer-corner placement.
+- **Page audio notes**: attach field audio to a page (editor-only, never printed) with a ♪ timeline indicator.
+- **Pan mode** button as a modifier-free alternative to Shift-drag.
+- **v1 → v2 migration**: existing autosaves and .bak files load cleanly.
+- **Automated test-suite**: 43 jsdom tests (`tests/run-tests.js`) covering the entire release checklist.
+
+### Fixed
+- Shift+drag photo panning (selection no longer rebuilds the DOM mid-gesture).
+- Elements can now genuinely cross the fold in spread view and re-home to the facing page.
+- Timeline crash when painting the cover spread (null left page).
+- Spread halves no longer hang off the paper in single-page view.
+
+## v1.1 — 2026-07-05
+- Lively colour system (gradient wordmark, rainbow rule, colour-coded panels) on a neutral canvas.
+- 40 Google Fonts with offline system-stack fallback.
+- Keep-original-aspect-ratio placement toggle.
+- `docs/ARCHITECTURE.md` and optional Phase-2 sync API scaffold (`server/`).
+
+## v1.0 — 2026-07-04
+- Core local-first editor: zine + photobook formats, front/back covers, drag-drop full-resolution photos, five templates, ⅛″ snap grid, text with date stamps, live clock.
+- PDF/print export at exact trim size; 8-page mini-zine imposition with fold instructions.
+- Verified `.bak` backups (test-restore before download), autosave, daily reminder.
