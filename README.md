@@ -32,6 +32,14 @@ Every project automatically includes a **front cover** and **back cover**; inter
 ## Clean, consistent layout system
 
 
+
+### New in v2.1 — pocket studio, print shop
+
+- **Works on your phone**: below 820 px the editor becomes a mobile app — Photos and Tools slide in as drawers, the timeline collapses into a bottom sheet, and a five-button toolbar (Photos · Tools · Timeline · Text · Full) drives everything. Touch drag, touch pan, and touch resize use the same pointer pipeline as the desktop, with larger 18 px handles on touch screens.
+- **Swipe to turn pages**: swipe the canvas left/right to step pages (or whole spreads in spread view). Tap a block to select it — an Edit chip opens the tools drawer straight to its settings.
+- **Fullscreen preview**: distraction-free reading view with ‹ › navigation and a page indicator, on mobile and desktop. Esc exits.
+- **Mini Zine print mode**: a dedicated print dialog with an **A4 / US Letter** toggle, live print preview of the actual imposed sheet, dashed **fold marks** with printer-style edge ticks, a ✂ **cut mark** across the middle two panels, page-number and guide toggles, **fit-to-paper** (uniform scaling — aspect ratios always preserved), an optional ¼″ paper margin, and a clear warning if 100% would clip on A4. Export to PDF through the browser's Save-as-PDF at the exact paper size.
+
 ### New in v2.0 — a proper visual layout tool
 
 - **Facing-page spreads**: Single/Spread view toggle — left and right pages always preview together, with a centre-fold guide, exactly as they'll sit in the reader's hands.

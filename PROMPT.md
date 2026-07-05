@@ -130,3 +130,33 @@ zero console errors.
 - Optional cloud sync via the Phase-2 API scaffold in `server/` (see
   `docs/ARCHITECTURE.md`).
 - Text auto-flow between linked frames; per-role default styles.
+
+---
+
+## v2.1 build prompt (mobile + mini-zine print)
+
+> Optimise the zine and photobook builder for mobile: fully responsive interface,
+> mobile-friendly preview, touch drag and touch resize, swipe navigation between pages,
+> tap to edit page blocks, a mobile toolbar, collapsible timeline and text editor
+> panels, fit preview to screen, prevent layout overflow, keep facing pages readable,
+> and allow switching between single-page, facing-spread, and fullscreen preview.
+>
+> Add a dedicated Mini Zine print mode: A4 and Letter layouts with a toggle, correct
+> fold marks, correct cut marks, page order arranged for folding, print preview before
+> export, browser print-to-PDF, and clear folding/cutting instructions. Export
+> settings: A4/Letter, PDF export, show/hide fold guide, show/hide cut guide,
+> include/hide page numbers, fit to paper, maintain margins, preserve image aspect
+> ratios. Test mobile preview, touch controls, swipe navigation, both paper layouts,
+> fold marks, cut marks, and PDF export before rendering.
+
+### v2.1 version note
+
+Delivered as above; see CHANGELOG.md for the feature breakdown and TESTING.md for the
+65-test report (22 new tests, all green, no defects found in this round). Design
+decisions worth knowing: the imposition is authored on a fixed 11 × 8.5″ design sheet
+(4 × 2.75 by 2 × 4.25 panels) and mapped onto the chosen paper with one uniform
+`scale()` — that is what guarantees "preserve image aspect ratios" by construction;
+A4 output is therefore 97.3% size (limited by A4's shorter height). Swipe recognition
+runs on pointer events with a 60 px horizontal / <50 px vertical threshold and yields
+to element drags. The mobile breakpoint is 820 px, read from `window.innerWidth` so it
+is testable in jsdom.

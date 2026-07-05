@@ -449,7 +449,219 @@ T('v1 .bak files migrate cleanly into v2', () => {
   ok('audio' in m.pages[0], 'pages gain audio slot');
 });
 
-/* ============ 13 · console health ============ */
+/* ============ 13 · mobile: responsive shell, drawers, fullscreen, swipe, tap-to-edit ============ */
+function setViewport(w) {
+  Object.defineProperty(window, 'innerWidth', { value: w, configurable: true, writable: true });
+  window.dispatchEvent(new window.Event('resize'));
+}
+T('narrow viewport activates the mobile shell; wide deactivates it', () => {
+  setViewport(390);
+  ok(document.body.classList.contains('mobile'), 'body.mobile at 390px');
+  ok(Z.isMobile(), 'isMobile() true');
+  setViewport(1280);
+  ok(!document.body.classList.contains('mobile'), 'desktop restored at 1280px');
+  setViewport(390);
+});
+T('mobile toolbar opens the Photos and Tools drawers; backdrop closes them', () => {
+  click($('mtbPhotos'));
+  ok(document.body.classList.contains('dLeft'), 'photos drawer open');
+  ok($('drawerBk').classList.contains('show'), 'backdrop shown');
+  click($('mtbTools'));
+  ok(document.body.classList.contains('dRight') && !document.body.classList.contains('dLeft'), 'tools drawer replaces photos drawer');
+  click($('drawerBk'));
+  ok(!document.body.classList.contains('dRight') && !$('drawerBk').classList.contains('show'), 'backdrop tap closes');
+});
+T('timeline panel collapses/expands from the toolbar', () => {
+  ok(!document.body.classList.contains('railOpen'), 'collapsed by default on mobile');
+  click($('mtbRail')); ok(document.body.classList.contains('railOpen'), 'expanded');
+  click($('mtbRail')); ok(!document.body.classList.contains('railOpen'), 'collapsed again');
+});
+T('text editor panel toggles from the toolbar', () => {
+  click($('mtbText')); eq(Z.view.tab, 'text', 'opens text editor');
+  click($('mtbText')); eq(Z.view.tab, 'layout', 'toggles back to layout');
+});
+T('tap-to-edit: selecting a block shows the Edit chip; chip opens the tools drawer', () => {
+  click($('viewSingle')); Z.goPage(3);
+  const t = Z.addTextEl('tap me', 10, 'caption', 3); // tap == select
+  ok($('mobEdit').classList.contains('show'), 'Edit chip visible for selection');
+  click($('mobEdit'));
+  ok(document.body.classList.contains('dRight'), 'chip opens the tools drawer');
+  click($('drawerBk'));
+  Z.select(3, null); Z.renderAll();
+  ok(!$('mobEdit').classList.contains('show'), 'chip hides when nothing selected');
+  Z.select(3, t.id); Z.deleteSel();
+});
+T('swipe left/right on the canvas navigates pages', () => {
+  click($('viewSingle')); Z.goPage(3); Z.select(3, null);
+  const cs = $('canvasScroll');
+  ptr(cs, 'pointerdown', { clientX: 300, clientY: 400 });
+  ptr(window, 'pointerup', { clientX: 180, clientY: 405 });
+  eq(Z.curPage, 4, 'swipe left → next page');
+  ptr(cs, 'pointerdown', { clientX: 120, clientY: 400 });
+  ptr(window, 'pointerup', { clientX: 260, clientY: 395 });
+  eq(Z.curPage, 3, 'swipe right → previous page');
+});
+T('swipe in spread view steps whole spreads; vertical drags are ignored', () => {
+  click($('viewSpread')); Z.goPage(3);
+  const s0 = Z.spreadIndexOf(Z.curPage), cs = $('canvasScroll');
+  ptr(cs, 'pointerdown', { clientX: 300, clientY: 300 });
+  ptr(window, 'pointerup', { clientX: 170, clientY: 300 });
+  eq(Z.spreadIndexOf(Z.curPage), s0 + 1, 'swipe advanced one spread');
+  ptr(cs, 'pointerdown', { clientX: 300, clientY: 100 });
+  ptr(window, 'pointerup', { clientX: 280, clientY: 400 });
+  eq(Z.spreadIndexOf(Z.curPage), s0 + 1, 'vertical scroll gesture does not navigate');
+  Z.stepSpread(-1);
+});
+T('swipe starting on an element never fires (touch drag wins)', () => {
+  click($('viewSingle')); Z.goPage(3);
+  const e = Z.addImageEl('tA', 1.2, 2.0, 3);
+  const before = Z.curPage, n = nodeFor(e.id);
+  ptr(n, 'pointerdown', { clientX: 300, clientY: 300 });
+  ptr(window, 'pointermove', { clientX: 200, clientY: 300 });
+  ptr(window, 'pointerup', { clientX: 200, clientY: 300 });
+  eq(Z.curPage, before, 'dragging an element did not navigate');
+  Z.deleteSel();
+});
+T('touch drag & resize use the same pointer pipeline (no mouse-only APIs)', () => {
+  // Our drag/resize handlers listen to pointer events, which unify touch + mouse.
+  // Verified structurally: no mousedown/mousemove/touchstart-specific handlers on elements.
+  const js = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  ok(!/addEventListener\('mousedown'/.test(js), 'no mousedown handlers');
+  ok(!/addEventListener\('touchstart'/.test(js), 'no touchstart-only handlers');
+  ok(/addEventListener\('pointerdown'/.test(js), 'pointer events in use');
+  ok(/touch-action:none/.test(js), 'touch-action:none prevents scroll from stealing drags');
+});
+T('fullscreen preview: enters, shows page indicator, navigates, exits via Esc', () => {
+  click($('mtbFS'));
+  ok(document.body.classList.contains('fs'), 'fullscreen on');
+  eq($('fsInd').textContent, (Z.curPage + 1) + ' / 8', 'page indicator');
+  const p0 = Z.curPage;
+  click($('fsNext')); ok(Z.curPage > p0, 'fullscreen next works');
+  click($('fsPrev')); eq(Z.curPage, p0, 'fullscreen prev works');
+  window.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape' }));
+  ok(!document.body.classList.contains('fs'), 'Esc exits fullscreen');
+});
+T('view switching survives on mobile: single / spread / fullscreen all reachable', () => {
+  click($('viewSpread')); eq(Z.view.mode, 'spread');
+  click($('viewSingle')); eq(Z.view.mode, 'single');
+  Z.toggleFS(true); ok(document.body.classList.contains('fs'));
+  Z.toggleFS(false); ok(!document.body.classList.contains('fs'));
+  setViewport(1280); // restore desktop for remaining tests
+  ok(!document.body.classList.contains('mobile'));
+  click($('viewSpread'));
+});
+
+/* ============ 14 · mini-zine print mode: A4/Letter, marks, fit, preview ============ */
+T('Letter imposition: exact 11×8.5 sheet, 8 panels, 4 rotated, scale 1', () => {
+  Z.state.settings.imp = { paper: 'letter', fit: true, margins: false, fold: true, cut: true };
+  const { page, paper, scale } = Z.buildImpSheet();
+  eq(paper.name, 'US Letter');
+  eq(page.style.width, '11in'); eq(page.style.height, '8.5in');
+  eq(page.querySelectorAll('.impPanel').length, 8);
+  eq(page.querySelectorAll('.impRot').length, 4);
+  approx(scale, 1, 1e-9, 'design sheet is native Letter — no scaling');
+});
+T('A4 imposition: paper resized, sheet scaled uniformly (aspect ratios preserved), centred', () => {
+  Z.state.settings.imp.paper = 'a4';
+  const { page, scale } = Z.buildImpSheet();
+  eq(page.style.width, '11.69in'); eq(page.style.height, '8.27in');
+  approx(scale, 8.27 / 8.5, 1e-6, 'fit is limited by A4 height');
+  const sheet = page.querySelector('.impSheet');
+  ok(/scale\(0\.9/.test(sheet.style.transform), 'single uniform scale() — nothing stretches');
+  const ox = parseFloat(sheet.style.left);
+  approx(ox, (11.69 - 11 * scale) / 2, 1e-4, 'sheet centred horizontally');
+});
+T('fold marks: 4 dashed fold lines + 8 edge ticks at the exact fold positions', () => {
+  const { page } = Z.buildImpSheet();
+  const folds = page.querySelectorAll('.foldLine');
+  eq(folds.length, 4, '3 vertical + 1 horizontal');
+  const xs = [...folds].map(f => f.style.left).filter(Boolean);
+  ok(xs.includes('2.75in') && xs.includes('5.5in') && xs.includes('8.25in'), 'vertical folds at panel boundaries');
+  eq(page.querySelectorAll('.tickMark').length, 8, 'printer-style edge ticks');
+});
+T('cut mark: single ✂ line across the two middle panels only', () => {
+  const { page } = Z.buildImpSheet();
+  const cuts = page.querySelectorAll('.cutLine');
+  eq(cuts.length, 1);
+  eq(cuts[0].style.left, '2.75in'); eq(cuts[0].style.top, '4.25in');
+  eq(cuts[0].style.width, '5.5in', 'spans exactly the middle two panels');
+  ok(/✂/.test(cuts[0].textContent), 'scissors glyph');
+});
+T('guides can be hidden: fold off and cut off remove every mark', () => {
+  Z.state.settings.imp.fold = false; Z.state.settings.imp.cut = false;
+  const { page } = Z.buildImpSheet();
+  eq(page.querySelectorAll('.foldLine').length, 0);
+  eq(page.querySelectorAll('.tickMark').length, 0);
+  eq(page.querySelectorAll('.cutLine').length, 0);
+  Z.state.settings.imp.fold = true; Z.state.settings.imp.cut = true;
+});
+T('maintain-margins shrinks the sheet to keep a ¼″ border', () => {
+  Z.state.settings.imp.paper = 'letter'; Z.state.settings.imp.margins = true;
+  const { scale } = Z.buildImpSheet();
+  approx(scale, Math.min(10.5 / 11, 8 / 8.5), 1e-6, 'fits inside paper minus ¼″ each side');
+  Z.state.settings.imp.margins = false;
+});
+T('100% on A4 warns that the sheet will clip; fit-to-paper clears the warning', () => {
+  Z.state.settings.imp.paper = 'a4'; Z.state.settings.imp.fit = false;
+  let r = Z.buildImpSheet();
+  ok(/Fit to paper/.test(r.warn), 'warning names the remedy');
+  approx(r.scale, 1, 1e-9, '100% honoured');
+  Z.state.settings.imp.fit = true;
+  r = Z.buildImpSheet();
+  eq(r.warn, '', 'no warning when fitted');
+});
+T('page numbers in the imposition follow the print toggle (interiors only)', () => {
+  Z.state.settings.pageNumsPrint = true;
+  let { page } = Z.buildImpSheet();
+  eq(page.querySelectorAll('.ppn').length, 6, 'six interior pages numbered, covers skipped');
+  Z.state.settings.pageNumsPrint = false;
+  ({ page } = Z.buildImpSheet());
+  eq(page.querySelectorAll('.ppn').length, 0);
+});
+T('print-preview modal: opens with synced settings, live preview, toggles rebuild it', () => {
+  Z.state.settings.imp = { paper: 'letter', fit: true, margins: false, fold: true, cut: true };
+  Z.openImpModal();
+  ok($('foldModalBk').classList.contains('show'), 'modal shown');
+  ok($('impPaperLetter').checked && !$('impPaperA4').checked, 'paper radio synced');
+  ok($('impPreview').querySelector('.impPanel'), 'preview contains the real imposed sheet');
+  $('impPaperA4').checked = true;
+  $('impPaperA4').dispatchEvent(new window.Event('change', { bubbles: true }));
+  eq(Z.state.settings.imp.paper, 'a4', 'radio updates the setting');
+  ok($('impPreview').querySelector('.impSheet').style.transform.includes('scale(0.9'), 'preview re-rendered for A4');
+  $('impFoldChk').checked = false;
+  $('impFoldChk').dispatchEvent(new window.Event('change', { bubbles: true }));
+  eq($('impPreview').querySelectorAll('.foldLine').length, 0, 'fold toggle live-updates the preview');
+  $('impFoldChk').checked = true;
+  $('impFoldChk').dispatchEvent(new window.Event('change', { bubbles: true }));
+  $('impPnChk').checked = true;
+  $('impPnChk').dispatchEvent(new window.Event('change', { bubbles: true }));
+  ok($('impPreview').querySelectorAll('.ppn').length > 0, 'page-number toggle live-updates the preview');
+  $('impPnChk').checked = false;
+  $('impPnChk').dispatchEvent(new window.Event('change', { bubbles: true }));
+  click($('foldClose'));
+  ok(!$('foldModalBk').classList.contains('show'), 'modal closes');
+  Z.state.settings.imp.paper = 'letter';
+});
+T('printing the imposition uses the chosen paper size for @page and PDF export', () => {
+  Z.state.settings.imp.paper = 'a4';
+  Z.buildImposition();
+  ok(/@page\{size:11\.69in 8\.27in/.test($('pageSizeStyle').textContent), '@page = A4 landscape');
+  eq(document.querySelectorAll('#printRoot .impPanel').length, 8);
+  Z.state.settings.imp.paper = 'letter';
+  Z.buildImposition();
+  ok(/@page\{size:11in 8\.5in/.test($('pageSizeStyle').textContent), '@page = Letter landscape');
+  document.getElementById('printRoot').innerHTML = '';
+});
+T('imposition settings survive a backup round-trip and migration fills defaults', () => {
+  const json = JSON.parse(JSON.stringify(Z.state));
+  eq(Z.validateProject(json), null);
+  eq(json.settings.imp.paper, 'letter', 'imp settings persisted');
+  delete json.settings.imp;
+  const m = Z.migrate(json);
+  eq(m.settings.imp.paper, 'letter', 'migration restores imposition defaults');
+});
+
+/* ============ 15 · console health ============ */
 T('no page errors or uncaught exceptions across the whole run', () => {
   eq(pageErrors.length, 0, 'errors: ' + pageErrors.slice(0, 3).join(' | '));
 });

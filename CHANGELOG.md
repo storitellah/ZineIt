@@ -1,5 +1,17 @@
 # Changelog — ZineIt by Storitellah
 
+## v2.1 — 2026-07-05
+Mobile optimisation + a dedicated Mini Zine print mode.
+
+### Added
+- **Fully responsive mobile shell** (≤820 px): single-column layout, Photos/Tools panels as slide-in drawers with a tap-to-close backdrop, collapsible timeline bottom sheet, five-button mobile toolbar (Photos · Tools · Timeline · Text · Full), compact header, overflow-safe canvas.
+- **Touch controls**: drag, pan, and 8-way resize on the unified pointer-event pipeline; `touch-action:none` keeps gestures on the frames; 18 px handles and larger tap targets on coarse pointers; tap-to-select with an **Edit chip** that opens the tools drawer (and focuses the text field for text blocks).
+- **Swipe navigation**: horizontal swipes on the canvas step pages in single view and whole spreads in spread view; vertical gestures and element drags never trigger it.
+- **Fullscreen preview** (mobile + desktop): chrome-free view with ‹ › navigation, page indicator, Esc/✕ to exit; single-page, facing-spread, and fullscreen views all switchable on mobile.
+- **Mini Zine print mode**: dedicated dialog with **A4 / US Letter** paper toggle, **live print preview** of the real imposed sheet, dashed **fold marks** + printer-style edge ticks, ✂ **cut mark** across the middle two panels, show/hide toggles for both, page-number toggle, **fit-to-paper** via a single uniform scale (image aspect ratios preserved), optional ¼″ paper margin, correct `@page` size per paper for browser print-to-PDF, clipping warning when 100% doesn't fit A4, and collapsible fold/cut instructions.
+- Imposition settings persist in the project (and .bak files); migration fills defaults for older projects.
+- 22 new automated tests (65 total, all passing — see TESTING.md).
+
 ## v2.0 — 2026-07-05
 A visual-layout-tool release: spreads, a text pipeline, and a tested render.
 

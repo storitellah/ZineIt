@@ -1,4 +1,4 @@
-ZineIt v2.0 test run — 2026-07-05T10:08:54.522Z
+ZineIt v2.0 test run — 2026-07-05T16:17:11.010Z
 PASS  boots into a valid mini-zine project
 PASS  spread model: cover alone · 3 interior pairs · back alone
 PASS  forward/backward page navigation, no skips, covers included
@@ -41,6 +41,28 @@ PASS  mini-zine imposition builds one sheet of 8 panels, top row rotated
 PASS  backup JSON round-trips through the validator (verified test restore)
 PASS  validator blocks corrupt backups with a reason
 PASS  v1 .bak files migrate cleanly into v2
+PASS  narrow viewport activates the mobile shell; wide deactivates it
+PASS  mobile toolbar opens the Photos and Tools drawers; backdrop closes them
+PASS  timeline panel collapses/expands from the toolbar
+PASS  text editor panel toggles from the toolbar
+PASS  tap-to-edit: selecting a block shows the Edit chip; chip opens the tools drawer
+PASS  swipe left/right on the canvas navigates pages
+PASS  swipe in spread view steps whole spreads; vertical drags are ignored
+PASS  swipe starting on an element never fires (touch drag wins)
+PASS  touch drag & resize use the same pointer pipeline (no mouse-only APIs)
+PASS  fullscreen preview: enters, shows page indicator, navigates, exits via Esc
+PASS  view switching survives on mobile: single / spread / fullscreen all reachable
+PASS  Letter imposition: exact 11×8.5 sheet, 8 panels, 4 rotated, scale 1
+PASS  A4 imposition: paper resized, sheet scaled uniformly (aspect ratios preserved), centred
+PASS  fold marks: 4 dashed fold lines + 8 edge ticks at the exact fold positions
+PASS  cut mark: single ✂ line across the two middle panels only
+PASS  guides can be hidden: fold off and cut off remove every mark
+PASS  maintain-margins shrinks the sheet to keep a ¼″ border
+PASS  100% on A4 warns that the sheet will clip; fit-to-paper clears the warning
+PASS  page numbers in the imposition follow the print toggle (interiors only)
+PASS  print-preview modal: opens with synced settings, live preview, toggles rebuild it
+PASS  printing the imposition uses the chosen paper size for @page and PDF export
+PASS  imposition settings survive a backup round-trip and migration fills defaults
 PASS  no page errors or uncaught exceptions across the whole run
 
-43 passed · 0 failed
+65 passed · 0 failed
