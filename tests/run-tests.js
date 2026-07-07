@@ -773,7 +773,69 @@ T('deleting a photo from the library also frees its stored blobs', async () => {
   eq(await Z.assetStore.get('delMe'), undefined, 'blobs gone — memory reclaimed');
 });
 
-/* ============ 16 · console health ============ */
+/* ============ 16 · v3.1: Android/iOS platform hardening + support layout ============ */
+const SRC = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+T('M-Pesa is completely removed from the tool', () => {
+  ok(!/mpesa/i.test(SRC), 'no M-Pesa markup, styles, or scripts');
+  ok(!/0711\s*254\s*986|0711254986/.test(SRC), 'no phone number anywhere');
+  ok(!$('copyMpesa'), 'copy button gone from the DOM');
+});
+T('Ko-fi and Patreon are icon buttons only — no URL text', () => {
+  const btns = document.querySelectorAll('#left .supBtn');
+  eq(btns.length, 2);
+  const [kofi, pat] = btns;
+  eq(kofi.href.replace(/\/$/,''), 'https://ko-fi.com/kiberastories');
+  eq(pat.href, 'https://www.patreon.com/c/kiberastories');
+  ok(kofi.querySelector('svg') && pat.querySelector('svg'), 'each carries an icon');
+  [kofi, pat].forEach(b => {
+    ok(!/ko-fi\.com|patreon\.com/.test(b.textContent), 'no raw URL text shown');
+    ok(b.getAttribute('aria-label'), 'accessible label present');
+    eq(b.target, '_blank');
+  });
+});
+T('viewport & platform meta: notch-safe, installable-friendly on Android and iOS', () => {
+  const vp = document.querySelector('meta[name="viewport"]').content;
+  ok(/viewport-fit=cover/.test(vp), 'viewport-fit=cover for notched iPhones');
+  ok(!/user-scalable=no|maximum-scale=1(\b|,)/.test(vp), 'pinch-zoom not disabled (accessibility)');
+  ok(document.querySelector('meta[name="theme-color"]'), 'theme-color for Android chrome');
+  ok(document.querySelector('meta[name="apple-mobile-web-app-capable"]'), 'iOS web-app meta');
+  ok(document.querySelector('meta[name="mobile-web-app-capable"]'), 'Android web-app meta');
+});
+T('layout survives iOS dynamic toolbars and hardware cutouts', () => {
+  ok(/height:100dvh/.test(SRC), 'dynamic viewport height (iOS address-bar safe) with 100vh fallback');
+  ok(/env\(safe-area-inset-top/.test(SRC) && /env\(safe-area-inset-bottom/.test(SRC), 'safe-area insets applied');
+  ok(/#mtb\{display:flex;padding-bottom:env\(safe-area-inset-bottom/.test(SRC), 'toolbar clears the home indicator');
+  ok(/#rail\{[^}]*bottom:calc\(54px \+ env\(safe-area-inset-bottom/.test(SRC), 'timeline sheet sits above the toolbar + inset');
+  ok(/overscroll-behavior:none/.test(SRC), 'pull-to-refresh cannot hijack canvas gestures');
+});
+T('no accidental zoom or selection during editing on touch devices', () => {
+  ok(/select,input\[type=text\],input\[type=number\],textarea\{font-size:16px\}/.test(SRC), '16px inputs stop iOS zoom-on-focus');
+  ok(/touch-action:manipulation/.test(SRC), 'double-tap zoom suppressed on controls');
+  ok(/-webkit-touch-callout:none/.test(SRC), 'iOS long-press callout suppressed on page elements');
+  ok(/-webkit-tap-highlight-color:transparent/.test(SRC), 'no grey tap flashes');
+  ok(/-webkit-text-size-adjust:100%/.test(SRC), 'iOS landscape text inflation disabled');
+});
+T('touch drags stay glued to the finger: pointer capture engaged, mouse path unaffected', () => {
+  ok(/setPointerCapture/.test(SRC), 'pointer capture requested on drag start');
+  // functional: a full drag still works via plain mouse-style events (no pointerId)
+  click($('viewSingle')); Z.goPage(3);
+  const e2 = Z.addImageEl('tA', 1.2, 2.0, 3);
+  const x0 = e2.x, n = nodeFor(e2.id);
+  ptr(n, 'pointerdown', { clientX: 100, clientY: 100 });
+  ptr(window, 'pointermove', { clientX: 100 + Z.scale, clientY: 100 });
+  ptr(window, 'pointerup', {});
+  ok(Math.abs(e2.x - x0) > 0.5, 'drag pipeline intact with and without pointerId');
+  Z.select(3, e2.id); Z.deleteSel();
+});
+T('mobile view bar scrolls horizontally instead of stacking', () => {
+  ok(/#viewBar\{[^}]*flex-wrap:nowrap;overflow-x:auto/.test(SRC), 'single-row scrollable toolbar on phones');
+});
+T('feedback subject carries the new version', () => {
+  eq(Z.APP_VER, '3.1');
+  ok(decodeURIComponent($('fbBtn').href).includes('ZineIt v3.1'), 'mailto subject updated');
+});
+
+/* ============ 17 · console health ============ */
 T('no page errors or uncaught exceptions across the whole run', () => {
   eq(pageErrors.length, 0, 'errors: ' + pageErrors.slice(0, 3).join(' | '));
 });

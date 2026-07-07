@@ -54,8 +54,9 @@ can be reproduced, audited, or extended.
 ## Project requirements (carried through all versions)
 
 - Fully local, standalone `index.html` — no build step, no server, works by double-click.
-- Branding: **ZineIt by Storitellah** (storitellah.com); support links to
-  ko-fi.com/kiberastories, patreon.com/c/kiberastories, and M-Pesa 0711 254 986.
+- Branding: **ZineIt by Storitellah** (storitellah.com); support via Ko-fi
+  (ko-fi.com/kiberastories) and Patreon (patreon.com/c/kiberastories) icon buttons.
+  (M-Pesa was part of v1.0–v3.0 and was removed in v3.1 at Brian's request.)
 - Zine formats: mini zine (8-page one-sheet with fold/cut imposition), quarter,
   half-letter, A5. Photobook formats: 8×8, 8×10, 10×8, A4. Front + back covers always.
 - Full-resolution photo import; drag/resize/reposition; PDF download and highest-quality
@@ -185,3 +186,27 @@ first and lazily loads heic2any only on failure, so the app remains offline-capa
 every non-HEIC format. .bak files still contain everything (originals are embedded on
 export), and v1/v2 autosaves and backups migrate in place. Feedback goes to
 bryanjaybee@gmail.com via prefilled mailto links in the Support panel and view bar.
+
+---
+
+## v3.1 build prompt (mobile platform polish)
+
+> Optimize the layout of the tool for mobile as well — to be used seamlessly on both
+> Android and iOS mobile devices. The PC version works well; make version 3 mobile
+> friendly and render it as an updated version. Remove the M-Pesa link. For Patreon
+> and Ko-fi only use icons or buttons. Test the mobile version and fix all bugs
+> before render.
+
+### v3.1 version note
+
+The v2.1 mobile shell handled layout; v3.1 handles the platforms. The fixes are the
+unglamorous ones that decide whether a web tool feels native: safe-area insets so the
+toolbar clears the iPhone home indicator, `100dvh` so Safari's collapsing address bar
+doesn't eat the timeline, ≥16 px inputs so iOS stops zooming on focus,
+`touch-action:manipulation` against double-tap zoom, suppressed tap highlights and
+long-press callouts on canvas elements, `overscroll-behavior:none` against
+pull-to-refresh, and pointer capture so drags survive the finger leaving the frame.
+One bug was introduced and caught by the suite during the round (the mobile toolbar's
+`display:flex` was lost in a CSS rewrite — restored), plus one test-expectation typo.
+Support card: M-Pesa removed entirely; Ko-fi and Patreon became brand-coloured icon
+buttons with accessible labels and no raw URL text.

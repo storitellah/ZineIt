@@ -1,8 +1,8 @@
 # TESTING.md — ZineIt v2.0 test report
 
-**Result: 75 passed · 0 failed · 0 console errors.** The whole tool — including the
-v3.0 memory architecture, HEIC import path, and feedback channel — was tested before
-this render, as required.
+**Result: 83 passed · 0 failed · 0 console errors.** The whole tool — including the
+v3.1 Android/iOS platform hardening and the redesigned support card — was tested
+before this render, as required.
 
 ## How it was tested
 
@@ -61,7 +61,14 @@ cd tests && npm install && npm test
 | HEIC | `.heic`/`.heif` accepted by the picker; detection by MIME **and** extension (HEIC often ships with no MIME type); native `createImageBitmap` decode attempted first, lazy heic2any fallback present |
 | Feedback | Support-card link and view-bar ✉ button both address bryanjaybee@gmail.com with a prefilled subject and bug-report template |
 | Cleanup | Deleting a library photo removes metadata **and** stored blobs |
-| Console health | Zero page errors or uncaught exceptions across all 75 tests |
+| M-Pesa removal | No markup, styles, scripts, or phone number anywhere in the file |
+| Support buttons | Exactly two icon buttons (Ko-fi, Patreon) with SVG icons, accessible labels, correct targets, and no raw URL text |
+| Platform meta | `viewport-fit=cover`, theme-color, iOS/Android web-app metas present; pinch-zoom **not** disabled |
+| Cutout & toolbar safety | `100dvh` app frame; safe-area insets on header, toolbar, timeline sheet, toast, chip, fullscreen controls; `overscroll-behavior:none` |
+| Touch hygiene | 16 px mobile inputs (no iOS focus zoom), `touch-action:manipulation`, tap-highlight and long-press callout suppression |
+| Pointer capture | Requested on drag start; the full drag pipeline verified to still work without a pointerId (mouse path) |
+| Mobile view bar | Single row, horizontally scrollable |
+| Console health | Zero page errors or uncaught exceptions across all 83 tests |
 
 ## Defects found by this suite and fixed before render
 
@@ -74,6 +81,10 @@ cd tests && npm install && npm test
 
 The v2.1 round (mobile + Mini Zine print mode) passed all 22 new tests on the first
 run with no defects found.
+
+The v3.1 round caught one real regression before render — the mobile toolbar's
+`display:flex` rule was dropped during the safe-area CSS rewrite, which would have
+hidden the toolbar entirely on phones; restored and covered by an explicit test.
 
 The v3.0 round surfaced one real portability defect — `img.loading`/`img.decoding` set
 as IDL properties don't reflect to attributes in all engines; switched to

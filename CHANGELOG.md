@@ -1,5 +1,17 @@
 # Changelog — ZineIt by Storitellah
 
+## v3.1 — 2026-07-07
+Mobile platform release: seamless on Android and iOS, plus a cleaner support card.
+
+### Changed
+- **Notch & home-indicator safe**: the header, mobile toolbar, drawers, timeline sheet, toast, Edit chip, and fullscreen controls all respect `env(safe-area-inset-*)`, so nothing hides behind iPhone notches or Android gesture bars.
+- **iOS dynamic-toolbar safe**: the app frame uses `100dvh` (with `100vh` fallback), so Safari's collapsing address bar never clips the timeline or toolbar.
+- **No accidental zoom**: form controls are ≥16 px on mobile (stops iOS zoom-on-focus), controls use `touch-action:manipulation` (no double-tap zoom), tap highlights and iOS long-press callouts are suppressed on page elements, and `overscroll-behavior:none` keeps pull-to-refresh from hijacking canvas gestures. Pinch-zoom remains enabled for accessibility.
+- **Touch drags stay glued to the finger**: pointer capture is engaged on drag start, making drag/pan/resize reliable on Android Chrome and iOS Safari even when the finger leaves the frame.
+- **Single-row view bar** on phones: horizontally scrollable instead of wrapping into a tall stack.
+- **Support card redesigned**: Ko-fi and Patreon are now compact icon buttons (brand-coloured, accessible labels, no raw URLs). **M-Pesa removed.**
+- 8 new automated tests (83 total, all passing).
+
 ## v3.0 — 2026-07-07
 Performance architecture release: less memory everywhere, photos that always load fast, every format in, and a feedback channel.
 

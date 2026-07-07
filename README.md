@@ -34,6 +34,14 @@ Every project automatically includes a **front cover** and **back cover**; inter
 
 
 
+
+### New in v3.1 — at home on Android and iOS
+
+- Safe-area aware: nothing hides behind notches, cutouts, or gesture bars; the layout survives Safari's collapsing address bar.
+- No accidental zoom or text selection while editing; pinch-zoom stays available for accessibility.
+- Touch drags, pans, and resizes are captured to the finger for reliability on Android Chrome and iOS Safari.
+- Support card: Ko-fi and Patreon as one-tap buttons.
+
 ### New in v3.0 — light on memory, fast on photos, open to feedback
 
 - **A new photo engine**: originals live in fast browser storage (IndexedDB) instead of inside the project file. The editor draws small previews — thumbnails appear instantly, sharper previews swap in — and full resolution is touched only for print, PDF, and the lightbox. Projects with dozens of photos stay light on RAM, on desktop and especially on phones, and autosave is instant no matter the photo count.
@@ -87,9 +95,7 @@ Nothing is ever sent anywhere. The `.bak` lives wherever your downloads go — m
 
 ## Support this work
 
-- Ko-fi: <https://ko-fi.com/kiberastories>
-- Patreon: <https://www.patreon.com/c/kiberastories>
-- M-Pesa: **0711 254 986**
+[Ko-fi](https://ko-fi.com/kiberastories) · [Patreon](https://www.patreon.com/c/kiberastories) — or send bugs and ideas to **bryanjaybee@gmail.com**.
 
 ## Repository
 
