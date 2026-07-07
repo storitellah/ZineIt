@@ -1,8 +1,8 @@
 # TESTING.md — ZineIt v2.0 test report
 
-**Result: 83 passed · 0 failed · 0 console errors.** The whole tool — including the
-v3.1 Android/iOS platform hardening and the redesigned support card — was tested
-before this render, as required.
+**Result: 89 passed · 0 failed · 0 console errors.** The whole tool — including the
+v3.2 type system and production-hardening pass — was tested before this render, as
+required.
 
 ## How it was tested
 
@@ -68,7 +68,11 @@ cd tests && npm install && npm test
 | Touch hygiene | 16 px mobile inputs (no iOS focus zoom), `touch-action:manipulation`, tap-highlight and long-press callout suppression |
 | Pointer capture | Requested on drag start; the full drag pipeline verified to still work without a pointerId (mouse path) |
 | Mobile view bar | Single row, horizontally scrollable |
-| Console health | Zero page errors or uncaught exceptions across all 83 tests |
+| Type system | Body stack leads with Source Sans (3 = current name of Source Sans Pro), display token is Bebas Neue, Google Fonts loads both with UI weights, wordmark/panel headers use the display face, numeric readouts stay mono; Source Sans and Bebas offered in the zine font picker |
+| Production shell | Inline SVG favicon, noscript message, header version badge matching APP_VER, console version banner |
+| Error handling | Synthetic uncaught error raises one toast naming the error, reassuring about autosave, and routing to the feedback email; a second immediate error is throttled; async rejections covered; boot guarded with a readable failure screen |
+| Accessibility | All icon-only controls carry aria-labels; `prefers-reduced-motion` honoured |
+| Console health | Zero page errors or uncaught exceptions across all 89 tests |
 
 ## Defects found by this suite and fixed before render
 

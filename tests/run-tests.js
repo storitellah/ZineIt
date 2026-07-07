@@ -831,11 +831,57 @@ T('mobile view bar scrolls horizontally instead of stacking', () => {
   ok(/#viewBar\{[^}]*flex-wrap:nowrap;overflow-x:auto/.test(SRC), 'single-row scrollable toolbar on phones');
 });
 T('feedback subject carries the new version', () => {
-  eq(Z.APP_VER, '3.1');
-  ok(decodeURIComponent($('fbBtn').href).includes('ZineIt v3.1'), 'mailto subject updated');
+  eq(Z.APP_VER, '3.2');
+  ok(decodeURIComponent($('fbBtn').href).includes('ZineIt v' + Z.APP_VER), 'mailto subject updated');
 });
 
-/* ============ 17 · console health ============ */
+/* ============ 17 · v3.2: type system + production readiness ============ */
+const SRC2 = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+T('UI type system: Source Sans body, Bebas Neue display, mono kept for data', () => {
+  ok(/--sans:'Source Sans 3','Source Sans Pro'/.test(SRC2), 'body stack leads with Source Sans (3 = current name of Source Sans Pro)');
+  ok(/--display:'Bebas Neue'/.test(SRC2), 'display token is Bebas Neue with condensed fallbacks');
+  ok(/family=Source\+Sans\+3:wght@400;600;700/.test(SRC2), 'Google Fonts loads Source Sans with UI weights');
+  ok(/family=Bebas\+Neue/.test(SRC2), 'Bebas Neue loaded');
+  ok(/\.brand \.mark\{font-family:var\(--display\)/.test(SRC2), 'wordmark set in Bebas');
+  ok(/\.sec h3\{font-family:var\(--display\)/.test(SRC2), 'panel headers set in Bebas');
+  ok(/#clock\{font-family:var\(--mono\)/.test(SRC2), 'numeric readouts stay monospaced');
+});
+T('Source Sans is also offered for zine text blocks', () => {
+  const opts = [...$('txtFont').options].map(o => o.value);
+  ok(opts.includes('Source Sans 3'), 'font picker includes Source Sans');
+  ok(opts.includes('Bebas Neue'), 'font picker includes Bebas Neue');
+});
+T('production shell: favicon, noscript, version badge, console banner', () => {
+  const icon = document.querySelector('link[rel="icon"]');
+  ok(icon && icon.href.startsWith('data:image/svg+xml'), 'inline SVG favicon — no 404 in production');
+  ok(document.querySelector('noscript'), 'noscript message for JS-disabled visitors');
+  eq($('verBadge').textContent, 'v' + Z.APP_VER, 'header shows the running version (useful in bug reports)');
+  ok(/console\.info\('ZineIt v'/.test(SRC2), 'version banner logged for support');
+});
+T('uncaught errors surface gently and route users to feedback', async () => {
+  window.dispatchEvent(new window.ErrorEvent('error', { message: 'synthetic-test-explosion' }));
+  await new Promise(r => setTimeout(r, 5));
+  const tx = $('toast').textContent;
+  ok($('toast').className.includes('show'), 'toast raised');
+  ok(/synthetic-test-explosion/.test(tx), 'names the error');
+  ok(/autosaved/.test(tx), 'reassures about work safety');
+  ok(new RegExp(Z.FEEDBACK_EMAIL).test(tx), 'routes to the feedback email');
+  ok(/unhandledrejection/.test(SRC2), 'async rejections covered too');
+  window.dispatchEvent(new window.ErrorEvent('error', { message: 'second-error' }));
+  ok(!/second-error/.test($('toast').textContent), 'throttled — no toast spam');
+});
+T('boot is guarded: startup failure shows a readable message, never a blank page', () => {
+  ok(/try\{ boot\(\);/.test(SRC2), 'boot wrapped');
+  ok(/ZineIt could not start/.test(SRC2), 'fallback screen present');
+  ok(/bryanjaybee@gmail\.com/.test(SRC2), 'failure screen points to support');
+});
+T('accessibility: icon-only controls are labelled; reduced motion respected', () => {
+  ['navPrevPage','navNextPage','navPrevSpread','navNextSpread','fsClose','fsPrev','fsNext']
+    .forEach(id => ok($(id).getAttribute('aria-label'), id + ' labelled'));
+  ok(/prefers-reduced-motion:reduce/.test(SRC2), 'transitions disabled for reduced-motion users');
+});
+
+/* ============ 18 · console health ============ */
 T('no page errors or uncaught exceptions across the whole run', () => {
   eq(pageErrors.length, 0, 'errors: ' + pageErrors.slice(0, 3).join(' | '));
 });

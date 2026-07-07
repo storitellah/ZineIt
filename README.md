@@ -35,6 +35,12 @@ Every project automatically includes a **front cover** and **back cover**; inter
 
 
 
+
+### New in v3.2 — dressed for production
+
+- A proper type system: **Bebas Neue** headlines, **Source Sans** text (Source Sans 3, the current name of Source Sans Pro), monospace kept for the clock and readouts — with system fallbacks so offline still looks right.
+- Production hardening: guarded startup (a readable message instead of a blank page), gentle error toasts that route to ✉ Feedback, a favicon, a visible version badge, labelled controls for screen readers, and reduced-motion support.
+
 ### New in v3.1 — at home on Android and iOS
 
 - Safe-area aware: nothing hides behind notches, cutouts, or gesture bars; the layout survives Safari's collapsing address bar.

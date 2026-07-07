@@ -9,9 +9,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>ZineIt — by Storitellah</title>
 <meta name="description" content="ZineIt by Storitellah — a local, print-quality zine and photobook layout tool for photojournalists and photographers.">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="%23F6407A"/><stop offset=".5" stop-color="%237C5CFF"/><stop offset="1" stop-color="%233E8DFF"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(%23g)"/><text x="32" y="46" font-family="Arial,Helvetica,sans-serif" font-size="40" font-weight="bold" text-anchor="middle" fill="white">Z</text></svg>'>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter&family=Roboto&family=Open+Sans&family=Lato&family=Montserrat&family=Poppins&family=Raleway&family=Work+Sans&family=DM+Sans&family=Nunito&family=Rubik&family=Karla&family=Space+Grotesk&family=Archivo&family=Archivo+Black&family=IBM+Plex+Sans&family=Oswald&family=Bebas+Neue&family=Anton&family=Merriweather&family=Playfair+Display&family=Lora&family=PT+Serif&family=Libre+Baskerville&family=EB+Garamond&family=Cormorant+Garamond&family=Crimson+Text&family=DM+Serif+Display&family=Abril+Fatface&family=Source+Serif+4&family=Space+Mono&family=IBM+Plex+Mono&family=JetBrains+Mono&family=Inconsolata&family=Courier+Prime&family=Special+Elite&family=Amatic+SC&family=Caveat&family=Shadows+Into+Light&family=Permanent+Marker&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter&family=Roboto&family=Open+Sans&family=Lato&family=Montserrat&family=Poppins&family=Raleway&family=Work+Sans&family=DM+Sans&family=Nunito&family=Rubik&family=Karla&family=Space+Grotesk&family=Archivo&family=Archivo+Black&family=IBM+Plex+Sans&family=Oswald&family=Bebas+Neue&family=Anton&family=Merriweather&family=Playfair+Display&family=Lora&family=PT+Serif&family=Libre+Baskerville&family=EB+Garamond&family=Cormorant+Garamond&family=Crimson+Text&family=DM+Serif+Display&family=Abril+Fatface&family=Source+Serif+4&family=Space+Mono&family=IBM+Plex+Mono&family=JetBrains+Mono&family=Inconsolata&family=Courier+Prime&family=Special+Elite&family=Amatic+SC&family=Caveat&family=Shadows+Into+Light&family=Permanent+Marker&family=Source+Sans+3:wght@400;600;700&display=swap">
 <style>
 /* ============ TOKENS ============ */
 :root{
@@ -22,7 +23,8 @@
   --grad:linear-gradient(90deg,#F6407A 0%,#FFB627 26%,#14C7AE 52%,#3E8DFF 76%,#7C5CFF 100%);
   --paper:#f6f4ee; --paper-shadow:rgba(0,0,0,.55);
   --ok:#4fae6e; --warn:#d9a13b; --danger:#e0564a;
-  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --sans:'Source Sans 3','Source Sans Pro',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --display:'Bebas Neue','Oswald','Arial Narrow',Impact,sans-serif;
   --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
   --radius:6px;
 }
@@ -47,7 +49,8 @@ a{color:var(--accent)}
 header{grid-area:hdr;display:flex;align-items:center;gap:14px;padding:0 16px;background:var(--panel);border-bottom:1px solid var(--line);position:relative;z-index:20}
 header::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:2.5px;background:var(--grad);z-index:2}
 .brand{display:flex;align-items:baseline;gap:8px;white-space:nowrap}
-.brand .mark{font-family:var(--mono);font-weight:700;font-size:19px;letter-spacing:-.5px}
+.brand .mark{font-family:var(--display);font-weight:400;font-size:24px;letter-spacing:.6px;line-height:1}
+.brand .ver{font-family:var(--mono);font-size:10px;color:var(--faint);align-self:flex-start;margin-top:2px}
 .brand .mark span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
 .brand .by{font-size:12px;color:var(--muted)}
 .brand .by a{color:var(--muted);text-decoration:underline;text-underline-offset:3px}
@@ -67,7 +70,7 @@ header::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:2.5
 #left{grid-area:left;border-right:1px solid var(--line)}
 #right{grid-area:right;border-left:1px solid var(--line)}
 .sec{display:flex;flex-direction:column;gap:8px}
-.sec h3{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);padding-bottom:6px;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;gap:7px}
+.sec h3{font-family:var(--display);font-size:13.5px;font-weight:400;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);padding-bottom:6px;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;gap:7px}
 .sec h3::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--accent);flex:none}
 #left .sec:nth-of-type(1) h3::before{background:var(--pop-amber)}
 #left .sec:nth-of-type(2) h3::before{background:var(--pop-teal)}
@@ -191,7 +194,7 @@ textarea{resize:vertical;min-height:56px}
 #textEditor.show{display:block}
 .teWrap{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
 .teHead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.teHead h2{font-size:16px}
+.teHead h2{font-family:var(--display);font-weight:400;font-size:21px;letter-spacing:.8px}
 .teHead .mono{font-family:var(--mono);font-size:11px;color:var(--faint)}
 .teRow{display:grid;grid-template-columns:112px 132px 1fr 84px;gap:10px;align-items:start;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:10px}
 .teRow .loc{font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.6;padding-top:6px}
@@ -243,7 +246,7 @@ textarea{resize:vertical;min-height:56px}
 .modalBk{position:fixed;inset:0;background:rgba(8,9,11,.72);display:none;align-items:center;justify-content:center;z-index:600}
 .modalBk.show{display:flex}
 .modal{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:22px;width:min(560px,92vw);max-height:86vh;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
-.modal h2{font-size:16px}
+.modal h2{font-family:var(--display);font-weight:400;font-size:21px;letter-spacing:.8px}
 .modal .mono{font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.7}
 .modal ol{padding-left:20px;font-size:13px;line-height:1.8;color:var(--text)}
 .modal .btns{display:flex;gap:8px;justify-content:flex-end}
@@ -318,6 +321,9 @@ body.fs header,body.fs #left,body.fs #right,body.fs #rail,body.fs #viewBar,body.
 body.fs #app{grid-template-rows:1fr;grid-template-columns:1fr;grid-template-areas:"canvas"}
 body.fs #canvasScroll{padding:14px}
 
+@media (prefers-reduced-motion:reduce){
+  .side,#rail,#toast,.btn,.vbtn{transition:none!important}
+}
 @media (pointer:coarse){
   .hd{width:18px;height:18px}
   .hd.nw{left:-9px;top:-9px}.hd.ne{right:-9px;top:-9px}.hd.sw{left:-9px;bottom:-9px}.hd.se{right:-9px;bottom:-9px}
@@ -360,11 +366,13 @@ body.fs #canvasScroll{padding:14px}
 </style>
 </head>
 <body>
+<noscript><div style="position:fixed;inset:0;background:#141619;color:#dde1e7;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:sans-serif;line-height:1.7;z-index:9999">ZineIt needs JavaScript to run.<br>Everything stays on your device — nothing is uploaded.</div></noscript>
 
 <div id="app">
   <header>
     <div class="brand">
       <span class="mark">Zine<span>It</span></span>
+      <span class="ver" id="verBadge">v3.2</span>
       <span class="by">by <a href="https://storitellah.com" target="_blank" rel="noopener">Storitellah</a></span>
     </div>
     <input id="projName" type="text" value="Untitled project" spellcheck="false" aria-label="Project / zine title">
@@ -418,10 +426,10 @@ body.fs #canvasScroll{padding:14px}
       <button class="vbtn on" id="tabLayout">Layout</button>
       <button class="vbtn" id="tabText">Text editor</button>
       <span class="vsep"></span>
-      <button class="vbtn" id="navPrevSpread" title="Previous spread">«</button>
-      <button class="vbtn" id="navPrevPage" title="Previous page">‹</button>
-      <button class="vbtn" id="navNextPage" title="Next page">›</button>
-      <button class="vbtn" id="navNextSpread" title="Next spread">»</button>
+      <button class="vbtn" id="navPrevSpread" title="Previous spread" aria-label="Previous spread">«</button>
+      <button class="vbtn" id="navPrevPage" title="Previous page" aria-label="Previous page">‹</button>
+      <button class="vbtn" id="navNextPage" title="Next page" aria-label="Next page">›</button>
+      <button class="vbtn" id="navNextSpread" title="Next spread" aria-label="Next spread">»</button>
       <span class="vsep"></span>
       <button class="vbtn" id="viewSingle" title="Single page view">Single</button>
       <button class="vbtn on" id="viewSpread" title="Facing pages view">Spread</button>
@@ -598,9 +606,9 @@ body.fs #canvasScroll{padding:14px}
 <div id="drawerBk"></div>
 <button id="mobEdit">✎ Edit</button>
 <div id="fsUi">
-  <button id="fsClose" title="Exit fullscreen (Esc)">✕</button>
-  <button id="fsPrev" title="Previous">‹</button>
-  <button id="fsNext" title="Next">›</button>
+  <button id="fsClose" title="Exit fullscreen (Esc)" aria-label="Exit fullscreen">✕</button>
+  <button id="fsPrev" title="Previous" aria-label="Previous page">‹</button>
+  <button id="fsNext" title="Next" aria-label="Next page">›</button>
   <div id="fsInd">—</div>
 </div>
 
@@ -671,10 +679,10 @@ const FORMATS = {
   'book-10x8'  :{group:'Photobooks', name:'Photobook — 10 × 8 in landscape', w:10, h:8},
   'book-a4'    :{group:'Photobooks', name:'Photobook — A4 portrait',  w:8.27, h:11.69},
 };
-const APP_VER='3.1', FEEDBACK_EMAIL='bryanjaybee@gmail.com';
+const APP_VER='3.2', FEEDBACK_EMAIL='bryanjaybee@gmail.com';
 const GRID=0.125, BLEED=0.125;
 const FONTS = ['Inter','Roboto','Open Sans','Lato','Montserrat','Poppins','Raleway','Work Sans','DM Sans','Nunito',
-  'Rubik','Karla','Space Grotesk','Archivo','Archivo Black','IBM Plex Sans','Oswald','Bebas Neue','Anton',
+  'Rubik','Karla','Source Sans 3','Space Grotesk','Archivo','Archivo Black','IBM Plex Sans','Oswald','Bebas Neue','Anton',
   'Merriweather','Playfair Display','Lora','PT Serif','Libre Baskerville','EB Garamond','Cormorant Garamond',
   'Crimson Text','DM Serif Display','Abril Fatface','Source Serif 4','Space Mono','IBM Plex Mono','JetBrains Mono',
   'Inconsolata','Courier Prime','Special Elite','Amatic SC','Caveat','Shadows Into Light','Permanent Marker'];
@@ -1925,6 +1933,17 @@ window.addEventListener('keydown',ev=>{ if(ev.key==='Escape'){ closeLightbox(); 
   if(document.body.classList.contains('fs'))toggleFS(false); }});
 window.addEventListener('resize',()=>{ if(!state)return; applyMobile(); if(view.tab==='layout')renderCanvas(); });
 
+/* production error reporting — never a silent white screen */
+let lastErrToast=0;
+function reportError(msg){
+  const now=Date.now(); if(now-lastErrToast<8000)return; lastErrToast=now;
+  try{ toast('Something went wrong ('+escapeHtml(String(msg||'unknown').slice(0,90))
+    +'). Your work is autosaved. If this keeps happening, tap ✉ Feedback and tell '
+    +FEEDBACK_EMAIL+' what you were doing.','err'); }catch(e){}
+}
+window.addEventListener('error',ev=>{ if(state)reportError(ev&&ev.message); });
+window.addEventListener('unhandledrejection',ev=>{ if(state)reportError(ev&&ev.reason&&(ev.reason.message||ev.reason)); });
+
 /* ---------- mobile: responsive shell, drawers, fullscreen, swipe, tap-to-edit ---------- */
 function isMobile(){ return window.innerWidth<=820; }
 function applyMobile(){
@@ -2000,7 +2019,13 @@ window.__zineit={
     try{ const b=dataURLtoBlob(src); assetStore.put(id,{full:b,preview:b}); }catch(e){} },
 };
 
-boot();
+try{ boot(); console.info('ZineIt v'+APP_VER+' — by Storitellah · feedback: '+FEEDBACK_EMAIL); }
+catch(e){
+  document.body.insertAdjacentHTML('beforeend',
+    '<div style="position:fixed;inset:0;background:#141619;color:#dde1e7;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:sans-serif;line-height:1.7;z-index:9999">'
+    +'ZineIt could not start.<br>Refresh the page — your work is autosaved.<br>'
+    +'If it keeps happening, please email <b>&nbsp;bryanjaybee@gmail.com</b></div>');
+}
 </script>
 </body>
 </html>

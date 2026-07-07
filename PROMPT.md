@@ -210,3 +210,24 @@ One bug was introduced and caught by the suite during the round (the mobile tool
 `display:flex` was lost in a CSS rewrite — restored), plus one test-expectation typo.
 Support card: M-Pesa removed entirely; Ko-fi and Patreon became brand-coloured icon
 buttons with accessible labels and no raw URL text.
+
+---
+
+## v3.2 build prompt (typography + production)
+
+> Change the font of the tool to Bebas Neue & Source Sans Pro, and also make the tool
+> production-ready.
+
+### v3.2 version note
+
+Typography: Bebas Neue is a caps-only condensed display face, so it takes the roles
+where that shines — wordmark, panel headers, dialog titles — while Source Sans carries
+every sentence. Google Fonts serves Source Sans Pro under its current name *Source
+Sans 3* (same typeface, renamed by Adobe); the CSS stack lists both names plus system
+fallbacks, and mono stays on numeric readouts where a display face would hurt
+legibility. Production readiness focused on failure behaviour: guarded boot with a
+readable fallback screen, global error/rejection handlers that toast once (throttled)
+and route to the feedback email, a favicon so production logs stay clean, noscript,
+a visible version badge for bug reports, aria-labels on icon-only controls, and
+reduced-motion support. Deliberately not minified — Cloudflare compresses on the
+wire and the single readable file is part of the tool's trust story.
