@@ -1,5 +1,32 @@
 # Changelog — ZineIt by Storitellah
 
+## v3.2 — 2026-07-07
+Type system + production readiness.
+
+### Changed
+- **New UI type system**: **Bebas Neue** for display (wordmark, panel headers, dialog titles) and **Source Sans** for all body text — loaded from Google Fonts as *Source Sans 3*, Adobe's current name for Source Sans Pro, with the classic name kept in the CSS stack and full system fallbacks so the tool still reads well offline. Monospace is retained where it belongs: the clock, zoom %, page readouts, and timeline tags. Source Sans is also available in the zine text-font picker.
+
+### Added — production hardening
+- **Crash guards**: boot is wrapped — a startup failure shows a readable message pointing to bryanjaybee@gmail.com instead of a blank page; uncaught errors and async rejections raise a gentle toast that names the error, reassures that work is autosaved, and routes to ✉ Feedback (throttled — never a toast storm).
+- **Inline SVG favicon** (no 404s in production), **noscript** message, **version badge** in the header (so bug reports say which build), and a console version banner.
+- **Accessibility**: aria-labels on all icon-only controls; `prefers-reduced-motion` disables drawer/toast animation.
+- 6 new automated tests (89 total, all passing).
+
+### Notes
+- The file ships readable, not minified — Cloudflare compresses on the wire (the gap is a few KB), and an auditable single file is part of ZineIt's local-first promise.
+
+## v3.1 — 2026-07-07
+Mobile platform release: seamless on Android and iOS, plus a cleaner support card.
+
+### Changed
+- **Notch & home-indicator safe**: the header, mobile toolbar, drawers, timeline sheet, toast, Edit chip, and fullscreen controls all respect `env(safe-area-inset-*)`, so nothing hides behind iPhone notches or Android gesture bars.
+- **iOS dynamic-toolbar safe**: the app frame uses `100dvh` (with `100vh` fallback), so Safari's collapsing address bar never clips the timeline or toolbar.
+- **No accidental zoom**: form controls are ≥16 px on mobile (stops iOS zoom-on-focus), controls use `touch-action:manipulation` (no double-tap zoom), tap highlights and iOS long-press callouts are suppressed on page elements, and `overscroll-behavior:none` keeps pull-to-refresh from hijacking canvas gestures. Pinch-zoom remains enabled for accessibility.
+- **Touch drags stay glued to the finger**: pointer capture is engaged on drag start, making drag/pan/resize reliable on Android Chrome and iOS Safari even when the finger leaves the frame.
+- **Single-row view bar** on phones: horizontally scrollable instead of wrapping into a tall stack.
+- **Support card redesigned**: Ko-fi and Patreon are now compact icon buttons (brand-coloured, accessible labels, no raw URLs). **M-Pesa removed.**
+- 8 new automated tests (83 total, all passing).
+
 ## v3.0 — 2026-07-07
 Performance architecture release: less memory everywhere, photos that always load fast, every format in, and a feedback channel.
 

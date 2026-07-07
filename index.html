@@ -2,12 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#141619">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>ZineIt — by Storitellah</title>
 <meta name="description" content="ZineIt by Storitellah — a local, print-quality zine and photobook layout tool for photojournalists and photographers.">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="%23F6407A"/><stop offset=".5" stop-color="%237C5CFF"/><stop offset="1" stop-color="%233E8DFF"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(%23g)"/><text x="32" y="46" font-family="Arial,Helvetica,sans-serif" font-size="40" font-weight="bold" text-anchor="middle" fill="white">Z</text></svg>'>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter&family=Roboto&family=Open+Sans&family=Lato&family=Montserrat&family=Poppins&family=Raleway&family=Work+Sans&family=DM+Sans&family=Nunito&family=Rubik&family=Karla&family=Space+Grotesk&family=Archivo&family=Archivo+Black&family=IBM+Plex+Sans&family=Oswald&family=Bebas+Neue&family=Anton&family=Merriweather&family=Playfair+Display&family=Lora&family=PT+Serif&family=Libre+Baskerville&family=EB+Garamond&family=Cormorant+Garamond&family=Crimson+Text&family=DM+Serif+Display&family=Abril+Fatface&family=Source+Serif+4&family=Space+Mono&family=IBM+Plex+Mono&family=JetBrains+Mono&family=Inconsolata&family=Courier+Prime&family=Special+Elite&family=Amatic+SC&family=Caveat&family=Shadows+Into+Light&family=Permanent+Marker&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter&family=Roboto&family=Open+Sans&family=Lato&family=Montserrat&family=Poppins&family=Raleway&family=Work+Sans&family=DM+Sans&family=Nunito&family=Rubik&family=Karla&family=Space+Grotesk&family=Archivo&family=Archivo+Black&family=IBM+Plex+Sans&family=Oswald&family=Bebas+Neue&family=Anton&family=Merriweather&family=Playfair+Display&family=Lora&family=PT+Serif&family=Libre+Baskerville&family=EB+Garamond&family=Cormorant+Garamond&family=Crimson+Text&family=DM+Serif+Display&family=Abril+Fatface&family=Source+Serif+4&family=Space+Mono&family=IBM+Plex+Mono&family=JetBrains+Mono&family=Inconsolata&family=Courier+Prime&family=Special+Elite&family=Amatic+SC&family=Caveat&family=Shadows+Into+Light&family=Permanent+Marker&family=Source+Sans+3:wght@400;600;700&display=swap">
 <style>
 /* ============ TOKENS ============ */
 :root{
@@ -18,13 +23,18 @@
   --grad:linear-gradient(90deg,#F6407A 0%,#FFB627 26%,#14C7AE 52%,#3E8DFF 76%,#7C5CFF 100%);
   --paper:#f6f4ee; --paper-shadow:rgba(0,0,0,.55);
   --ok:#4fae6e; --warn:#d9a13b; --danger:#e0564a;
-  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --sans:'Source Sans 3','Source Sans Pro',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --display:'Bebas Neue','Oswald','Arial Narrow',Impact,sans-serif;
   --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
   --radius:6px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
-body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;overflow:hidden}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;overflow:hidden;
+     -webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+button,.btn,.vbtn,.tpl,.thumb,.tlPage,.toggle,#mtb button{touch-action:manipulation}
+.el,.el *,.hd{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 button{font-family:inherit;cursor:pointer}
 input,select,textarea{font-family:inherit;color:var(--text)}
 a{color:var(--accent)}
@@ -34,12 +44,13 @@ a{color:var(--accent)}
 :focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 
 /* ============ APP FRAME ============ */
-#app{display:grid;grid-template-rows:52px 1fr 178px;grid-template-columns:258px 1fr 292px;height:100vh;
+#app{display:grid;grid-template-rows:52px 1fr 178px;grid-template-columns:258px 1fr 292px;height:100vh;height:100dvh;
      grid-template-areas:"hdr hdr hdr" "left canvas right" "rail rail rail"}
 header{grid-area:hdr;display:flex;align-items:center;gap:14px;padding:0 16px;background:var(--panel);border-bottom:1px solid var(--line);position:relative;z-index:20}
 header::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:2.5px;background:var(--grad);z-index:2}
 .brand{display:flex;align-items:baseline;gap:8px;white-space:nowrap}
-.brand .mark{font-family:var(--mono);font-weight:700;font-size:19px;letter-spacing:-.5px}
+.brand .mark{font-family:var(--display);font-weight:400;font-size:24px;letter-spacing:.6px;line-height:1}
+.brand .ver{font-family:var(--mono);font-size:10px;color:var(--faint);align-self:flex-start;margin-top:2px}
 .brand .mark span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
 .brand .by{font-size:12px;color:var(--muted)}
 .brand .by a{color:var(--muted);text-decoration:underline;text-underline-offset:3px}
@@ -59,7 +70,7 @@ header::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:2.5
 #left{grid-area:left;border-right:1px solid var(--line)}
 #right{grid-area:right;border-left:1px solid var(--line)}
 .sec{display:flex;flex-direction:column;gap:8px}
-.sec h3{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);padding-bottom:6px;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;gap:7px}
+.sec h3{font-family:var(--display);font-size:13.5px;font-weight:400;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);padding-bottom:6px;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;gap:7px}
 .sec h3::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--accent);flex:none}
 #left .sec:nth-of-type(1) h3::before{background:var(--pop-amber)}
 #left .sec:nth-of-type(2) h3::before{background:var(--pop-teal)}
@@ -110,10 +121,12 @@ textarea{resize:vertical;min-height:56px}
 .support a.slink{display:flex;align-items:center;gap:8px;font-size:12.5px;text-decoration:none;color:var(--text);padding:6px 8px;border:1px solid var(--line);border-radius:5px;background:var(--panel)}
 .support a.slink:hover{border-color:var(--accent)}
 .support .ico{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--accent);width:38px;flex:none;text-align:center;border:1px solid var(--line);border-radius:3px;padding:2px 0}
-.mpesa{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:6px 8px;border:1px solid var(--line);border-radius:5px;background:var(--panel)}
-.mpesa .num{font-family:var(--mono);font-weight:600;letter-spacing:.5px;flex:1}
-.mpesa button{background:none;border:1px solid var(--line);color:var(--muted);border-radius:3px;font-size:10px;padding:2px 6px}
-.mpesa button:hover{color:var(--accent);border-color:var(--accent)}
+.supBtns{display:flex;gap:8px}
+.supBtn{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:9px 8px;border-radius:6px;
+  font-size:12.5px;font-weight:600;text-decoration:none;color:#fff;border:none;transition:filter .12s}
+.supBtn:hover{filter:brightness(1.12)}
+.supBtn.kofi{background:linear-gradient(120deg,#13A3DD,#0e7fb0)}
+.supBtn.patreon{background:linear-gradient(120deg,#FF424D,#c92f38)}
 
 /* templates */
 .tpls{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
@@ -181,7 +194,7 @@ textarea{resize:vertical;min-height:56px}
 #textEditor.show{display:block}
 .teWrap{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
 .teHead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.teHead h2{font-size:16px}
+.teHead h2{font-family:var(--display);font-weight:400;font-size:21px;letter-spacing:.8px}
 .teHead .mono{font-family:var(--mono);font-size:11px;color:var(--faint)}
 .teRow{display:grid;grid-template-columns:112px 132px 1fr 84px;gap:10px;align-items:start;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:10px}
 .teRow .loc{font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.6;padding-top:6px}
@@ -233,7 +246,7 @@ textarea{resize:vertical;min-height:56px}
 .modalBk{position:fixed;inset:0;background:rgba(8,9,11,.72);display:none;align-items:center;justify-content:center;z-index:600}
 .modalBk.show{display:flex}
 .modal{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:22px;width:min(560px,92vw);max-height:86vh;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
-.modal h2{font-size:16px}
+.modal h2{font-family:var(--display);font-weight:400;font-size:21px;letter-spacing:.8px}
 .modal .mono{font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.7}
 .modal ol{padding-left:20px;font-size:13px;line-height:1.8;color:var(--text)}
 .modal .btns{display:flex;gap:8px;justify-content:flex-end}
@@ -308,6 +321,9 @@ body.fs header,body.fs #left,body.fs #right,body.fs #rail,body.fs #viewBar,body.
 body.fs #app{grid-template-rows:1fr;grid-template-columns:1fr;grid-template-areas:"canvas"}
 body.fs #canvasScroll{padding:14px}
 
+@media (prefers-reduced-motion:reduce){
+  .side,#rail,#toast,.btn,.vbtn{transition:none!important}
+}
 @media (pointer:coarse){
   .hd{width:18px;height:18px}
   .hd.nw{left:-9px;top:-9px}.hd.ne{right:-9px;top:-9px}.hd.sw{left:-9px;bottom:-9px}.hd.se{right:-9px;bottom:-9px}
@@ -317,25 +333,31 @@ body.fs #canvasScroll{padding:14px}
 }
 
 @media (max-width:820px){
-  #app{grid-template-rows:46px 1fr 54px;grid-template-columns:1fr;grid-template-areas:"hdr" "canvas" "mtb"}
-  header{gap:8px;padding:0 10px}
-  #projName{min-width:0;flex:1;font-size:12px}
+  #app{grid-template-rows:calc(46px + env(safe-area-inset-top,0px)) 1fr calc(54px + env(safe-area-inset-bottom,0px));grid-template-columns:1fr;grid-template-areas:"hdr" "canvas" "mtb"}
+  header{gap:8px;padding-top:env(safe-area-inset-top,0px);padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px))}
+  #mtb{display:flex;padding-bottom:env(safe-area-inset-bottom,0px)}
+  #fsClose{top:max(12px,env(safe-area-inset-top,0px))}
+  #fsInd{bottom:max(14px,env(safe-area-inset-bottom,0px))}
+  select,input[type=text],input[type=number],textarea{font-size:16px}  /* ≥16px stops iOS zoom-on-focus */
+  #projName{min-width:0;flex:1;font-size:16px}
   #clkDate,#saveStateTxt{display:none}
   #clock{font-size:11px}
-  #mtb{display:flex}
-  .side{position:fixed;top:46px;bottom:54px;width:min(84vw,330px);z-index:320;transition:transform .22s ease;box-shadow:0 0 44px rgba(0,0,0,.55)}
+  .side{position:fixed;top:calc(46px + env(safe-area-inset-top,0px));bottom:calc(54px + env(safe-area-inset-bottom,0px));width:min(84vw,330px);z-index:320;transition:transform .22s ease;box-shadow:0 0 44px rgba(0,0,0,.55);-webkit-overflow-scrolling:touch}
   #left{left:0;border-right:1px solid var(--line);transform:translateX(-106%)}
   #right{right:0;border-left:1px solid var(--line);transform:translateX(106%)}
   body.dLeft #left{transform:none}
   body.dRight #right{transform:none}
-  #rail{position:fixed;left:0;right:0;bottom:54px;height:174px;z-index:312;transform:translateY(112%);transition:transform .22s ease;border-top:1px solid var(--line)}
+  #rail{position:fixed;left:0;right:0;bottom:calc(54px + env(safe-area-inset-bottom,0px));height:174px;z-index:312;transform:translateY(112%);transition:transform .22s ease;border-top:1px solid var(--line)}
   body.railOpen #rail{transform:none}
-  #viewBar{padding:5px 8px;gap:4px}
-  .vbtn{padding:4px 7px;font-size:11px}
-  #viewBar .toggle{font-size:10.5px!important}
+  #viewBar{padding:5px 8px;gap:4px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  #viewBar::-webkit-scrollbar{display:none}
+  #viewBar>*{flex:none}
+  .vbtn{padding:6px 8px;font-size:11px}
+  #viewBar .toggle{font-size:10.5px!important;white-space:nowrap}
   #canvasScroll{padding:12px}
   #pageTag{font-size:9.5px;top:-20px}
-  #toast{bottom:66px;max-width:92vw}
+  #toast{bottom:calc(66px + env(safe-area-inset-bottom,0px));max-width:92vw}
+  #mobEdit{bottom:calc(66px + env(safe-area-inset-bottom,0px))}
   .teRow{grid-template-columns:1fr;gap:7px}
   .teRow .ops{flex-direction:row}
   .teAdd{grid-template-columns:1fr}
@@ -344,11 +366,13 @@ body.fs #canvasScroll{padding:14px}
 </style>
 </head>
 <body>
+<noscript><div style="position:fixed;inset:0;background:#141619;color:#dde1e7;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:sans-serif;line-height:1.7;z-index:9999">ZineIt needs JavaScript to run.<br>Everything stays on your device — nothing is uploaded.</div></noscript>
 
 <div id="app">
   <header>
     <div class="brand">
       <span class="mark">Zine<span>It</span></span>
+      <span class="ver" id="verBadge">v3.2</span>
       <span class="by">by <a href="https://storitellah.com" target="_blank" rel="noopener">Storitellah</a></span>
     </div>
     <input id="projName" type="text" value="Untitled project" spellcheck="false" aria-label="Project / zine title">
@@ -382,9 +406,14 @@ body.fs #canvasScroll{padding:14px}
       <h3>Support this work</h3>
       <div class="support">
         <h4>Keep independent photo stories alive</h4>
-        <a class="slink" href="https://ko-fi.com/kiberastories" target="_blank" rel="noopener"><span class="ico">KO-FI</span>ko-fi.com/kiberastories</a>
-        <a class="slink" href="https://www.patreon.com/c/kiberastories" target="_blank" rel="noopener"><span class="ico">PATR</span>patreon.com/c/kiberastories</a>
-        <div class="mpesa"><span class="ico" style="color:var(--ok)">M-PESA</span><span class="num">0711 254 986</span><button id="copyMpesa" title="Copy number">copy</button></div>
+        <div class="supBtns">
+          <a class="supBtn kofi" href="https://ko-fi.com/kiberastories" target="_blank" rel="noopener" aria-label="Support on Ko-fi" title="Support on Ko-fi">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="M20.2 6H3.4c-.8 0-1.4.6-1.4 1.4v6.1C2 17.1 4.9 20 8.5 20h4.3c3 0 5.5-2.1 6.2-4.9h1.2c1.9 0 3.3-1.5 3.3-3.4v-2C23.5 7.6 22 6 20.2 6zm1.3 5.7c0 .8-.6 1.4-1.3 1.4h-.9V8h.9c.7 0 1.3.7 1.3 1.5v2.2zM12.1 14.6s3.3-1.9 3.3-4.2c0-1.3-1-2.1-2-2.1-.7 0-1.2.4-1.3.6-.2-.2-.7-.6-1.4-.6-1 0-2 .8-2 2.1 0 2.3 3.4 4.2 3.4 4.2z"/></svg>
+            Ko-fi</a>
+          <a class="supBtn patreon" href="https://www.patreon.com/c/kiberastories" target="_blank" rel="noopener" aria-label="Support on Patreon" title="Support on Patreon">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><circle cx="14.5" cy="9.5" r="6.5"/><rect x="3" y="3" width="4" height="18"/></svg>
+            Patreon</a>
+        </div>
         <a class="slink" id="feedbackLink" href="#"><span class="ico" style="color:var(--pop-amber)">✉</span>Found a bug? Have an idea? Email us</a>
         <div class="hint">Reports and recommendations go straight to bryanjaybee@gmail.com — every one gets read.</div>
       </div>
@@ -397,10 +426,10 @@ body.fs #canvasScroll{padding:14px}
       <button class="vbtn on" id="tabLayout">Layout</button>
       <button class="vbtn" id="tabText">Text editor</button>
       <span class="vsep"></span>
-      <button class="vbtn" id="navPrevSpread" title="Previous spread">«</button>
-      <button class="vbtn" id="navPrevPage" title="Previous page">‹</button>
-      <button class="vbtn" id="navNextPage" title="Next page">›</button>
-      <button class="vbtn" id="navNextSpread" title="Next spread">»</button>
+      <button class="vbtn" id="navPrevSpread" title="Previous spread" aria-label="Previous spread">«</button>
+      <button class="vbtn" id="navPrevPage" title="Previous page" aria-label="Previous page">‹</button>
+      <button class="vbtn" id="navNextPage" title="Next page" aria-label="Next page">›</button>
+      <button class="vbtn" id="navNextSpread" title="Next spread" aria-label="Next spread">»</button>
       <span class="vsep"></span>
       <button class="vbtn" id="viewSingle" title="Single page view">Single</button>
       <button class="vbtn on" id="viewSpread" title="Facing pages view">Spread</button>
@@ -577,9 +606,9 @@ body.fs #canvasScroll{padding:14px}
 <div id="drawerBk"></div>
 <button id="mobEdit">✎ Edit</button>
 <div id="fsUi">
-  <button id="fsClose" title="Exit fullscreen (Esc)">✕</button>
-  <button id="fsPrev" title="Previous">‹</button>
-  <button id="fsNext" title="Next">›</button>
+  <button id="fsClose" title="Exit fullscreen (Esc)" aria-label="Exit fullscreen">✕</button>
+  <button id="fsPrev" title="Previous" aria-label="Previous page">‹</button>
+  <button id="fsNext" title="Next" aria-label="Next page">›</button>
   <div id="fsInd">—</div>
 </div>
 
@@ -650,10 +679,10 @@ const FORMATS = {
   'book-10x8'  :{group:'Photobooks', name:'Photobook — 10 × 8 in landscape', w:10, h:8},
   'book-a4'    :{group:'Photobooks', name:'Photobook — A4 portrait',  w:8.27, h:11.69},
 };
-const APP_VER='3.0', FEEDBACK_EMAIL='bryanjaybee@gmail.com';
+const APP_VER='3.2', FEEDBACK_EMAIL='bryanjaybee@gmail.com';
 const GRID=0.125, BLEED=0.125;
 const FONTS = ['Inter','Roboto','Open Sans','Lato','Montserrat','Poppins','Raleway','Work Sans','DM Sans','Nunito',
-  'Rubik','Karla','Space Grotesk','Archivo','Archivo Black','IBM Plex Sans','Oswald','Bebas Neue','Anton',
+  'Rubik','Karla','Source Sans 3','Space Grotesk','Archivo','Archivo Black','IBM Plex Sans','Oswald','Bebas Neue','Anton',
   'Merriweather','Playfair Display','Lora','PT Serif','Libre Baskerville','EB Garamond','Cormorant Garamond',
   'Crimson Text','DM Serif Display','Abril Fatface','Source Serif 4','Space Mono','IBM Plex Mono','JetBrains Mono',
   'Inconsolata','Courier Prime','Special Elite','Amatic SC','Caveat','Shadows Into Light','Permanent Marker'];
@@ -1229,6 +1258,7 @@ function startDrag(ev,pgIdx,id,handle){
   if(pe.spread&&view.mode!=='spread'){ select(pgIdx,id); toast('Switch to Spread view to edit a double-page photo.'); return; }
   select(pgIdx,id);
   const pan=!handle && pe.type==='image' && pe.asset && (ev.shiftKey||ev.altKey||panMode);
+  try{ if(ev.pointerId!=null&&ev.target.setPointerCapture)ev.target.setPointerCapture(ev.pointerId); }catch(e){}
   drag={pgIdx,id,handle,pan,sx:ev.clientX,sy:ev.clientY,ox:pe.x,oy:pe.y,ow:pe.w,oh:pe.h,
         opx:pe.px==null?50:pe.px,opy:pe.py==null?50:pe.py,moved:false};
   window.addEventListener('pointermove',onDragMove);
@@ -1901,11 +1931,18 @@ $('lbClose').addEventListener('click',closeLightbox);
 window.addEventListener('keydown',ev=>{ if(ev.key==='Escape'){ closeLightbox(); closeDrawers();
   $('foldModalBk').classList.remove('show');
   if(document.body.classList.contains('fs'))toggleFS(false); }});
-$('copyMpesa').addEventListener('click',async()=>{
-  try{ await navigator.clipboard.writeText('0711254986'); toast('M-Pesa number copied: 0711254986','ok'); }
-  catch(e){ toast('M-Pesa: 0711254986'); }
-});
 window.addEventListener('resize',()=>{ if(!state)return; applyMobile(); if(view.tab==='layout')renderCanvas(); });
+
+/* production error reporting — never a silent white screen */
+let lastErrToast=0;
+function reportError(msg){
+  const now=Date.now(); if(now-lastErrToast<8000)return; lastErrToast=now;
+  try{ toast('Something went wrong ('+escapeHtml(String(msg||'unknown').slice(0,90))
+    +'). Your work is autosaved. If this keeps happening, tap ✉ Feedback and tell '
+    +FEEDBACK_EMAIL+' what you were doing.','err'); }catch(e){}
+}
+window.addEventListener('error',ev=>{ if(state)reportError(ev&&ev.message); });
+window.addEventListener('unhandledrejection',ev=>{ if(state)reportError(ev&&ev.reason&&(ev.reason.message||ev.reason)); });
 
 /* ---------- mobile: responsive shell, drawers, fullscreen, swipe, tap-to-edit ---------- */
 function isMobile(){ return window.innerWidth<=820; }
@@ -1982,7 +2019,13 @@ window.__zineit={
     try{ const b=dataURLtoBlob(src); assetStore.put(id,{full:b,preview:b}); }catch(e){} },
 };
 
-boot();
+try{ boot(); console.info('ZineIt v'+APP_VER+' — by Storitellah · feedback: '+FEEDBACK_EMAIL); }
+catch(e){
+  document.body.insertAdjacentHTML('beforeend',
+    '<div style="position:fixed;inset:0;background:#141619;color:#dde1e7;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:sans-serif;line-height:1.7;z-index:9999">'
+    +'ZineIt could not start.<br>Refresh the page — your work is autosaved.<br>'
+    +'If it keeps happening, please email <b>&nbsp;bryanjaybee@gmail.com</b></div>');
+}
 </script>
 </body>
 </html>

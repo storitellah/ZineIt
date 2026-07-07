@@ -1,4 +1,4 @@
-ZineIt v3.0 test run — 2026-07-07T06:00:14.000Z
+ZineIt v3.2 test run — 2026-07-07T14:42:08.236Z
 PASS  boots into a valid mini-zine project
 PASS  spread model: cover alone · 3 interior pairs · back alone
 PASS  forward/backward page navigation, no skips, covers included
@@ -73,6 +73,20 @@ PASS  legacy v1/v2 projects ingest: inline photos move to the store, state slims
 PASS  HEIC import path: files accepted, detection by type and extension
 PASS  feedback channel: support card + view-bar button email bryanjaybee@gmail.com with context
 PASS  deleting a photo from the library also frees its stored blobs
+PASS  M-Pesa is completely removed from the tool
+PASS  Ko-fi and Patreon are icon buttons only — no URL text
+PASS  viewport & platform meta: notch-safe, installable-friendly on Android and iOS
+PASS  layout survives iOS dynamic toolbars and hardware cutouts
+PASS  no accidental zoom or selection during editing on touch devices
+PASS  touch drags stay glued to the finger: pointer capture engaged, mouse path unaffected
+PASS  mobile view bar scrolls horizontally instead of stacking
+PASS  feedback subject carries the new version
+PASS  UI type system: Source Sans body, Bebas Neue display, mono kept for data
+PASS  Source Sans is also offered for zine text blocks
+PASS  production shell: favicon, noscript, version badge, console banner
+PASS  uncaught errors surface gently and route users to feedback
+PASS  boot is guarded: startup failure shows a readable message, never a blank page
+PASS  accessibility: icon-only controls are labelled; reduced motion respected
 PASS  no page errors or uncaught exceptions across the whole run
 
-75 passed · 0 failed
+89 passed · 0 failed
