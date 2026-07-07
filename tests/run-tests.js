@@ -23,9 +23,12 @@ const { document } = window;
 const Z = window.__zineit;
 
 let pass = 0, fail = 0; const results = [];
+let chain = Promise.resolve();
 function T(name, fn) {
-  try { fn(); pass++; results.push(['PASS', name]); }
-  catch (e) { fail++; results.push(['FAIL', name + ' — ' + e.message]); }
+  chain = chain.then(async () => {
+    try { await fn(); pass++; results.push(['PASS', name]); }
+    catch (e) { fail++; results.push(['FAIL', name + ' — ' + e.message]); }
+  });
 }
 function eq(a, b, msg) { if (a !== b) throw new Error((msg||'') + ` (got ${JSON.stringify(a)}, want ${JSON.stringify(b)})`); }
 function ok(v, msg) { if (!v) throw new Error(msg || 'expected truthy'); }
@@ -38,7 +41,7 @@ const PXDATA = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFc
 /* ============ 1 · boot & model ============ */
 T('boots into a valid mini-zine project', () => {
   ok(Z && Z.state, 'test API present');
-  eq(Z.state.app, 'ZineIt'); eq(Z.state.ver, 2);
+  eq(Z.state.app, 'ZineIt'); eq(Z.state.ver, 3);
   eq(Z.state.pages.length, 8, '8 fixed pages');
   eq(Z.state.pages[0].label, 'Front cover');
   eq(Z.state.pages[7].label, 'Back cover');
@@ -443,7 +446,7 @@ T('v1 .bak files migrate cleanly into v2', () => {
     settings: { snap: true, grid: true, margin: 0.25, daily: true } };
   eq(Z.validateProject(v1), null, 'v1 passes validation');
   const m = Z.migrate(JSON.parse(JSON.stringify(v1)));
-  eq(m.ver, 2);
+  eq(m.ver, 3);
   eq(m.pages[0].elements[0].role, 'custom', 'text gains a role');
   ok(m.settings.guides && typeof m.settings.bleed === 'boolean', 'v2 settings filled in');
   ok('audio' in m.pages[0], 'pages gain audio slot');
@@ -661,16 +664,127 @@ T('imposition settings survive a backup round-trip and migration fills defaults'
   eq(m.settings.imp.paper, 'letter', 'migration restores imposition defaults');
 });
 
-/* ============ 15 · console health ============ */
+/* ============ 15 · v3: lean memory, fast photos, HEIC, feedback ============ */
+T('project state carries no full-resolution photo data (memory guarantee)', () => {
+  ok(Object.keys(Z.state.assets).length >= 3, 'assets registered');
+  for (const id of Object.keys(Z.state.assets)) {
+    const a = Z.state.assets[id];
+    ok(!('src' in a), 'no full-res dataURL in state');
+    ok(typeof a.thumb === 'string', 'tiny thumb string only');
+    ok(Number.isFinite(a.w) && Number.isFinite(a.h), 'dimensions kept for layout math');
+  }
+  Z.persist(); // autosave of the lean state must succeed
+  ok(document.querySelector('#saveState').className.includes('saved'), 'lean autosave persists');
+});
+T('asset store round-trips blobs and serves URLs (memory fallback path)', async () => {
+  const blob = Z.dataURLtoBlob(PXDATA);
+  await Z.assetStore.put('rt1', { full: blob, preview: blob });
+  const rec = await Z.assetStore.get('rt1');
+  ok(rec && rec.full && rec.full.size > 0, 'blob stored and retrieved');
+  const u = await Z.assetStore.url('rt1', 'preview');
+  ok(u && /^(blob:|data:)/.test(u), 'serves an object/data URL');
+  eq(Z.assetStore.cachedUrl('rt1', 'preview'), u, 'URL cached for sync render paths');
+  await Z.assetStore.del('rt1');
+  eq(await Z.assetStore.get('rt1'), undefined, 'delete frees the stored photo');
+});
+T('canvas hydrates progressively: thumb instantly, preview when the store answers', async () => {
+  click($('viewSingle')); Z.goPage(5);
+  const e = Z.addImageEl('tA', 1.2, 2.0, 5);
+  const img = nodeFor(e.id).querySelector('img');
+  ok(img.src && img.src.startsWith('data:'), 'thumbnail visible immediately — no blank frame');
+  await Z.assetStore.url('tA', 'preview');
+  Z.renderAll();
+  const img2 = nodeFor(e.id).querySelector('img');
+  ok(img2.src && img2.src.length > 0, 'preview URL applied from cache on re-render');
+  ok(img2.getAttribute('decoding') === 'async', 'async decode keeps the UI responsive');
+  Z.select(5, e.id); Z.deleteSel();
+});
+T('fast-load pipeline: library and timeline render from tiny thumbs, print resolves full-res', () => {
+  const libImg = document.querySelector('#library .thumb img');
+  ok(libImg && libImg.src.startsWith('data:'), 'library uses thumb strings');
+  eq(libImg.getAttribute('loading'), 'lazy', 'library thumbs lazy-load');
+  ok(typeof Z.printSrc === 'function' && typeof Z.usedAssetIds === 'function', 'print source resolver present');
+  const ids = Z.usedAssetIds();
+  ids.forEach(id => ok(Z.printSrc(id), 'every placed photo resolves a print source'));
+});
+T('lightbox opens instantly and upgrades to full resolution', async () => {
+  Z.openLightbox('tA');
+  ok($('lightbox').classList.contains('show'));
+  ok(/loading full resolution|full resolution/.test($('lbCap').textContent), 'caption reflects load state');
+  await new Promise(r => setTimeout(r, 30));
+  ok(/full resolution/.test($('lbCap').textContent), 'full-res swap completed');
+  ok($('lbImg').src.length > 0);
+  window.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape' }));
+});
+T('.bak v3 is self-contained: embeds originals + previews, passes the verifier', async () => {
+  const { json, err } = await Z.buildBakJson();
+  eq(err, undefined, 'no build error');
+  const p = JSON.parse(json);
+  eq(p.ver, 3);
+  eq(Z.validateProject(p), null, 'verified test restore');
+  for (const id of Object.keys(p.assets)) {
+    ok(p.assetData[id] && p.assetData[id].full.startsWith('data:'), 'original embedded for ' + id);
+  }
+  ok(!('assetData' in Z.state), 'live state stays lean — assetData only exists in the file');
+});
+T('legacy v1/v2 projects ingest: inline photos move to the store, state slims down', async () => {
+  Z.state.assets['leg1'] = { name: 'old.png', src: PXDATA, w: 10, h: 10 };
+  const moved = await Z.ingestLegacy();
+  ok(moved.includes('leg1'), 'legacy asset detected');
+  ok(!('src' in Z.state.assets['leg1']), 'inline dataURL removed from state');
+  ok(typeof Z.state.assets['leg1'].thumb === 'string', 'thumb retained for instant render');
+  const rec = await Z.assetStore.get('leg1');
+  ok(rec && rec.full && rec.full.size > 0, 'original now lives in the store');
+  delete Z.state.assets['leg1']; await Z.assetStore.del('leg1');
+});
+T('HEIC import path: files accepted, detection by type and extension', () => {
+  ok(/\.heic/i.test($('fileInput').accept), 'file picker accepts .heic');
+  ok(/\.heif/i.test($('fileInput').accept), 'file picker accepts .heif');
+  ok(Z.isHeic({ name: 'IMG_0231.HEIC', type: '' }), 'detected by extension (empty MIME, common on Windows/Android)');
+  ok(Z.isHeic({ name: 'x.jpg', type: 'image/heic' }), 'detected by MIME type');
+  ok(!Z.isHeic({ name: 'x.jpg', type: 'image/jpeg' }), 'plain JPEG untouched');
+  const src = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  ok(/heic2any/.test(src), 'HEIC converter loads lazily as fallback');
+  ok(/createImageBitmap/.test(src), 'native decode attempted first (Safari decodes HEIC natively)');
+});
+T('feedback channel: support card + view-bar button email bryanjaybee@gmail.com with context', () => {
+  const a = $('feedbackLink'), b = $('fbBtn');
+  ok(a && b, 'both entry points exist');
+  [a, b].forEach(l => {
+    ok(l.href.startsWith('mailto:bryanjaybee@gmail.com'), 'addressed correctly');
+    ok(/subject=/.test(l.href) && /ZineIt/.test(decodeURIComponent(l.href)), 'prefilled subject');
+    ok(/bug/i.test(decodeURIComponent(l.href)), 'invites bug reports');
+  });
+  ok(/every one gets read/i.test(document.querySelector('#left .support').textContent), 'invitation text present');
+});
+T('deleting a photo from the library also frees its stored blobs', async () => {
+  Z.setAsset('delMe', { name: 'zz-delete-me.png', src: PXDATA, w: 5, h: 5 });
+  await new Promise(r => setTimeout(r, 10));
+  ok(await Z.assetStore.get('delMe'), 'stored');
+  Z.renderAll();
+  const thumbs = [...document.querySelectorAll('#library .thumb')];
+  const target = thumbs.find(th => th.title.startsWith('zz-delete-me.png'));
+  ok(target, 'library thumb rendered');
+  const oldConfirm = window.confirm; window.confirm = () => true;
+  click(target.querySelector('.del'));
+  window.confirm = oldConfirm;
+  await new Promise(r => setTimeout(r, 10));
+  ok(!Z.state.assets['delMe'], 'metadata gone');
+  eq(await Z.assetStore.get('delMe'), undefined, 'blobs gone — memory reclaimed');
+});
+
+/* ============ 16 · console health ============ */
 T('no page errors or uncaught exceptions across the whole run', () => {
   eq(pageErrors.length, 0, 'errors: ' + pageErrors.slice(0, 3).join(' | '));
 });
 
 /* ============ report ============ */
-const stamp = new Date().toISOString();
-console.log(`ZineIt v2.0 test run — ${stamp}`);
-for (const [s, n] of results) console.log(`  ${s === 'PASS' ? '✓' : '✗'} ${s}  ${n}`);
-console.log(`\n${pass} passed · ${fail} failed · ${pass + fail} total`);
-fs.writeFileSync(path.join(__dirname, 'last-run.txt'),
-  `ZineIt v2.0 test run — ${stamp}\n` + results.map(([s, n]) => `${s}  ${n}`).join('\n') + `\n\n${pass} passed · ${fail} failed\n`);
-process.exit(fail ? 1 : 0);
+chain.then(() => {
+  const stamp = new Date().toISOString();
+  console.log(`ZineIt v${Z.APP_VER} test run — ${stamp}`);
+  for (const [s, n] of results) console.log(`  ${s === 'PASS' ? '✓' : '✗'} ${s}  ${n}`);
+  console.log(`\n${pass} passed · ${fail} failed · ${pass + fail} total`);
+  fs.writeFileSync(path.join(__dirname, 'last-run.txt'),
+    `ZineIt v${Z.APP_VER} test run — ${stamp}\n` + results.map(([s, n]) => `${s}  ${n}`).join('\n') + `\n\n${pass} passed · ${fail} failed\n`);
+  process.exit(fail ? 1 : 0);
+}).catch(e => { console.error('suite crashed:', e); process.exit(1); });

@@ -370,9 +370,9 @@ body.fs #canvasScroll{padding:14px}
     <div class="sec">
       <h3>Photos</h3>
       <div id="dropzone" tabindex="0" role="button" aria-label="Import photos">
-        <b>Drop photos here</b><br>or click to browse<br><span style="font-size:10.5px;color:var(--faint)">JPG · PNG · WebP — originals kept at full resolution</span>
+        <b>Drop photos here</b><br>or click to browse<br><span style="font-size:10.5px;color:var(--faint)">JPG · PNG · WebP · HEIC &amp; more — originals kept at full quality</span>
       </div>
-      <input type="file" id="fileInput" accept="image/*" multiple hidden>
+      <input type="file" id="fileInput" accept="image/*,.heic,.heif,.HEIC,.HEIF" multiple hidden>
       <div id="library"></div>
       <label class="toggle"><input type="checkbox" id="aspectChk" checked>Keep original aspect ratio</label>
       <div class="hint" id="libHint">Drag onto the page or a frame · double-click a placed photo for full view · drag a placed photo onto an empty frame to snap it in.</div>
@@ -385,6 +385,8 @@ body.fs #canvasScroll{padding:14px}
         <a class="slink" href="https://ko-fi.com/kiberastories" target="_blank" rel="noopener"><span class="ico">KO-FI</span>ko-fi.com/kiberastories</a>
         <a class="slink" href="https://www.patreon.com/c/kiberastories" target="_blank" rel="noopener"><span class="ico">PATR</span>patreon.com/c/kiberastories</a>
         <div class="mpesa"><span class="ico" style="color:var(--ok)">M-PESA</span><span class="num">0711 254 986</span><button id="copyMpesa" title="Copy number">copy</button></div>
+        <a class="slink" id="feedbackLink" href="#"><span class="ico" style="color:var(--pop-amber)">✉</span>Found a bug? Have an idea? Email us</a>
+        <div class="hint">Reports and recommendations go straight to bryanjaybee@gmail.com — every one gets read.</div>
       </div>
     </div>
   </aside>
@@ -410,6 +412,8 @@ body.fs #canvasScroll{padding:14px}
       <button class="vbtn" id="zoomIn">+</button>
       <span class="vsep"></span>
       <label class="toggle" style="font-size:11.5px"><input type="checkbox" id="pnPreviewChk">Page numbers</label>
+      <span class="vsep"></span>
+      <a class="vbtn" id="fbBtn" href="#" title="Report a bug or suggest an improvement">✉ Feedback</a>
     </div>
 
     <div id="canvasScroll">
@@ -646,6 +650,7 @@ const FORMATS = {
   'book-10x8'  :{group:'Photobooks', name:'Photobook — 10 × 8 in landscape', w:10, h:8},
   'book-a4'    :{group:'Photobooks', name:'Photobook — A4 portrait',  w:8.27, h:11.69},
 };
+const APP_VER='3.0', FEEDBACK_EMAIL='bryanjaybee@gmail.com';
 const GRID=0.125, BLEED=0.125;
 const FONTS = ['Inter','Roboto','Open Sans','Lato','Montserrat','Poppins','Raleway','Work Sans','DM Sans','Nunito',
   'Rubik','Karla','Space Grotesk','Archivo','Archivo Black','IBM Plex Sans','Oswald','Bebas Neue','Anton',
@@ -679,7 +684,7 @@ function newProject(formatKey){
   const pages=[blankPage('Front cover')];
   for(let i=2;i<n;i++)pages.push(blankPage('Page '+i));
   pages.push(blankPage('Back cover'));
-  state={ app:'ZineIt', ver:2,
+  state={ app:'ZineIt', ver:3,
     meta:{name:'Untitled project', created:new Date().toISOString(), modified:new Date().toISOString()},
     format:formatKey, pages, assets:{}, settings:defaultSettings() };
   curPage=0; selPg=0; selId=null;
@@ -690,7 +695,8 @@ function migrate(p){ // v1 .bak files load cleanly into v2
   p.settings.imp=Object.assign({paper:'letter',fit:true,margins:false,fold:true,cut:true},(p.settings.imp||{}));
   p.pages.forEach(pg=>{ if(!('audio' in pg))pg.audio=null;
     pg.elements.forEach(e=>{ if(e.type==='text'&&!e.role)e.role='custom'; if(e.type==='image'&&e.spread==null)e.spread=false; });});
-  p.ver=2; return p;
+  for(const id in (p.assets||{})){ const a=p.assets[id]; if(a&&a.src&&!a.thumb)a.thumb=a.src; }
+  p.ver=3; return p;
 }
 
 /* ---------- spreads ---------- */
@@ -729,6 +735,106 @@ function persist(){
 setInterval(()=>{ if(state) persist(); },30000);
 window.addEventListener('beforeunload',()=>{ if(state) persist(); });
 
+/* ---------- asset store (v3): originals & previews live in IndexedDB as blobs ----------
+   state.assets keeps only metadata + a tiny thumbnail string, so the project JSON stays
+   small, autosave is instant, and the DOM never decodes full-resolution photos except
+   for print/export and the lightbox. Falls back to in-memory blobs when IndexedDB is
+   unavailable (private browsing, test environments). */
+const assetStore=(()=>{
+  let db=null; const mem=new Map(); const urls=new Map();
+  function open(){ return new Promise(res=>{ let done=false; const fin=v=>{ if(!done){done=true;res(v)} };
+    try{
+      if(typeof indexedDB==='undefined')return fin(false);
+      const r=indexedDB.open('zineit-assets',1);
+      r.onupgradeneeded=()=>{ try{r.result.createObjectStore('a')}catch(e){} };
+      r.onsuccess=()=>{ db=r.result; fin(true); };
+      r.onerror=()=>fin(false); r.onblocked=()=>fin(false);
+      setTimeout(()=>fin(false),3000);
+    }catch(e){ fin(false); } }); }
+  function tx(mode,fn){ return new Promise((res,rej)=>{ try{
+    const t=db.transaction('a',mode); const q=fn(t.objectStore('a'));
+    q.onsuccess=()=>res(q.result); q.onerror=()=>rej(q.error);
+  }catch(e){ rej(e); } }); }
+  async function put(id,rec){ if(db){ try{ await tx('readwrite',s=>s.put(rec,id)); revoke(id); return; }catch(e){} } mem.set(id,rec); revoke(id); }
+  async function get(id){ if(db){ try{ const r=await tx('readonly',s=>s.get(id)); if(r)return r; }catch(e){} } return mem.get(id); }
+  async function del(id){ revoke(id); if(db){ try{ await tx('readwrite',s=>s.delete(id)); }catch(e){} } mem.delete(id); }
+  async function keys(){ let k=[]; if(db){ try{ k=await tx('readonly',s=>s.getAllKeys()); }catch(e){} } return [...new Set([...(k||[]),...mem.keys()])]; }
+  function revoke(id){ const u=urls.get(id); if(u){ for(const k in u){ try{ if(/^blob:/.test(u[k]))URL.revokeObjectURL(u[k]); }catch(e){} } urls.delete(id); } }
+  function blobUrl(b){ return new Promise(res=>{
+    try{ if(typeof URL!=='undefined'&&URL.createObjectURL)return res(URL.createObjectURL(b)); }catch(e){}
+    try{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=()=>res(null); r.readAsDataURL(b); }
+    catch(e){ res(null); } }); }
+  async function url(id,kind){ const u=urls.get(id)||{}; if(u[kind])return u[kind];
+    const rec=await get(id); const b=rec&&(rec[kind]||rec.full); if(!b)return null;
+    const link=await blobUrl(b); if(link){ u[kind]=link; urls.set(id,u); } return link; }
+  function cachedUrl(id,kind){ const u=urls.get(id); return (u&&(u[kind]||u.full))||null; }
+  return {open,put,get,del,keys,revoke,url,cachedUrl};
+})();
+
+function dataURLtoBlob(d){
+  const m=String(d).match(/^data:([^;,]+)?(;base64)?,([\s\S]*)$/);
+  if(!m) return new Blob([String(d)]);
+  const mime=m[1]||'application/octet-stream';
+  if(m[2]){ const bin=atob(m[3]); const u=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+    return new Blob([u],{type:mime}); }
+  return new Blob([decodeURIComponent(m[3])],{type:mime});
+}
+function blobToDataURL(b){ return new Promise(res=>{ const r=new FileReader();
+  r.onload=()=>res(r.result); r.onerror=()=>res(null); r.readAsDataURL(b); }); }
+
+/* decode pipeline — all formats, including HEIC/HEIF */
+const ACCEPT_EXT=/\.(jpe?g|png|webp|gif|bmp|avif|heic|heif|tiff?)$/i;
+const isHeic=f=>/hei[cf]/i.test((f&&f.type)||'')||/\.hei[cf]$/i.test((f&&f.name)||'');
+let heicLibP=null;
+function loadHeicLib(){ if(!heicLibP) heicLibP=new Promise((res,rej)=>{
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js';
+    s.onload=()=>window.heic2any?res(window.heic2any):rej(new Error('heic lib failed'));
+    s.onerror=()=>{ heicLibP=null; rej(new Error('offline')); };
+    document.head.appendChild(s); });
+  return heicLibP; }
+async function decodeToBitmap(blob){
+  if(typeof createImageBitmap==='function'){ try{ return await createImageBitmap(blob); }catch(e){} }
+  const src=await new Promise(res=>{
+    try{ if(typeof URL!=='undefined'&&URL.createObjectURL)return res(URL.createObjectURL(blob)); }catch(e){}
+    const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(blob); });
+  return await new Promise((res,rej)=>{ const im=new Image();
+    im.onload=()=>res(im); im.onerror=()=>rej(new Error('undecodable image')); im.src=src; });
+}
+function drawScaled(bmp,max){
+  const w=bmp.naturalWidth||bmp.width, h=bmp.naturalHeight||bmp.height;
+  const s=Math.min(1,max/Math.max(w,h));
+  const c=document.createElement('canvas');
+  c.width=Math.max(1,Math.round(w*s)); c.height=Math.max(1,Math.round(h*s));
+  const ctx=c.getContext('2d');
+  if(ctx){ ctx.imageSmoothingEnabled=true; try{ctx.imageSmoothingQuality='high'}catch(e){}
+    ctx.drawImage(bmp,0,0,c.width,c.height); }
+  return c;
+}
+function canvasBlob(c,q){ return new Promise(res=>{
+  try{ if(c.toBlob)return c.toBlob(b=>res(b),'image/jpeg',q); }catch(e){}
+  try{ res(dataURLtoBlob(c.toDataURL('image/jpeg',q))); }catch(e){ res(null); } }); }
+async function ingestFile(f){
+  let src=f, bmp=null;
+  try{ bmp=await decodeToBitmap(src); }
+  catch(e){
+    if(!isHeic(f)) throw e;
+    const heic2any=await loadHeicLib();                    // lazy: only ever loaded for HEIC
+    let out=await heic2any({blob:f,toType:'image/jpeg',quality:0.92});
+    src=Array.isArray(out)?out[0]:out;
+    bmp=await decodeToBitmap(src);
+  }
+  const w=bmp.naturalWidth||bmp.width, h=bmp.naturalHeight||bmp.height;
+  const preview=(await canvasBlob(drawScaled(bmp,1600),0.82))||src;   // ~fast to decode on any device
+  let thumb=''; try{ thumb=drawScaled(bmp,192).toDataURL('image/jpeg',0.72); }catch(e){}
+  if(bmp.close){ try{bmp.close()}catch(e){} }
+  const id=uid();
+  state.assets[id]={name:f.name||'photo',w,h,thumb};
+  await assetStore.put(id,{full:src,preview});
+  return id;
+}
+
 /* ---------- backup with verified test-restore ---------- */
 function validateProject(p){
   if(!p||p.app!=='ZineIt'||!Array.isArray(p.pages)||p.pages.length<2) return 'not a ZineIt project';
@@ -741,10 +847,25 @@ function validateProject(p){
     }}
   return null;
 }
-function downloadBak(){
-  const json=JSON.stringify(state);
-  let err=null; try{ err=validateProject(JSON.parse(json)); }catch(e){ err='unreadable backup'; }
-  if(err){ toast('Backup <b>failed verification</b>: '+err,'err'); return; }
+/* v3 .bak = project JSON + assetData{full,preview} pulled from the store, so one file
+   still contains everything — while day-to-day autosave stays tiny (metadata + thumbs). */
+async function buildBakJson(){
+  const assetData={};
+  for(const id of Object.keys(state.assets)){
+    const rec=await assetStore.get(id);
+    if(!rec||!rec.full) return {err:'missing photo data for "'+((state.assets[id]&&state.assets[id].name)||id)+'" — re-import it, then back up'};
+    const full=await blobToDataURL(rec.full);
+    if(!full) return {err:'could not read photo data'};
+    assetData[id]={ full, preview: rec.preview?await blobToDataURL(rec.preview):null };
+  }
+  return { json: JSON.stringify(Object.assign({},state,{ver:3,assetData})) };
+}
+async function downloadBak(){
+  toast('Building backup…');
+  const {json,err}=await buildBakJson();
+  if(err){ toast('Backup failed: '+err,'err'); return; }
+  let verr=null; try{ verr=validateProject(JSON.parse(json)); }catch(e){ verr='unreadable backup'; }
+  if(verr){ toast('Backup <b>failed verification</b>: '+verr,'err'); return; }
   const name=(state.meta.name||'zineit').replace(/[^\w\- ]+/g,'').trim().replace(/\s+/g,'-')||'zineit';
   const stamp=new Date().toISOString().slice(0,16).replace(/[:T]/g,'').replace(/(\d{8})(\d{4})/,'$1-$2');
   const a=document.createElement('a');
@@ -755,12 +876,30 @@ function downloadBak(){
 }
 function restoreBak(file){
   const r=new FileReader();
-  r.onload=()=>{ let p; try{ p=JSON.parse(r.result); }catch(e){ toast('Not a valid .bak file','err'); return; }
+  r.onload=async()=>{ let p; try{ p=JSON.parse(r.result); }catch(e){ toast('Not a valid .bak file','err'); return; }
     const err=validateProject(p);
     if(err){ toast('Restore blocked: '+err,'err'); return; }
     const info=`"${p.meta&&p.meta.name||'Untitled'}" · ${p.pages.length} pages · ${FORMATS[p.format].name}\nLast modified ${p.meta&&p.meta.modified?new Date(p.meta.modified).toLocaleString():'unknown'}`;
     if(!confirm('Restore this backup? Your current project will be replaced.\n\n'+info)) return;
-    state=migrate(p); curPage=0; selPg=0; selId=null; renderAll(); persist();
+    toast('Restoring…');
+    const data=p.assetData||{}; delete p.assetData;
+    state=migrate(p);
+    const legacy=[];
+    for(const id of Object.keys(state.assets)){
+      const a=state.assets[id];
+      try{
+        if(data[id]&&data[id].full){
+          await assetStore.put(id,{ full:dataURLtoBlob(data[id].full),
+            preview: data[id].preview?dataURLtoBlob(data[id].preview):dataURLtoBlob(data[id].full) });
+        } else if(a&&a.src){                       // v1 / v2 .bak: inline full-res dataURL
+          const b=dataURLtoBlob(a.src);
+          await assetStore.put(id,{full:b,preview:b});
+          if(!a.thumb)a.thumb=a.src; delete a.src; legacy.push(id);
+        }
+      }catch(e){}
+    }
+    curPage=0; selPg=0; selId=null; renderAll(); persist();
+    if(legacy.length) regenLegacy(legacy);
     toast('Backup restored ✓','ok'); };
   r.readAsText(file);
 }
@@ -784,17 +923,20 @@ function tickClock(){ const n=new Date();
   $('clkDate').textContent=n.toLocaleDateString(undefined,{weekday:'short',year:'numeric',month:'short',day:'numeric'}); }
 setInterval(tickClock,1000); tickClock();
 
-/* ---------- photo import ---------- */
-function importFiles(files){
-  const imgs=[...files].filter(f=>f.type.startsWith('image/'));
-  if(!imgs.length){ toast('No image files found in that drop.','err'); return; }
-  let done=0;
-  imgs.forEach(f=>{ const r=new FileReader();
-    r.onload=()=>{ const im=new Image();
-      im.onload=()=>{ state.assets[uid()]={name:f.name,src:r.result,w:im.naturalWidth,h:im.naturalHeight};
-        if(++done===imgs.length){ renderLibrary(); touch(); toast(imgs.length+' photo'+(imgs.length>1?'s':'')+' imported at full resolution','ok'); } };
-      im.src=r.result; };
-    r.readAsDataURL(f); });
+/* ---------- photo import (v3: decoded once, stored as blobs, previews on screen) ---------- */
+async function importFiles(files){
+  const list=[...files].filter(f=>(f.type&&f.type.startsWith('image/'))||ACCEPT_EXT.test(f.name||''));
+  if(!list.length){ toast('No image files found in that drop.','err'); return; }
+  toast('Importing '+list.length+' photo'+(list.length>1?'s':'')+'…');
+  let done=0,fail=0,heicFail=false;
+  for(const f of list){                     // sequential — one decode at a time caps peak memory
+    try{ await ingestFile(f); done++; renderLibrary(); }
+    catch(e){ fail++; if(isHeic(f))heicFail=true; }
+  }
+  renderCanvas(); renderTimeline(); touch();
+  if(done) toast(done+' photo'+(done>1?'s':'')+' imported ✓ — originals stored at full quality, light previews on screen'
+    +(fail?` · ${fail} failed${heicFail?' (HEIC conversion needs internet once)':''}`:''), fail?'err':'ok');
+  else toast('Import failed'+(heicFail?' — HEIC conversion needs an internet connection the first time':''),'err');
 }
 
 /* ---------- geometry ---------- */
@@ -956,6 +1098,30 @@ function updateSelectionDom(){
 }
 function select(pg,id){ selPg=pg; selId=id; updateSelectionDom(); renderInspector(); }
 
+/* progressive image hydration: tiny thumb instantly, mid-size preview when ready */
+function hydrate(imgEl,assetId,kind){
+  const a=state.assets[assetId]; if(!a)return;
+  const cached=assetStore.cachedUrl(assetId,kind);
+  if(cached){ imgEl.src=cached; return; }
+  if(a.thumb)imgEl.src=a.thumb;
+  assetStore.url(assetId,kind).then(u=>{ if(u&&imgEl.isConnected)imgEl.src=u; });
+}
+function printSrc(id){ return assetStore.cachedUrl(id,'full')||assetStore.cachedUrl(id,'preview')||(state.assets[id]&&state.assets[id].thumb)||''; }
+function usedAssetIds(){ const s=new Set();
+  state.pages.forEach(p=>p.elements.forEach(e=>{ if(e.type==='image'&&e.asset)s.add(e.asset); }));
+  return [...s]; }
+async function ensureFullRes(){
+  const ids=usedAssetIds();
+  await Promise.all(ids.map(id=>assetStore.url(id,'full')));
+  await Promise.all(ids.map(id=>new Promise(res=>{
+    const u=assetStore.cachedUrl(id,'full'); if(!u)return res();
+    const im=new Image(); let done=false; const fin=()=>{ if(!done){done=true;res()} };
+    im.onload=fin; im.onerror=fin;
+    try{ if(im.decode){ im.src=u; im.decode().then(fin,fin); } else im.src=u; }catch(e){ fin(); }
+    setTimeout(fin,10000);
+  })));
+}
+
 /* ---------- canvas rendering ---------- */
 function renderCanvas(){
   const f=fmt(), P=$('page'), cs=canvasSize();
@@ -1011,7 +1177,8 @@ function renderEl(P,e,pgIdx,dxIn,z,interactive){
   d.style.width=(e.w*scale)+'px'; d.style.height=(e.h*scale)+'px';
   d.style.zIndex=10+z; d.dataset.id=e.id; d.dataset.pg=pgIdx;
   if(e.type==='image'&&e.asset){
-    const im=document.createElement('img'); im.src=state.assets[e.asset].src; im.draggable=false;
+    const im=document.createElement('img'); im.draggable=false; im.setAttribute('decoding','async');
+    hydrate(im,e.asset,'preview');
     im.style.objectPosition=(e.px==null?50:e.px)+'% '+(e.py==null?50:e.py)+'%'; d.appendChild(im);
     d.addEventListener('dblclick',ev=>{ ev.stopPropagation(); openLightbox(e.asset); });
   }
@@ -1242,7 +1409,7 @@ function tlPage(pi,tw,th,sp){
   const paint=(e,dx)=>{ const mi=document.createElement('div');
     mi.className='mini'+(e.type==='text'?' mtxt':'')+(e.type==='image'&&e.asset?' hasimg':'');
     mi.style.left=((e.x+dx)*s)+'px'; mi.style.top=(e.y*s)+'px'; mi.style.width=(e.w*s)+'px'; mi.style.height=(e.h*s)+'px';
-    if(e.type==='image'&&e.asset){ mi.style.backgroundImage=`url(${state.assets[e.asset].src})`;
+    if(e.type==='image'&&e.asset){ const a=state.assets[e.asset]; if(a&&a.thumb)mi.style.backgroundImage=`url(${a.thumb})`;
       mi.draggable=true; mi.addEventListener('dragstart',ev=>{ ev.stopPropagation(); ev.dataTransfer.setData('text/zineit-asset',e.asset); }); }
     pv.appendChild(mi); };
   p.elements.forEach(e=>paint(e,0));
@@ -1276,11 +1443,11 @@ function renderLibrary(){
   const ids=Object.keys(state.assets);
   ids.forEach(id=>{ const a=state.assets[id];
     const t=document.createElement('div'); t.className='thumb'; t.draggable=true; t.title=a.name+` (${a.w}×${a.h}px)`;
-    const im=document.createElement('img'); im.src=a.src; im.draggable=false; t.appendChild(im);
+    const im=document.createElement('img'); im.src=a.thumb||''; im.draggable=false; im.setAttribute('loading','lazy'); im.setAttribute('decoding','async'); t.appendChild(im);
     const del=document.createElement('button'); del.className='del'; del.textContent='×';
     del.addEventListener('click',ev=>{ ev.stopPropagation();
       if(!confirm('Remove this photo from the library? Frames using it will show as empty.'))return;
-      delete state.assets[id];
+      delete state.assets[id]; assetStore.del(id);
       state.pages.forEach(p=>p.elements.forEach(e=>{ if(e.asset===id)e.asset=null; }));
       renderLibrary(); renderCanvas(); renderTimeline(); touch(); });
     t.appendChild(del);
@@ -1368,8 +1535,13 @@ function syncViewBar(){
 /* ---------- lightbox ---------- */
 function openLightbox(assetId){
   const a=state.assets[assetId]; if(!a)return;
-  $('lbImg').src=a.src; $('lbCap').textContent=`${a.name} · ${a.w} × ${a.h}px — full resolution`;
+  const img=$('lbImg');
+  img.src=assetStore.cachedUrl(assetId,'preview')||a.thumb||'';
+  $('lbCap').textContent=`${a.name} · ${a.w} × ${a.h}px — loading full resolution…`;
   $('lightbox').classList.add('show');
+  assetStore.url(assetId,'preview').then(u=>{ if(u&&$('lightbox').classList.contains('show')&&!/full$/.test(img.dataset.res||''))img.src=u; });
+  assetStore.url(assetId,'full').then(u=>{ if(u&&$('lightbox').classList.contains('show')){ img.src=u; img.dataset.res='full';
+    $('lbCap').textContent=`${a.name} · ${a.w} × ${a.h}px — full resolution`; } });
 }
 function closeLightbox(){ $('lightbox').classList.remove('show'); $('lbImg').src=''; }
 
@@ -1388,7 +1560,7 @@ function renderPrintPage(pi,W,H){
     x.className='pel '+(e.type==='image'?'pimg':'ptxt');
     x.style.left=(e.x+dx)+'in'; x.style.top=e.y+'in'; x.style.width=e.w+'in'; x.style.height=e.h+'in';
     if(e.type==='image'){
-      if(e.asset){ const im=document.createElement('img'); im.src=state.assets[e.asset].src;
+      if(e.asset){ const im=document.createElement('img'); im.src=printSrc(e.asset);
         im.style.objectFit=e.fit; im.style.objectPosition=(e.px==null?50:e.px)+'% '+(e.py==null?50:e.py)+'%';
         x.appendChild(im); }
       else return; // empty frames don't print
@@ -1486,7 +1658,16 @@ function openImpModal(){
   $('foldModalBk').classList.add('show');
   renderImpPreview();
 }
-function doPrint(mode){ if(mode==='imp')buildImposition(); else buildSequentialPrint(); setTimeout(()=>window.print(),120); }
+let printing=false;
+async function doPrint(mode){
+  if(printing)return; printing=true;
+  try{
+    toast('Preparing full-resolution photos…');
+    await ensureFullRes();
+    if(mode==='imp')buildImposition(); else buildSequentialPrint();
+    setTimeout(()=>{ printing=false; window.print(); },150);
+  }catch(e){ printing=false; toast('Could not prepare photos for print','err'); }
+}
 window.addEventListener('afterprint',()=>{ $('printRoot').innerHTML=''; });
 
 /* ---------- format info / renderAll ---------- */
@@ -1518,6 +1699,40 @@ function renderAll(){
 }
 
 /* ---------- wiring ---------- */
+/* legacy autosaves (v1/v2) carry full-res dataURLs inside state — move them into the
+   blob store, then regenerate proper small previews/thumbs in the background */
+async function ingestLegacy(){
+  const legacy=[];
+  for(const id of Object.keys(state.assets)){
+    const a=state.assets[id];
+    if(a&&a.src){
+      try{ const b=dataURLtoBlob(a.src); await assetStore.put(id,{full:b,preview:b}); }catch(e){}
+      if(!a.thumb)a.thumb=a.src; delete a.src; legacy.push(id);
+    }
+  }
+  if(legacy.length)touch();
+  return legacy;
+}
+async function regenLegacy(ids){
+  for(const id of ids){
+    try{
+      const rec=await assetStore.get(id); if(!rec||!rec.full)continue;
+      const bmp=await decodeToBitmap(rec.full);
+      const w=bmp.naturalWidth||bmp.width, h=bmp.naturalHeight||bmp.height;
+      const preview=await canvasBlob(drawScaled(bmp,1600),0.82);
+      let thumb=''; try{ thumb=drawScaled(bmp,192).toDataURL('image/jpeg',0.72); }catch(e){}
+      if(bmp.close){ try{bmp.close()}catch(e){} }
+      if(preview) await assetStore.put(id,{full:rec.full,preview});
+      const a=state.assets[id]; if(a){ if(thumb)a.thumb=thumb; a.w=a.w||w; a.h=a.h||h; }
+    }catch(e){}
+  }
+  renderLibrary(); renderTimeline(); if(view.tab==='layout')renderCanvas(); touch();
+}
+async function sweepOrphans(){
+  try{ const valid=new Set(Object.keys(state.assets));
+    for(const k of await assetStore.keys()) if(!valid.has(k)) assetStore.del(k);
+  }catch(e){}
+}
 function boot(){
   initFormatSelect();
   const fs=$('txtFont');
@@ -1527,7 +1742,17 @@ function boot(){
   const saved=store.get(LS_KEY);
   if(saved){ try{ const p=JSON.parse(saved); if(!validateProject(p))state=migrate(p); }catch(e){} }
   if(!state)newProject('mini-zine');
+  const fb='mailto:'+FEEDBACK_EMAIL
+    +'?subject='+encodeURIComponent('ZineIt v'+APP_VER+' — bug report / idea')
+    +'&body='+encodeURIComponent('Hi Brian,\n\nWhat happened (or what I wish ZineIt did):\n\n\nSteps to reproduce (for a bug):\n1.\n2.\n\n—\nZineIt v'+APP_VER+' · format: '+state.format+' · '+(navigator.userAgent||''));
+  $('feedbackLink').href=fb; $('fbBtn').href=fb;
   renderAll(); applyMobile(); dailyCheck(); setSaveState('saved','autosave on');
+  window.__zineitReady=(async()=>{      // storage warm-up continues in the background
+    await assetStore.open();
+    const legacy=await ingestLegacy();
+    sweepOrphans();
+    if(legacy.length){ toast('Older project detected — photos moved to fast storage, previews regenerating…'); regenLegacy(legacy); }
+  })().catch(()=>{});
 }
 
 $('projName').addEventListener('input',e=>{ state.meta.name=e.target.value; if(view.tab==='text')$('teTitle').value=e.target.value; touch(); });
@@ -1540,7 +1765,9 @@ $('fmtSel').addEventListener('change',e=>{
 });
 $('newProjBtn').addEventListener('click',()=>{
   if(!confirm('Start a new project? Unsaved work is replaced (autosave + .bak backups keep you covered).'))return;
+  const oldIds=Object.keys(state.assets);
   newProject($('fmtSel').value); renderAll(); touch();
+  oldIds.forEach(id=>assetStore.del(id));
 });
 
 /* photos */
@@ -1748,7 +1975,11 @@ window.__zineit={
   buildSequentialPrint, buildImposition, buildImpSheet, renderImpPreview, openImpModal,
   applyMobile, isMobile, openDrawer, closeDrawers, toggleRail, toggleFS,
   renderAll, renderTextEditor, persist,
-  setAsset:(id,a)=>{state.assets[id]=a},
+  assetStore, buildBakJson, ingestLegacy, printSrc, usedAssetIds, isHeic, dataURLtoBlob,
+  hydrate, openLightbox, APP_VER, FEEDBACK_EMAIL,
+  setAsset:(id,a)=>{ const src=a.src||a.thumb||'';
+    state.assets[id]={name:a.name||'test',w:a.w||100,h:a.h||100,thumb:src};
+    try{ const b=dataURLtoBlob(src); assetStore.put(id,{full:b,preview:b}); }catch(e){} },
 };
 
 boot();

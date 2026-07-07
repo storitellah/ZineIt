@@ -33,6 +33,15 @@ Every project automatically includes a **front cover** and **back cover**; inter
 
 
 
+
+### New in v3.0 — light on memory, fast on photos, open to feedback
+
+- **A new photo engine**: originals live in fast browser storage (IndexedDB) instead of inside the project file. The editor draws small previews — thumbnails appear instantly, sharper previews swap in — and full resolution is touched only for print, PDF, and the lightbox. Projects with dozens of photos stay light on RAM, on desktop and especially on phones, and autosave is instant no matter the photo count.
+- **Every format imports, including HEIC** (the iPhone default): native decoding where the browser supports it, with an automatic converter fetched only if needed. JPG, PNG, WebP, GIF, BMP, AVIF, and TIFF all work — and the app stays fully offline for everything except first-time HEIC conversion.
+- **Print quality is untouched**: exports always use your original files at full resolution.
+- **Your projects carry over**: older projects and .bak files migrate automatically on first load.
+- **Found a bug? Have an idea?** Use the ✉ Feedback button (or the link in the Support panel) — it opens an email to **bryanjaybee@gmail.com** with the details prefilled. Every message gets read.
+
 ### New in v2.1 — pocket studio, print shop
 
 - **Works on your phone**: below 820 px the editor becomes a mobile app — Photos and Tools slide in as drawers, the timeline collapses into a bottom sheet, and a five-button toolbar (Photos · Tools · Timeline · Text · Full) drives everything. Touch drag, touch pan, and touch resize use the same pointer pipeline as the desktop, with larger 18 px handles on touch screens.

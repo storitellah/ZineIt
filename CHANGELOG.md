@@ -1,5 +1,21 @@
 # Changelog — ZineIt by Storitellah
 
+## v3.0 — 2026-07-07
+Performance architecture release: less memory everywhere, photos that always load fast, every format in, and a feedback channel.
+
+### Changed — the photo engine
+- **Photos moved out of the project JSON into IndexedDB as blobs.** State now carries only metadata plus a ~15 KB thumbnail per photo, so autosave is instant and tiny regardless of how many photos a project holds, and the browser never keeps full-resolution images decoded just to draw the editor.
+- **Three-tier rendering**: 192 px thumbs for the library and timeline (lazy-loaded), ~1600 px previews for the canvas (progressively hydrated — thumb appears instantly, preview swaps in), and full-resolution originals touched **only** for print/PDF and the lightbox. On a phone this is the difference between decoding megapixels and decoding kilobytes.
+- **Print quality unchanged**: exports preload the untouched originals from the store before the print dialog opens.
+- **.bak files remain fully self-contained** — export embeds the originals and previews, restore rehydrates the store. Old v1/v2 projects and .bak files migrate automatically: inline photos move to fast storage on first load and previews regenerate in the background.
+- Deleting a photo (or starting a new project) frees its stored blobs and revokes object URLs — memory is actually reclaimed, and orphaned blobs are swept at startup.
+- Imports run sequentially through one decoder to cap peak memory on mobile during multi-photo drops; decoding uses `createImageBitmap` with high-quality downscaling.
+
+### Added
+- **All photo formats import, including HEIC/HEIF** (iPhone default). Native decode is tried first (Safari handles HEIC itself); elsewhere a converter loads lazily from a CDN only when a HEIC file actually arrives — the app stays fully offline for every other format. Detection works by MIME type *and* extension, since HEIC files often arrive with no MIME type on Windows/Android.
+- **Feedback channel**: "Found a bug? Have an idea?" in the Support panel and a ✉ Feedback button in the view bar — both open a pre-addressed email to **bryanjaybee@gmail.com** with the app version, format, and browser prefilled.
+- 10 new automated tests (75 total, all passing).
+
 ## v2.1 — 2026-07-05
 Mobile optimisation + a dedicated Mini Zine print mode.
 

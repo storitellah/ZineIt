@@ -1,8 +1,8 @@
 # TESTING.md — ZineIt v2.0 test report
 
-**Result: 65 passed · 0 failed · 0 console errors.** The whole tool — including the
-v2.1 mobile shell and the Mini Zine print mode — was tested before this render, as
-required.
+**Result: 75 passed · 0 failed · 0 console errors.** The whole tool — including the
+v3.0 memory architecture, HEIC import path, and feedback channel — was tested before
+this render, as required.
 
 ## How it was tested
 
@@ -54,7 +54,14 @@ cd tests && npm install && npm test
 | Print preview | Modal opens with settings synced from state; the preview embeds the real imposed sheet; paper, fold, and page-number toggles live-rebuild it |
 | PDF / @page | `@page` follows the chosen paper (11×8.5 or 11.69×8.27 landscape) so browser print-to-PDF exports at the right size |
 | Imposition persistence | Settings survive the .bak round-trip; migration restores defaults when absent |
-| Console health | Zero page errors or uncaught exceptions across all 65 tests |
+| Lean memory | Project state carries **no** full-resolution photo data — metadata + tiny thumb strings only; lean autosave persists |
+| Asset store | Blobs round-trip through the store (IndexedDB path in browsers, verified here on the identical in-memory fallback), URLs served and cached for sync render paths, deletes reclaim storage |
+| Fast loading | Canvas hydrates progressively (thumb instantly, preview on arrival, `decoding=async`); library thumbs lazy-load; every placed photo resolves a print source; lightbox opens instantly and upgrades to full resolution |
+| Self-contained .bak | v3 export embeds originals + previews per asset and passes the verifier; live state stays lean; legacy v1/v2 ingest moves inline photos to the store and slims state |
+| HEIC | `.heic`/`.heif` accepted by the picker; detection by MIME **and** extension (HEIC often ships with no MIME type); native `createImageBitmap` decode attempted first, lazy heic2any fallback present |
+| Feedback | Support-card link and view-bar ✉ button both address bryanjaybee@gmail.com with a prefilled subject and bug-report template |
+| Cleanup | Deleting a library photo removes metadata **and** stored blobs |
+| Console health | Zero page errors or uncaught exceptions across all 75 tests |
 
 ## Defects found by this suite and fixed before render
 
@@ -67,6 +74,11 @@ cd tests && npm install && npm test
 
 The v2.1 round (mobile + Mini Zine print mode) passed all 22 new tests on the first
 run with no defects found.
+
+The v3.0 round surfaced one real portability defect — `img.loading`/`img.decoding` set
+as IDL properties don't reflect to attributes in all engines; switched to
+`setAttribute`, which behaves identically everywhere — plus one test-fixture name
+collision (two assets named `d.png`), fixed in the suite.
 
 ## Limits of this environment
 

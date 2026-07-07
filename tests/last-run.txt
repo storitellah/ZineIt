@@ -1,4 +1,4 @@
-ZineIt v2.0 test run — 2026-07-05T16:18:13.836Z
+ZineIt v3.0 test run — 2026-07-07T06:00:14.000Z
 PASS  boots into a valid mini-zine project
 PASS  spread model: cover alone · 3 interior pairs · back alone
 PASS  forward/backward page navigation, no skips, covers included
@@ -63,6 +63,16 @@ PASS  page numbers in the imposition follow the print toggle (interiors only)
 PASS  print-preview modal: opens with synced settings, live preview, toggles rebuild it
 PASS  printing the imposition uses the chosen paper size for @page and PDF export
 PASS  imposition settings survive a backup round-trip and migration fills defaults
+PASS  project state carries no full-resolution photo data (memory guarantee)
+PASS  asset store round-trips blobs and serves URLs (memory fallback path)
+PASS  canvas hydrates progressively: thumb instantly, preview when the store answers
+PASS  fast-load pipeline: library and timeline render from tiny thumbs, print resolves full-res
+PASS  lightbox opens instantly and upgrades to full resolution
+PASS  .bak v3 is self-contained: embeds originals + previews, passes the verifier
+PASS  legacy v1/v2 projects ingest: inline photos move to the store, state slims down
+PASS  HEIC import path: files accepted, detection by type and extension
+PASS  feedback channel: support card + view-bar button email bryanjaybee@gmail.com with context
+PASS  deleting a photo from the library also frees its stored blobs
 PASS  no page errors or uncaught exceptions across the whole run
 
-65 passed · 0 failed
+75 passed · 0 failed

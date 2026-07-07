@@ -160,3 +160,28 @@ A4 output is therefore 97.3% size (limited by A4's shorter height). Swipe recogn
 runs on pointer events with a 60 px horizontal / <50 px vertical threshold and yields
 to element drags. The mobile breakpoint is 820 px, read from `window.innerWidth` so it
 is testable in jsdom.
+
+---
+
+## v3.0 build prompt (memory, speed, formats, feedback)
+
+> Recreate the zine to use less memory on the computer and on mobile and to always load
+> photos fast. All formats of photos including HEIC should be read and imported by the
+> tool. Also add an option on the tool that if anyone has experienced a bug or has any
+> recommendation for improving the tool they should write an email to
+> bryanjaybee@gmail.com. Create this as a new version.
+
+### v3.0 version note
+
+The memory problem was architectural: v1/v2 kept every photo as a base64 string inside
+the project JSON — parsed at boot, re-stringified on every autosave, and rendered at
+full resolution in the canvas, library, and timeline simultaneously. v3 splits storage
+from display: originals live in IndexedDB as blobs (with an in-memory fallback for
+private browsing), the UI renders 192 px thumbs and ~1600 px previews, and originals
+are only decoded for print and the lightbox. Autosave shrinks from potentially tens of
+MB to a few hundred KB; "load fast" falls out of the same design because the first
+paint uses thumbnails already sitting in state. HEIC tries the browser's native decoder
+first and lazily loads heic2any only on failure, so the app remains offline-capable for
+every non-HEIC format. .bak files still contain everything (originals are embedded on
+export), and v1/v2 autosaves and backups migrate in place. Feedback goes to
+bryanjaybee@gmail.com via prefilled mailto links in the Support panel and view bar.
