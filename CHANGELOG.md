@@ -1,5 +1,18 @@
 # Changelog — ZineIt by Storitellah
 
+## v3.3 — 2026-07-15
+Lightroom Classic plug-in (plug-in v1.0.0).
+
+### Added
+- **`lightroom/zineit.lrplugin`** — a Lightroom Classic plug-in that bridges the catalogue into ZineIt. Adds an export destination (*ZineIt zine / photobook*) that renders the selection with its develop settings, reads IPTC caption/title/headline, places one photo per page at its true aspect ratio, adds a Bebas Neue title to the cover, and writes a self-contained `.bak` ready to restore. Also adds Library ▸ Plug-in Extras items (Open ZineIt, Report a bug) and a Plug-in Manager panel with feedback links to bryanjaybee@gmail.com.
+- Scope, honestly: the **editor cannot run inside Lightroom** — the SDK has no webview or canvas — so the plug-in owns selection→project and ZineIt owns layout. See `docs/LIGHTROOM.md`.
+- Engineering notes: `ZineItProject`/`ZineItJson` import no Lr modules and are unit-tested on plain Lua; the `.bak` is **streamed** (project JSON, brace trimmed, photos base64-appended one at a time) so peak memory stays at ~one photo no matter the export size; over-capacity selections are reported before rendering starts.
+- **`run-tests.sh`** — runs Lua syntax checks, Lua unit tests, fixture regeneration, and the JS suite in one command.
+- 22 Lua unit tests + 5 JS contract tests (22 Lua · 97 JS, all passing).
+
+### Changed
+- ZineIt now supports **thumbnail-less imported projects**: the library falls back to the stored preview instead of a blank tile, and restore regenerates proper preview/thumbnail tiers for any asset arriving without them (reusing the tested legacy-migration path). This is what lets an importer ship photos without pre-baking thumbnails.
+
 ## v3.2 — 2026-07-07
 Type system + production readiness.
 

@@ -231,3 +231,31 @@ and route to the feedback email, a favicon so production logs stay clean, noscri
 a visible version badge for bug reports, aria-labels on icon-only controls, and
 reduced-motion support. Deliberately not minified — Cloudflare compresses on the
 wire and the single readable file is part of the tool's trust story.
+
+---
+
+## v3.3 build prompt (Lightroom Classic plug-in)
+
+> Can you turn this tool into an Adobe Lightroom Classic plugin?
+
+### v3.3 version note
+
+The honest constraint shaped the design: Lightroom Classic plug-ins are Lua + LrView,
+and LrView has no canvas, no webview, no drag-and-drop surface. ZineIt's editor cannot
+live inside Lightroom, and a reduced imitation would be worse than the browser tool.
+So the plug-in takes the half Lightroom is genuinely better at — selection, develop
+settings, catalogue metadata — and hands off: render the selection, read IPTC captions,
+place one photo per page at true aspect ratio, write a self-contained .bak, open ZineIt.
+
+Structure follows testability: `ZineItProject` and `ZineItJson` import nothing from
+Lightroom, so the layout maths and file format (where the real risk lives) run under
+plain Lua 5.4 in CI. The .bak is streamed rather than assembled in memory — encode the
+project, trim the closing brace, append each photo's base64 and release it — keeping
+peak memory at one photo for a 40-photo book. The decisive test is the contract test:
+a .bak produced by the plug-in's own Lua is restored by the real ZineIt in jsdom and
+inspected end to end. It immediately earned its keep by catching a wrong base64
+encoder in the fixture tooling.
+
+Unverifiable here, and stated plainly in docs/LIGHTROOM.md and TESTING.md: Adobe's own
+APIs (encodeBase64, croppedDimensions, metadata field names, the rendition flow) exist
+only inside Lightroom. The plug-in needs one real-catalogue run before it ships.
