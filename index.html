@@ -913,22 +913,23 @@ function restoreBak(file){
     toast('Restoring…');
     const data=p.assetData||{}; delete p.assetData;
     state=migrate(p);
-    const legacy=[];
+    const regen=[];
     for(const id of Object.keys(state.assets)){
       const a=state.assets[id];
       try{
         if(data[id]&&data[id].full){
           await assetStore.put(id,{ full:dataURLtoBlob(data[id].full),
             preview: data[id].preview?dataURLtoBlob(data[id].preview):dataURLtoBlob(data[id].full) });
+          if(!a.thumb||!data[id].preview) regen.push(id);   // importer-made .bak: build proper tiers
         } else if(a&&a.src){                       // v1 / v2 .bak: inline full-res dataURL
           const b=dataURLtoBlob(a.src);
           await assetStore.put(id,{full:b,preview:b});
-          if(!a.thumb)a.thumb=a.src; delete a.src; legacy.push(id);
+          if(!a.thumb)a.thumb=a.src; delete a.src; regen.push(id);
         }
       }catch(e){}
     }
     curPage=0; selPg=0; selId=null; renderAll(); persist();
-    if(legacy.length) regenLegacy(legacy);
+    if(regen.length) regenLegacy(regen);
     toast('Backup restored ✓','ok'); };
   r.readAsText(file);
 }
@@ -1473,7 +1474,9 @@ function renderLibrary(){
   const ids=Object.keys(state.assets);
   ids.forEach(id=>{ const a=state.assets[id];
     const t=document.createElement('div'); t.className='thumb'; t.draggable=true; t.title=a.name+` (${a.w}×${a.h}px)`;
-    const im=document.createElement('img'); im.src=a.thumb||''; im.draggable=false; im.setAttribute('loading','lazy'); im.setAttribute('decoding','async'); t.appendChild(im);
+    const im=document.createElement('img'); im.draggable=false; im.setAttribute('loading','lazy'); im.setAttribute('decoding','async');
+    if(a.thumb)im.src=a.thumb; else hydrate(im,id,'preview');
+    t.appendChild(im);
     const del=document.createElement('button'); del.className='del'; del.textContent='×';
     del.addEventListener('click',ev=>{ ev.stopPropagation();
       if(!confirm('Remove this photo from the library? Frames using it will show as empty.'))return;
@@ -2012,7 +2015,7 @@ window.__zineit={
   buildSequentialPrint, buildImposition, buildImpSheet, renderImpPreview, openImpModal,
   applyMobile, isMobile, openDrawer, closeDrawers, toggleRail, toggleFS,
   renderAll, renderTextEditor, persist,
-  assetStore, buildBakJson, ingestLegacy, printSrc, usedAssetIds, isHeic, dataURLtoBlob,
+  assetStore, buildBakJson, restoreBak, ingestLegacy, printSrc, usedAssetIds, isHeic, dataURLtoBlob,
   hydrate, openLightbox, APP_VER, FEEDBACK_EMAIL,
   setAsset:(id,a)=>{ const src=a.src||a.thumb||'';
     state.assets[id]={name:a.name||'test',w:a.w||100,h:a.h||100,thumb:src};

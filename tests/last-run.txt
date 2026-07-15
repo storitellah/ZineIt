@@ -1,4 +1,4 @@
-ZineIt v3.2 test run — 2026-07-07T14:42:08.236Z
+ZineIt v3.2 test run — 2026-07-15T14:54:05.618Z
 PASS  boots into a valid mini-zine project
 PASS  spread model: cover alone · 3 interior pairs · back alone
 PASS  forward/backward page navigation, no skips, covers included
@@ -87,6 +87,14 @@ PASS  production shell: favicon, noscript, version badge, console banner
 PASS  uncaught errors surface gently and route users to feedback
 PASS  boot is guarded: startup failure shows a readable message, never a blank page
 PASS  accessibility: icon-only controls are labelled; reduced motion respected
+PASS  physical favicon files ship in the repo with valid signatures
+PASS  icons are cache-controlled on Cloudflare; the app itself stays always-fresh
+PASS  single-file use keeps working: inline data-URI icon retained, no file-based icon links
+PASS  plug-in .bak passes ZineIt's own verifier
+PASS  plug-in .bak carries every photo as an embedded data URL
+PASS  ZineIt restores the plug-in project: pages, photos, captions, title all land
+PASS  restored plug-in project renders and prints like any other ZineIt project
+PASS  thumbless importer projects still show photos everywhere
 PASS  no page errors or uncaught exceptions across the whole run
 
-89 passed · 0 failed
+97 passed · 0 failed

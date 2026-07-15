@@ -36,6 +36,11 @@ Every project automatically includes a **front cover** and **back cover**; inter
 
 
 
+
+### New in v3.3 — Lightroom Classic plug-in
+
+Select photos in Lightroom, choose a zine format, and get a laid-out ZineIt project: your develop settings rendered in, your IPTC captions carried across, one photo per page at its true proportions. The editor stays in ZineIt (Lightroom's SDK has no canvas to host it) — Lightroom does the selecting and developing, ZineIt does the layout. Install `lightroom/zineit.lrplugin` via **File ▸ Plug-in Manager ▸ Add**; full guide in [`docs/LIGHTROOM.md`](docs/LIGHTROOM.md).
+
 ### New in v3.2 — dressed for production
 
 - A proper type system: **Bebas Neue** headlines, **Source Sans** text (Source Sans 3, the current name of Source Sans Pro), monospace kept for the clock and readouts — with system fallbacks so offline still looks right.
@@ -107,6 +112,8 @@ Nothing is ever sent anywhere. The `.bak` lives wherever your downloads go — m
 
 ```
 index.html            the entire product — zero-build, works offline
+lightroom/            Lightroom Classic plug-in (Lua) + its tests
+run-tests.sh          runs every suite in one command
 PROMPT.md             the full build prompt, requirements, and version record
 CHANGELOG.md          release history (v1.0 → v2.0)
 TESTING.md            v2.0 test report — 43 automated tests, all passing

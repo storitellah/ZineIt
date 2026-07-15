@@ -38,7 +38,7 @@ public, **no** README/.gitignore — the push brings everything).
 From then on, every `git push` to `main` deploys automatically; other branches get
 preview URLs.
 
-The `_headers` file in the repo is picked up by Pages automatically: it sets sane
+The repo also ships a full favicon set (`favicon.ico`, `favicon.svg`, `apple-touch-icon.png`, 192/512 px PNGs) that Pages serves from the root — crawlers and iOS find them by convention, so no HTML changes were needed and no 404s appear in logs. The `_headers` file in the repo is picked up by Pages automatically: it sets sane
 security headers and `must-revalidate` caching, so users always get the newest
 version of the single-file app the moment you push.
 

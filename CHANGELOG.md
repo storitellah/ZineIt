@@ -1,5 +1,18 @@
 # Changelog — ZineIt by Storitellah
 
+## v3.3 — 2026-07-15
+Lightroom Classic plug-in (plug-in v1.0.0).
+
+### Added
+- **`lightroom/zineit.lrplugin`** — a Lightroom Classic plug-in that bridges the catalogue into ZineIt. Adds an export destination (*ZineIt zine / photobook*) that renders the selection with its develop settings, reads IPTC caption/title/headline, places one photo per page at its true aspect ratio, adds a Bebas Neue title to the cover, and writes a self-contained `.bak` ready to restore. Also adds Library ▸ Plug-in Extras items (Open ZineIt, Report a bug) and a Plug-in Manager panel with feedback links to bryanjaybee@gmail.com.
+- Scope, honestly: the **editor cannot run inside Lightroom** — the SDK has no webview or canvas — so the plug-in owns selection→project and ZineIt owns layout. See `docs/LIGHTROOM.md`.
+- Engineering notes: `ZineItProject`/`ZineItJson` import no Lr modules and are unit-tested on plain Lua; the `.bak` is **streamed** (project JSON, brace trimmed, photos base64-appended one at a time) so peak memory stays at ~one photo no matter the export size; over-capacity selections are reported before rendering starts.
+- **`run-tests.sh`** — runs Lua syntax checks, Lua unit tests, fixture regeneration, and the JS suite in one command.
+- 22 Lua unit tests + 5 JS contract tests (22 Lua · 97 JS, all passing).
+
+### Changed
+- ZineIt now supports **thumbnail-less imported projects**: the library falls back to the stored preview instead of a blank tile, and restore regenerates proper preview/thumbnail tiers for any asset arriving without them (reusing the tested legacy-migration path). This is what lets an importer ship photos without pre-baking thumbnails.
+
 ## v3.2 — 2026-07-07
 Type system + production readiness.
 
@@ -10,7 +23,9 @@ Type system + production readiness.
 - **Crash guards**: boot is wrapped — a startup failure shows a readable message pointing to bryanjaybee@gmail.com instead of a blank page; uncaught errors and async rejections raise a gentle toast that names the error, reassures that work is autosaved, and routes to ✉ Feedback (throttled — never a toast storm).
 - **Inline SVG favicon** (no 404s in production), **noscript** message, **version badge** in the header (so bug reports say which build), and a console version banner.
 - **Accessibility**: aria-labels on all icon-only controls; `prefers-reduced-motion` disables drawer/toast animation.
-- 6 new automated tests (89 total, all passing).
+- 9 new automated tests (92 total, all passing).
+
+- **Shipped favicon set for the Cloudflare deployment**: `favicon.ico` (16/32/48 multi-size), scalable `favicon.svg`, `apple-touch-icon.png` (iOS Add-to-Home-Screen finds it at the root by convention), and 192/512 px PNGs for future PWA use — all the gradient Z mark, all cache-controlled for a week in `_headers`. No icon links were added to the HTML: browsers use the inline data-URI (which keeps a locally saved single ZineIt.html fully working), while crawlers, bookmark services, and iOS fetch the root files directly — so production logs stop showing favicon 404s.
 
 ### Notes
 - The file ships readable, not minified — Cloudflare compresses on the wire (the gap is a few KB), and an auditable single file is part of ZineIt's local-first promise.
