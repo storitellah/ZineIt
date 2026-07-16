@@ -19,6 +19,27 @@ Brand system, a real image engine, the 16-page zine, and high-resolution export.
 - v3 projects migrate automatically: `object-position` percentages and `object-fit`
   become an equivalent transform, with the photo left exactly where it was.
 
+### Added — template library
+- **Nine templates**, each answering for all **eleven page types** (cover, intro, single,
+  two-photo, three-photo, grid, caption, quote, full bleed, closing, back cover): Blank —
+  still the default — plus Minimalist editorial, Documentary essay, Photojournalism,
+  Magazine, Travel journal, Contact sheet, Portfolio and Newspaper, the seven named in the
+  brand guidelines.
+- **Recipes are page-relative**, written in fractions of the content box rather than
+  inches, so one recipe lays out correctly on a 2.75in mini zine and a 12in photobook.
+  Type scales with the page instead of staying stranded at one size.
+- **Template browser** with live previews drawn from the real recipes; apply to this page,
+  selected pages, or the whole zine — which assigns cover, intro, closing and back cover
+  automatically and cycles the body through the remaining types.
+- **Replace without losing work.** Photos re-flow into the new frames in order at their
+  true aspect ratio; photos the new layout has no room for are kept rather than deleted;
+  text carries across by role, so a quote stays a quote.
+- **Custom templates**: save the current page as a template, duplicate any template
+  including the built-ins, export to JSON and import back. Stored locally; junk files are
+  refused rather than half-loaded.
+- **Text colour** is now part of the model — rendered on canvas, in print, and in the
+  300 DPI export.
+
 ### Added — print and export
 - **16-page saddle-stitch mini zine**: fixed 16-page format, correct imposition across
   four duplex sheets, **reading-order and print-order previews**, and fold/staple/
@@ -53,12 +74,18 @@ Brand system, a real image engine, the 16-page zine, and high-resolution export.
   would have described itself incorrectly to a future importer. Now stamps v4.
 
 ### Testing
-- 118 app tests + 22 Lua tests, all passing. New coverage: clipping-mask overhang,
+- 133 app tests + 22 Lua tests, all passing. New coverage: clipping-mask overhang,
   aspect preservation on Fit/Fill, original-untouched guarantees, keyboard shortcuts,
   rotation, v3→v4 migration, corrupt-transform rejection, 16-page imposition (including
   the pages-sum-to-17 invariant and every-page-printed-once), A4 full bleed, 3:2 ratios,
   mm bleed, file naming, JPG numbering, CRC32/ZIP correctness, 300 DPI export path,
-  audio removal, brand palette and type system.
+  audio removal, brand palette and type system. Templates: every template supplies all
+  eleven page types; **every recipe materialises on the page in all seven formats**;
+  type scales with the page; replace keeps photos, their order and their aspect ratio;
+  surplus photos are never discarded; text carries by role; whole-zine application
+  assigns covers correctly and leaves a valid, saveable project; custom save/duplicate/
+  export/import round-trips; junk template files rejected; browser UI previews and
+  applies.
 
 ## v3.3 — 2026-07-15
 Lightroom Classic plug-in (plug-in v1.0.0).

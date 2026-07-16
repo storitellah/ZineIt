@@ -23,6 +23,8 @@ automated tests pass before anything renders.
 | **Photobook ratios** | 3:2 landscape and 2:3 portrait |
 | **High-res export** | 300 DPI JPGs from the originals, numbered in reading order, spreads, ZIP packaging |
 | **File naming** | `Title_Made with ZineIt_Date_Time` / `Title_ZineIt_Date_Time`, sanitised, optional suffix |
+| **Template library** | Nine templates (Blank + the seven named in the brand guidelines + Photojournalism), all eleven page types each, page-relative recipes that fit every format, browser with live previews, apply to page/selection/whole zine, non-destructive replace, save/duplicate/export/import |
+| **Text colour** | Colour is now part of the text model, rendered on canvas and in the 300 DPI export |
 | **Removals** | Page audio notes gone from every surface |
 
 ## Phase 2 — the workspace (next)
@@ -35,16 +37,14 @@ automated tests pass before anything renders.
   bleed → colour profile → quality → template
 - **Paper and finished-size options**: A3/A4/Letter/custom sheets, A6/A7/custom trims
 
-## Phase 3 — templates
+## Phase 3 — templates ✅ shipped (brought forward)
 
-- Template library across the categories in the brand guidelines (magazine,
-  documentary essay, travel journal, contact sheet, portfolio, newspaper, minimalist
-  editorial) then broadening to the full list in the brief
-- Each template: cover, intro, single photo, two-photo spread, three-photo, grid,
-  caption, quote, full-bleed, closing, back cover
-- Apply to page / selection / whole zine; replace without destroying content
-- Save, duplicate, import, export custom templates
-- Template controls: fonts, colours, margins, frames, page numbering, caption styles
+The engine and the brand guidelines' seven named templates shipped in v4.0 — see
+`docs/TEMPLATE-GUIDE.md`. Remaining, and cheap now the engine exists: the rest of the
+brief's categories (Fine Art, Youth Zine, Family Archive, Exhibition Catalogue, Black
+and White, Bold Typography, Interview, Photo Essay, Community Story, Annual Report,
+Panorama Book). Each is a style block plus a handful of overrides — roughly an hour
+each, not a subsystem.
 
 ## Phase 4 — colour and proofing
 

@@ -1,7 +1,7 @@
 # TESTING.md — ZineIt v2.0 test report
 
-**Result: 118 passed · 0 failed · 0 console errors in the app suite, plus 22 Lua unit
-tests for the Lightroom plug-in — 140 total, all green.** The whole tool — including the
+**Result: 133 passed · 0 failed · 0 console errors in the app suite, plus 22 Lua unit
+tests for the Lightroom plug-in — 155 total, all green.** The whole tool — including the
 v3.2 type system and production-hardening pass — was tested before this render, as
 required.
 
@@ -86,7 +86,9 @@ cd tests && npm test    # just the app + contract suite
 | Export | 300 DPI target; renders from the **original** photo not the preview; canvas clip matches the on-screen frame; photo drawn at true ratio; JPG numbering in reading order and separate spread numbering; **CRC32 verified against the RFC check value** (a wrong table silently corrupts every ZIP) |
 | Brand | Palette values exact (primary + secondary); Poppins/Inter/Source Serif 4/Manrope loaded and assigned; wordmark ExtraBold; yellow buttons carry ink text for 4.5:1 |
 | Audio removal | No UI, handlers, markup or state field anywhere |
-| Console health | Zero page errors or uncaught exceptions across all 118 app tests |
+| Templates | All nine templates supply all eleven page types; Blank stays blank; the seven templates named in the brand guidelines all exist; **every recipe materialises on-page across all seven formats** (mini-zine, mini-16, A4 portrait/landscape, 3:2, 2:3, half-letter); type scales with page size but never below legibility; applying sets frames, text, fonts, colours and margin; **replace keeps photos, their order and their true aspect ratio**; surplus photos are never discarded; text carries across by role; whole-zine apply assigns cover/intro/closing/back and leaves a project that passes the verifier; custom save/duplicate/export→import round-trip; junk template files refused; customs persist to local storage; browser UI previews from real recipes and applies |
+| Text colour | Defaults to ink, renders on canvas, used by the 300 DPI export |
+| Console health | Zero page errors or uncaught exceptions across all 133 app tests |
 
 ## Defects found by this suite and fixed before render
 
