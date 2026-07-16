@@ -100,5 +100,5 @@ only inside Lightroom. Specifically unverified until run there:
 - export dialog rendering and `processRenderedPhotos` rendition flow.
 
 **Please run it against a real catalogue before relying on it.** Bugs and ideas:
-**bryanjaybee@gmail.com** — there's a menu item and a Plug-in Manager button that
+**hello@storitellah.com** — there's a menu item and a Plug-in Manager button that
 write the email for you.

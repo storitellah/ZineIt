@@ -12,21 +12,27 @@
 <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="%23F6407A"/><stop offset=".5" stop-color="%237C5CFF"/><stop offset="1" stop-color="%233E8DFF"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(%23g)"/><text x="32" y="46" font-family="Arial,Helvetica,sans-serif" font-size="40" font-weight="bold" text-anchor="middle" fill="white">Z</text></svg>'>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter&family=Roboto&family=Open+Sans&family=Lato&family=Montserrat&family=Poppins&family=Raleway&family=Work+Sans&family=DM+Sans&family=Nunito&family=Rubik&family=Karla&family=Space+Grotesk&family=Archivo&family=Archivo+Black&family=IBM+Plex+Sans&family=Oswald&family=Bebas+Neue&family=Anton&family=Merriweather&family=Playfair+Display&family=Lora&family=PT+Serif&family=Libre+Baskerville&family=EB+Garamond&family=Cormorant+Garamond&family=Crimson+Text&family=DM+Serif+Display&family=Abril+Fatface&family=Source+Serif+4&family=Space+Mono&family=IBM+Plex+Mono&family=JetBrains+Mono&family=Inconsolata&family=Courier+Prime&family=Special+Elite&family=Amatic+SC&family=Caveat&family=Shadows+Into+Light&family=Permanent+Marker&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter&family=Roboto&family=Open+Sans&family=Lato&family=Montserrat&family=Poppins&family=Raleway&family=Work+Sans&family=DM+Sans&family=Nunito&family=Rubik&family=Karla&family=Space+Grotesk&family=Archivo&family=Archivo+Black&family=IBM+Plex+Sans&family=Oswald&family=Bebas+Neue&family=Anton&family=Merriweather&family=Playfair+Display&family=Lora&family=PT+Serif&family=Libre+Baskerville&family=EB+Garamond&family=Cormorant+Garamond&family=Crimson+Text&family=DM+Serif+Display&family=Abril+Fatface&family=Source+Serif+4&family=Space+Mono&family=IBM+Plex+Mono&family=JetBrains+Mono&family=Inconsolata&family=Courier+Prime&family=Special+Elite&family=Amatic+SC&family=Caveat&family=Shadows+Into+Light&family=Permanent+Marker&family=Source+Sans+3:wght@400;600;700&family=Poppins:wght@700;800&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;600&display=swap">
 <style>
 /* ============ TOKENS ============ */
 :root{
-  --bg:#141619; --panel:#1b1e23; --panel-2:#22262d; --line:#2d323b; --line-soft:#262b33;
-  --text:#dde1e7; --muted:#8b93a0; --faint:#5c6470;
-  --accent:#3E8DFF; --accent-deep:#2c5db3;
-  --pop-pink:#F6407A; --pop-violet:#7C5CFF; --pop-teal:#14C7AE; --pop-amber:#FFB627; --pop-coral:#FF7059;
-  --grad:linear-gradient(90deg,#F6407A 0%,#FFB627 26%,#14C7AE 52%,#3E8DFF 76%,#7C5CFF 100%);
-  --paper:#f6f4ee; --paper-shadow:rgba(0,0,0,.55);
-  --ok:#4fae6e; --warn:#d9a13b; --danger:#e0564a;
-  --sans:'Source Sans 3','Source Sans Pro',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-  --display:'Bebas Neue','Oswald','Arial Narrow',Impact,sans-serif;
+  /* ZineIt brand — Ink Black / Paper White / Warm Yellow (Brand Guidelines v1.0) */
+  --ink:#1A1A1A; --paper-white:#F7F7F5; --yellow:#FFC43D;
+  --teal:#00B4A6; --coral:#FF5C5C; --indigo:#3D5AFE; --forest:#2F8A5F;
+  /* dark workspace (guideline 7), light page canvas */
+  --bg:#141414; --panel:#1E1E1E; --panel-2:#272727; --line:#383838; --line-soft:#303030;
+  --text:#F2F2F0; --muted:#A3A3A0; --faint:#6E6E6B;
+  --accent:var(--yellow); --accent-ink:var(--ink);
+  --pop-pink:var(--coral); --pop-violet:var(--indigo); --pop-teal:var(--teal); --pop-amber:var(--yellow); --pop-coral:var(--coral);
+  --grad:linear-gradient(90deg,#FFC43D 0%,#FF5C5C 34%,#00B4A6 67%,#3D5AFE 100%);
+  --paper:var(--paper-white); --paper-shadow:rgba(0,0,0,.6);
+  --ok:var(--forest); --warn:var(--yellow); --danger:var(--coral);
+  --sans:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --display:'Poppins','Inter',-apple-system,"Segoe UI",Arial,sans-serif;
+  --serif:'Source Serif 4','Source Serif Pro',Georgia,'Times New Roman',serif;
+  --caption-font:'Manrope','Inter',-apple-system,Arial,sans-serif;
   --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
-  --radius:6px;
+  --radius:8px; --sp:8px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
@@ -49,7 +55,8 @@ a{color:var(--accent)}
 header{grid-area:hdr;display:flex;align-items:center;gap:14px;padding:0 16px;background:var(--panel);border-bottom:1px solid var(--line);position:relative;z-index:20}
 header::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:2.5px;background:var(--grad);z-index:2}
 .brand{display:flex;align-items:baseline;gap:8px;white-space:nowrap}
-.brand .mark{font-family:var(--display);font-weight:400;font-size:24px;letter-spacing:.6px;line-height:1}
+.brand{padding:0 calc(var(--sp)*2) 0 0}  /* clear space ≥ height of the Z */
+.brand .mark{font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:-.4px;line-height:1}
 .brand .ver{font-family:var(--mono);font-size:10px;color:var(--faint);align-self:flex-start;margin-top:2px}
 .brand .mark span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
 .brand .by{font-size:12px;color:var(--muted)}
@@ -70,7 +77,7 @@ header::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:2.5
 #left{grid-area:left;border-right:1px solid var(--line)}
 #right{grid-area:right;border-left:1px solid var(--line)}
 .sec{display:flex;flex-direction:column;gap:8px}
-.sec h3{font-family:var(--display);font-size:13.5px;font-weight:400;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);padding-bottom:6px;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;gap:7px}
+.sec h3{font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);padding-bottom:6px;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;gap:7px}
 .sec h3::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--accent);flex:none}
 #left .sec:nth-of-type(1) h3::before{background:var(--pop-amber)}
 #left .sec:nth-of-type(2) h3::before{background:var(--pop-teal)}
@@ -89,15 +96,16 @@ select,input[type=text],input[type=number],textarea{background:var(--panel-2);bo
 textarea{resize:vertical;min-height:56px}
 .btn{background:var(--panel-2);border:1px solid var(--line);color:var(--text);border-radius:var(--radius);padding:7px 10px;font-size:12.5px;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background .12s,border-color .12s}
 .btn:hover{background:#2a2f37;border-color:#3a404b}
-.btn.primary{background:linear-gradient(120deg,var(--pop-pink),var(--pop-violet));border:none;color:#fff;font-weight:600}
-.btn.primary:hover{filter:brightness(1.12)}
+.btn.primary{background:var(--yellow);border:none;color:var(--ink);font-weight:700}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.on{border-color:var(--yellow);color:var(--yellow);background:rgba(255,196,61,.12)}
 .btn.danger{color:var(--danger);border-color:#4b2a27}
 .btn.danger:hover{background:#2e1e1c}
 .btn.ghost{background:transparent}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 .btn.wide{width:100%}
-.btn.on{border-color:var(--accent);color:var(--accent);background:rgba(62,141,255,.09)}
-.hint{font-size:11px;color:var(--faint);line-height:1.45}
+
+.hint{font-family:var(--caption-font);font-size:11px;color:var(--muted);line-height:1.5}
 .kv{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--muted)}
 .toggle{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);cursor:pointer;user-select:none}
 .toggle input{accent-color:var(--accent)}
@@ -152,7 +160,7 @@ textarea{resize:vertical;min-height:56px}
 #viewBar .vsep{width:1px;height:20px;background:var(--line);margin:0 4px}
 .vbtn{background:transparent;border:1px solid transparent;color:var(--muted);border-radius:5px;padding:4px 9px;font-size:12px;font-family:var(--mono)}
 .vbtn:hover{color:var(--text);border-color:var(--line)}
-.vbtn.on{color:var(--accent);border-color:var(--accent);background:rgba(62,141,255,.09)}
+.vbtn.on{color:var(--yellow);border-color:var(--yellow);background:rgba(255,196,61,.12)}
 #zoomPct{font-family:var(--mono);font-size:11px;color:var(--faint);min-width:42px;text-align:center}
 #canvasScroll{flex:1;overflow:auto;display:grid;place-items:center;padding:26px;position:relative}
 #pageHost{position:relative;flex:none}
@@ -171,9 +179,7 @@ textarea{resize:vertical;min-height:56px}
 #pageTag .warnTxt{color:var(--warn)}
 .el{position:absolute;touch-action:none}
 .el.img{overflow:hidden;background:#e8e5dd}
-.el.img img{width:100%;height:100%;display:block;pointer-events:none}
-.el.img.fit-cover img{object-fit:cover}
-.el.img.fit-contain img{object-fit:contain}
+.el.img img{display:block;pointer-events:none}   /* frame = clipping mask; photo may exceed it */
 .el.img.empty{background:rgba(44,93,179,.06);border:1.5px dashed rgba(44,93,179,.6);display:flex;align-items:center;justify-content:center}
 .el.img.empty::after{content:"drop photo";font-family:var(--mono);font-size:10px;color:rgba(44,93,179,.85);letter-spacing:.8px}
 .el.txt{color:#1b1b1b;line-height:1.32;white-space:pre-wrap;word-break:break-word;overflow:hidden}
@@ -187,6 +193,8 @@ textarea{resize:vertical;min-height:56px}
 .hd.sw{left:-5px;bottom:-5px;cursor:nesw-resize}.hd.se{right:-5px;bottom:-5px;cursor:nwse-resize}
 .hd.n{left:calc(50% - 5px);top:-5px;cursor:ns-resize}.hd.s{left:calc(50% - 5px);bottom:-5px;cursor:ns-resize}
 .hd.w{left:-5px;top:calc(50% - 5px);cursor:ew-resize}.hd.e{right:-5px;top:calc(50% - 5px);cursor:ew-resize}
+.hd.rot{left:calc(50% - 7px);top:-26px;width:14px;height:14px;border-radius:50%;background:var(--yellow);border-color:var(--ink);cursor:grab}
+.hd.rot::after{content:"";position:absolute;left:50%;top:14px;width:1.5px;height:12px;background:var(--yellow);transform:translateX(-50%)}
 #cropGhost{position:absolute;border:1.5px dashed rgba(255,182,39,.85);background:rgba(255,182,39,.06);pointer-events:none;z-index:55}
 
 /* ============ TEXT EDITOR TAB ============ */
@@ -194,7 +202,7 @@ textarea{resize:vertical;min-height:56px}
 #textEditor.show{display:block}
 .teWrap{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
 .teHead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.teHead h2{font-family:var(--display);font-weight:400;font-size:21px;letter-spacing:.8px}
+.teHead h2{font-family:var(--display);font-weight:800;font-size:19px;letter-spacing:-.2px}
 .teHead .mono{font-family:var(--mono);font-size:11px;color:var(--faint)}
 .teRow{display:grid;grid-template-columns:112px 132px 1fr 84px;gap:10px;align-items:start;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:10px}
 .teRow .loc{font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.6;padding-top:6px}
@@ -246,7 +254,7 @@ textarea{resize:vertical;min-height:56px}
 .modalBk{position:fixed;inset:0;background:rgba(8,9,11,.72);display:none;align-items:center;justify-content:center;z-index:600}
 .modalBk.show{display:flex}
 .modal{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:22px;width:min(560px,92vw);max-height:86vh;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
-.modal h2{font-family:var(--display);font-weight:400;font-size:21px;letter-spacing:.8px}
+.modal h2{font-family:var(--display);font-weight:800;font-size:19px;letter-spacing:-.2px}
 .modal .mono{font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.7}
 .modal ol{padding-left:20px;font-size:13px;line-height:1.8;color:var(--text)}
 .modal .btns{display:flex;gap:8px;justify-content:flex-end}
@@ -372,7 +380,7 @@ body.fs #canvasScroll{padding:14px}
   <header>
     <div class="brand">
       <span class="mark">Zine<span>It</span></span>
-      <span class="ver" id="verBadge">v3.2</span>
+      <span class="ver" id="verBadge">v4.0</span>
       <span class="by">by <a href="https://storitellah.com" target="_blank" rel="noopener">Storitellah</a></span>
     </div>
     <input id="projName" type="text" value="Untitled project" spellcheck="false" aria-label="Project / zine title">
@@ -415,7 +423,7 @@ body.fs #canvasScroll{padding:14px}
             Patreon</a>
         </div>
         <a class="slink" id="feedbackLink" href="#"><span class="ico" style="color:var(--pop-amber)">✉</span>Found a bug? Have an idea? Email us</a>
-        <div class="hint">Reports and recommendations go straight to bryanjaybee@gmail.com — every one gets read.</div>
+        <div class="hint">Reports and recommendations go straight to hello@storitellah.com — every one gets read.</div>
       </div>
     </div>
   </aside>
@@ -502,7 +510,11 @@ body.fs #canvasScroll{padding:14px}
         <label class="toggle"><input type="checkbox" id="gridChk" checked>Grid</label>
         <label class="toggle"><input type="checkbox" id="snapChk" checked>Snap</label>
       </div>
-      <label class="toggle"><input type="checkbox" id="bleedChk">Bleed mode — allow spill past trim (⅛″)</label>
+      <label class="toggle"><input type="checkbox" id="bleedChk">Bleed mode — allow spill past trim</label>
+      <div class="row">
+        <label class="small" style="flex:0 0 auto">Bleed</label>
+        <select id="bleedMmSel"><option value="3">3 mm</option><option value="5">5 mm</option></select>
+      </div>
       <label class="toggle"><input type="checkbox" id="warnChk" checked>Warn when photos cross margins</label>
       <div class="hint">Bleed off: nothing can pass the trim edge, ever. Bleed on: controlled ⅛″ spill for full-bleed printing, including across the gutter on spreads.</div>
     </div>
@@ -535,8 +547,15 @@ body.fs #canvasScroll{padding:14px}
           <button class="btn" id="resetCropBtn" title="Re-centre the crop">Reset crop</button>
           <button class="btn" id="resetFrameBtn" title="Frame matches photo's true proportions">Reset frame</button>
         </div>
+        <div class="row">
+          <button class="btn" id="zoomOutImg" title="Shrink the photo">−</button>
+          <button class="btn" id="zoomInImg" title="Enlarge the photo">+</button>
+          <button class="btn" id="rotL" title="Rotate 90° left">↺</button>
+          <button class="btn" id="rotR" title="Rotate 90° right">↻</button>
+          <button class="btn" id="rotReset" title="Straighten">0°</button>
+        </div>
         <button class="btn wide" id="spreadBtn" style="display:none"></button>
-        <div class="hint">⇧ drag (or Pan mode) moves the photo inside its frame · double-click = full view · resize crops, never stretches.</div>
+        <div class="hint">The frame is a mask: ⇧ drag (or Pan mode) moves the photo <b>anywhere</b>, even outside the frame · scroll or pinch to zoom · the round handle rotates · resize crops, never stretches · nothing is ever written to your original file.<br><b>F</b> fit · <b>⇧F</b> fill · <b>C</b> centre · <b>R</b> reset crop · <b>⇧R</b> reset frame</div>
         <button class="btn" id="panModeBtn">Pan mode: off</button>
       </div>
       <div id="inspTxt" style="display:none;flex-direction:column;gap:8px">
@@ -560,22 +579,13 @@ body.fs #canvasScroll{padding:14px}
     </div>
 
     <div class="sec">
-      <h3>Page audio note</h3>
-      <div class="row" id="audioRow">
-        <button class="btn" id="audioAttachBtn">Attach</button>
-        <button class="btn" id="audioPlayBtn" disabled>Play</button>
-        <button class="btn danger" id="audioDelBtn" disabled>✕</button>
-      </div>
-      <input type="file" id="audioInput" accept="audio/*" hidden>
-      <div class="hint" id="audioName">Field audio for this page — editor only, never printed.</div>
-    </div>
-
-    <div class="sec">
       <h3>Export</h3>
       <label class="toggle"><input type="checkbox" id="pnPrintChk">Page numbers in print / PDF</label>
       <button class="btn primary wide" id="pdfBtn">Download PDF</button>
       <button class="btn wide" id="printBtn">Print (highest quality)</button>
       <button class="btn wide" id="impBtn" style="display:none">Print mini-zine sheet (fold &amp; cut)</button>
+      <button class="btn wide" id="saddleBtn" style="display:none">Print 16-page sheets (saddle stitch)</button>
+      <button class="btn wide" id="jpgBtn">Download all pages as high-res JPGs</button>
       <div class="hint">PDF: choose <b>Save as PDF</b>, margins <b>None</b>, scale <b>100%</b>, background graphics <b>on</b>. Photos export at original resolution.</div>
     </div>
 
@@ -618,6 +628,66 @@ body.fs #canvasScroll{padding:14px}
   <button class="btn ghost" id="bannerDismiss">Later</button>
 </div>
 <div id="toast" role="status"></div>
+
+<div class="modalBk" id="jpgModalBk">
+  <div class="modal">
+    <h2>Download all pages as high-res JPGs</h2>
+    <p class="mono">Rendered at 300 DPI from your original photos — not from the screen previews.</p>
+    <div class="impSet">
+      <div class="row full">
+        <label class="small" style="flex:0 0 auto">Export</label>
+        <select id="jpgWhat">
+          <option value="pages">Pages only</option>
+          <option value="spreads">Spreads only</option>
+          <option value="both">Pages and spreads</option>
+        </select>
+      </div>
+      <div class="row full">
+        <label class="small" style="flex:0 0 auto">Quality</label>
+        <select id="jpgQ">
+          <option value="0.95" selected>Maximum (95%)</option>
+          <option value="0.85">High (85%)</option>
+          <option value="0.75">Web (75%)</option>
+        </select>
+      </div>
+      <label class="toggle full"><input type="checkbox" id="jpgZip" checked>Package as a single ZIP</label>
+    </div>
+    <div class="hint">Files are numbered in reading order — <b>Project-Name_001.jpg</b>, <b>_002.jpg</b> … and spreads as <b>_Spread-001.jpg</b>. Bleed and page numbers follow your current print settings. Large books take a moment: every page is a full-resolution render.</div>
+    <div class="btns"><button class="btn primary" id="jpgGo">Export JPGs</button><button class="btn" id="jpgClose">Close</button></div>
+  </div>
+</div>
+
+<div class="modalBk" id="saddleModalBk">
+  <div class="modal">
+    <h2>Print your 16-page zine</h2>
+    <p class="mono">Four sheets · printed both sides · folded together · stapled through the spine.</p>
+    <div class="impSet">
+      <label class="toggle full"><input type="checkbox" id="saddlePnChk">Page numbers in print</label>
+    </div>
+    <details open>
+      <summary>Print order — what actually comes out of the printer</summary>
+      <div id="printOrderList" class="hint" style="line-height:1.9"></div>
+    </details>
+    <details>
+      <summary>Reading order — what the reader sees</summary>
+      <div id="readOrderList" class="hint" style="line-height:1.9"></div>
+    </details>
+    <details>
+      <summary>How to print, fold, staple and trim</summary>
+      <ol>
+        <li><b>Print</b> on A4, landscape, 100% scale, margins none, <b>double-sided, flipped on the SHORT edge</b>. Getting this wrong is the single most common mistake — every page will be upside down.</li>
+        <li><b>Check before you commit</b>: print on plain paper first, fold it, and read it through. A paper mockup costs one sheet and saves a whole run.</li>
+        <li><b>Fold</b> each sheet in half along the dashed centre line, printed side out. Crease with a bone folder or the back of a spoon.</li>
+        <li><b>Nest</b> the sheets inside one another in order — sheet 1 outermost, sheet 4 innermost. Sheet 1 carries the covers.</li>
+        <li><b>Align</b> the folded edges against a flat surface, tapping the spine square before you staple.</li>
+        <li><b>Staple</b> twice through the spine fold, roughly a quarter of the way in from the top and bottom. A saddle stapler reaches the centre; a standard one works if you open it flat and staple over a soft eraser, then close the legs by hand.</li>
+        <li><b>Thread stitch</b> instead, if you prefer: pierce three or five evenly spaced holes along the fold with an awl, then sew a pamphlet stitch with waxed linen thread, ending in a square knot around the long stitch inside.</li>
+        <li><b>Trim</b> the fore-edge last — the inner pages creep outward as the booklet thickens. A guillotine or a steel rule and a fresh scalpel blade both work; take 2–3 mm off.</li>
+      </ol>
+    </details>
+    <div class="btns"><button class="btn primary" id="saddleGo">Print / Save as PDF</button><button class="btn" id="saddleClose">Close</button></div>
+  </div>
+</div>
 
 <div class="modalBk" id="foldModalBk">
   <div class="modal">
@@ -671,16 +741,21 @@ body.fs #canvasScroll{padding:14px}
 /* ---------- constants ---------- */
 const FORMATS = {
   'mini-zine'  :{group:'Zines', name:'Mini zine — 8-page, one sheet', w:2.75, h:4.25, fixed:8, imposition:true},
+  'mini-16'    :{group:'Zines', name:'Mini zine — 16-page, saddle stitch', w:5.83, h:8.27, fixed:16, saddle:true},
   'quarter'    :{group:'Zines', name:'Quarter zine — 4.25 × 5.5 in',  w:4.25, h:5.5},
   'half-letter':{group:'Zines', name:'Half-letter zine — 5.5 × 8.5 in', w:5.5, h:8.5},
   'a5'         :{group:'Zines', name:'A5 zine — 148 × 210 mm',        w:5.83, h:8.27},
+  'a4-portrait':{group:'Zines', name:'A4 zine — portrait, full bleed', w:8.27, h:11.69, fullBleed:true},
+  'a4-landscape':{group:'Zines', name:'A4 zine — landscape, full bleed', w:11.69, h:8.27, fullBleed:true},
   'book-8x8'   :{group:'Photobooks', name:'Photobook — 8 × 8 in square', w:8, h:8},
   'book-8x10'  :{group:'Photobooks', name:'Photobook — 8 × 10 in portrait', w:8, h:10},
   'book-10x8'  :{group:'Photobooks', name:'Photobook — 10 × 8 in landscape', w:10, h:8},
   'book-a4'    :{group:'Photobooks', name:'Photobook — A4 portrait',  w:8.27, h:11.69},
+  'book-3x2'   :{group:'Photobooks', name:'Photobook — 3:2 landscape (12 × 8 in)', w:12, h:8},
+  'book-2x3'   :{group:'Photobooks', name:'Photobook — 2:3 portrait (8 × 12 in)',  w:8, h:12},
 };
-const APP_VER='3.2', FEEDBACK_EMAIL='bryanjaybee@gmail.com';
-const GRID=0.125, BLEED=0.125;
+const APP_VER='4.0', FEEDBACK_EMAIL='hello@storitellah.com';
+const GRID=0.125, MM=1/25.4;
 const FONTS = ['Inter','Roboto','Open Sans','Lato','Montserrat','Poppins','Raleway','Work Sans','DM Sans','Nunito',
   'Rubik','Karla','Source Sans 3','Space Grotesk','Archivo','Archivo Black','IBM Plex Sans','Oswald','Bebas Neue','Anton',
   'Merriweather','Playfair Display','Lora','PT Serif','Libre Baskerville','EB Garamond','Cormorant Garamond',
@@ -703,29 +778,41 @@ const pageAt=i=> state.pages[i];
 const el =()=> pageAt(selPg) && pageAt(selPg).elements.find(e=>e.id===selId) || null;
 const escapeHtml=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-function blankPage(label){return {id:uid(), label, elements:[], audio:null}}
+function blankPage(label){return {id:uid(), label, elements:[]}}
 function defaultSettings(){ return { snap:true, grid:true, margin:0.25, daily:true, keepAspect:true,
-  bleed:false, warnMargins:true, pageNumsPreview:false, pageNumsPrint:false,
-  guides:{margins:true, safe:false, bleedG:false, fold:true},
+  bleed:false, bleedMm:3, warnMargins:true, pageNumsPreview:false, pageNumsPrint:false,
+  guides:{margins:true, safe:false, bleedG:false, fold:true}, nameSuffix:'',
   imp:{paper:'letter', fit:true, margins:false, fold:true, cut:true} }; }
 function newProject(formatKey){
   const f=FORMATS[formatKey], n=f.fixed||4;
+  const s=defaultSettings();
+  if(f.fullBleed){ s.margin=0; s.bleed=true; s.warnMargins=false; }   // A4 zines: edge to edge by default
   const pages=[blankPage('Front cover')];
   for(let i=2;i<n;i++)pages.push(blankPage('Page '+i));
   pages.push(blankPage('Back cover'));
-  state={ app:'ZineIt', ver:3,
+  state={ app:'ZineIt', ver:4,
     meta:{name:'Untitled project', created:new Date().toISOString(), modified:new Date().toISOString()},
-    format:formatKey, pages, assets:{}, settings:defaultSettings() };
+    format:formatKey, pages, assets:{}, settings:s };
   curPage=0; selPg=0; selId=null;
 }
 function migrate(p){ // v1 .bak files load cleanly into v2
   const d=defaultSettings();
   p.settings=Object.assign(d, p.settings||{}); p.settings.guides=Object.assign(d.guides,(p.settings.guides||{}));
   p.settings.imp=Object.assign({paper:'letter',fit:true,margins:false,fold:true,cut:true},(p.settings.imp||{}));
-  p.pages.forEach(pg=>{ if(!('audio' in pg))pg.audio=null;
+  if(p.settings.bleedMm!==5)p.settings.bleedMm=3;
+  p.pages.forEach(pg=>{ delete pg.audio;
     pg.elements.forEach(e=>{ if(e.type==='text'&&!e.role)e.role='custom'; if(e.type==='image'&&e.spread==null)e.spread=false; });});
   for(const id in (p.assets||{})){ const a=p.assets[id]; if(a&&a.src&&!a.thumb)a.thumb=a.src; }
-  p.ver=3; return p;
+  // v3 stored object-position percentages + object-fit; v4 stores a real photo transform
+  p.pages.forEach(pg=>pg.elements.forEach(e=>{
+    if(e.type!=='image'||e.img)return;
+    const a=e.asset&&p.assets[e.asset], ar=(a&&a.w&&a.h)?a.h/a.w:0.75;
+    const base=(e.fit==='contain')? Math.min(e.w,e.h/ar) : Math.max(e.w,e.h/ar);
+    const px=(e.px==null?50:e.px), py=(e.py==null?50:e.py);
+    e.img={ w:base, ox:(50-px)/100*(base-e.w), oy:(50-py)/100*(base*ar-e.h), rot:0 };
+    delete e.px; delete e.py; delete e.fit;
+  }));
+  p.ver=4; return p;
 }
 
 /* ---------- spreads ---------- */
@@ -873,6 +960,7 @@ function validateProject(p){
       if(!['image','text'].includes(e.type)) return 'corrupt element';
       if(e.type==='image'&&e.asset&&!p.assets[e.asset]) return 'missing photo asset';
       if(![e.x,e.y,e.w,e.h].every(Number.isFinite)) return 'corrupt geometry';
+      if(e.type==='image'&&e.img&&![e.img.w,e.img.ox,e.img.oy,e.img.rot].every(Number.isFinite)) return 'corrupt photo transform';
     }}
   return null;
 }
@@ -887,19 +975,36 @@ async function buildBakJson(){
     if(!full) return {err:'could not read photo data'};
     assetData[id]={ full, preview: rec.preview?await blobToDataURL(rec.preview):null };
   }
-  return { json: JSON.stringify(Object.assign({},state,{ver:3,assetData})) };
+  return { json: JSON.stringify(Object.assign({},state,{ver:4,assetData})) };
 }
+/* ---------- file naming ----------
+   Exports:  Project Title_Made with ZineIt_YYYY-MM-DD_HH-MM
+   Backups:  Project Title_ZineIt_YYYY-MM-DD_HH-MM                        */
+function sanitizeName(s){
+  return String(s||'').replace(/[\\/:*?"<>|]+/g,' ')      // filesystem-hostile characters
+    .replace(/[^\w\- ]+/g,'').trim().replace(/\s+/g,' ').slice(0,80) || 'Untitled project';
+}
+function stamp(){
+  const d=new Date(), p=n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}_${p(d.getHours())}-${p(d.getMinutes())}`;
+}
+function fileName(kind,ext){
+  const base=sanitizeName(state.meta.name);
+  const sfx=state.settings.nameSuffix? '_'+sanitizeName(state.settings.nameSuffix).replace(/\s+/g,'-') : '';
+  const mid=kind==='export'? 'Made with ZineIt' : 'ZineIt';
+  return `${base}_${mid}_${stamp()}${sfx}${ext?'.'+ext:''}`;
+}
+function exportBase(){ return sanitizeName(state.meta.name).replace(/\s+/g,'-'); }
+
 async function downloadBak(){
   toast('Building backup…');
   const {json,err}=await buildBakJson();
   if(err){ toast('Backup failed: '+err,'err'); return; }
   let verr=null; try{ verr=validateProject(JSON.parse(json)); }catch(e){ verr='unreadable backup'; }
   if(verr){ toast('Backup <b>failed verification</b>: '+verr,'err'); return; }
-  const name=(state.meta.name||'zineit').replace(/[^\w\- ]+/g,'').trim().replace(/\s+/g,'-')||'zineit';
-  const stamp=new Date().toISOString().slice(0,16).replace(/[:T]/g,'').replace(/(\d{8})(\d{4})/,'$1-$2');
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([json],{type:'application/json'}));
-  a.download=`${name}_${stamp}.bak`; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  a.download=fileName('backup','bak'); a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);
   store.set(LS_BAK,new Date().toISOString()); renderBakInfo(); hideBanner();
   toast('Backup saved ✓ — verified by test restore before download','ok');
 }
@@ -971,8 +1076,58 @@ async function importFiles(files){
 
 /* ---------- geometry ---------- */
 function surfW(e){ return e.spread? fmt().w*2 : fmt().w; }   // element's coordinate-space width
+
+/* ---------- non-destructive image geometry ----------
+   The frame (e.x,e.y,e.w,e.h) is a clipping mask. The photo lives in e.img:
+     w   displayed width in inches (height follows the photo's true ratio — never stretched)
+     ox  horizontal offset of the photo's centre from the frame's centre, inches
+     oy  vertical offset, inches
+     rot rotation in degrees
+   The photo may sit far outside its frame; only the part inside prints. The
+   original file is never touched, so every crop is reversible. */
+function assetAR(e){ const a=e.asset&&state.assets[e.asset]; return (a&&a.w&&a.h)? a.h/a.w : 0.75; }
+function containW(e){ const ar=assetAR(e); return Math.min(e.w, e.h/ar); }
+function coverW(e){ const ar=assetAR(e); return Math.max(e.w, e.h/ar); }
+function ensureImg(e){
+  if(e.type!=='image')return null;
+  if(!e.img||!Number.isFinite(e.img.w)||e.img.w<=0){
+    e.img={w:coverW(e), ox:0, oy:0, rot:0};
+  }
+  if(!Number.isFinite(e.img.ox))e.img.ox=0;
+  if(!Number.isFinite(e.img.oy))e.img.oy=0;
+  if(!Number.isFinite(e.img.rot))e.img.rot=0;
+  return e.img;
+}
+function imgBox(e){                     // photo rect in page inches (rotation ignored — used for the ghost)
+  const g=ensureImg(e); if(!g)return null;
+  const w=g.w, h=g.w*assetAR(e);
+  return { x:e.x+e.w/2+g.ox-w/2, y:e.y+e.h/2+g.oy-h/2, w, h };
+}
+function imgFit(e){ const g=ensureImg(e); if(!g)return; g.w=containW(e); g.ox=0; g.oy=0; }
+function imgFill(e){ const g=ensureImg(e); if(!g)return; g.w=coverW(e); g.ox=0; g.oy=0; }
+function imgCentre(e){ const g=ensureImg(e); if(!g)return; g.ox=0; g.oy=0; }   // keeps the current zoom
+function imgResetCrop(e){ const g=ensureImg(e); if(!g)return; g.w=coverW(e); g.ox=0; g.oy=0; g.rot=0; }
+function imgResetFrame(e){
+  if(e.home){ e.x=e.home.x; e.y=e.home.y; e.w=e.home.w; e.h=e.home.h; }
+  else if(e.asset) applyAspectToFrame(e);
+  clampEl(e); imgFill(e);
+}
+function imgCropPct(e){                 // how much of the photo the frame hides
+  const b=imgBox(e); if(!b||!b.w||!b.h)return 0;
+  const ix=Math.max(0, Math.min(e.x+e.w,b.x+b.w)-Math.max(e.x,b.x));
+  const iy=Math.max(0, Math.min(e.y+e.h,b.y+b.h)-Math.max(e.y,b.y));
+  return Math.max(0, Math.round((1-(ix*iy)/(b.w*b.h))*100));
+}
+function imgStyle(e,px){                // CSS for the <img> inside its clipping frame
+  const g=ensureImg(e), w=g.w*px, h=g.w*assetAR(e)*px;
+  return `position:absolute;left:50%;top:50%;width:${w}px;height:${h}px;max-width:none;`
+    +`transform:translate(-50%,-50%) translate(${g.ox*px}px,${g.oy*px}px) rotate(${g.rot}deg);`
+    +`transform-origin:center center;`;
+}
 function snapV(v){ return state.settings.snap? Math.round(v/GRID)*GRID : v; }
-function bleedAllow(){ return state.settings.bleed? BLEED : 0; }
+function bleedMm(){ const v=state.settings.bleedMm; return (v===5)?5:3; }
+function bleedIn(){ return bleedMm()*MM; }
+function bleedAllow(){ return state.settings.bleed? bleedIn() : 0; }
 function clampEl(e){
   const f=fmt(), W=surfW(e), b=bleedAllow();
   e.w=Math.max(0.3,Math.min(e.w,W+2*b)); e.h=Math.max(0.25,Math.min(e.h,f.h+2*b));
@@ -993,26 +1148,16 @@ function marginViolation(e){ // sides where the element crosses the margin box
   if(e.x+e.w > W-m+1e-6) out.push('right'); if(e.y+e.h > f.h-m+1e-6) out.push('bottom');
   return out;
 }
-/* rendered extent of a cover-fit photo (for crop ghost + crop %) */
-function coverExtent(e){
-  const a=state.assets[e.asset]; if(!a)return null;
-  const fw=e.w, fh=e.h, ar=a.h/a.w;
-  let dw,dh;
-  if(fw/fh > a.w/a.h){ dw=fw; dh=fw*ar; } else { dh=fh; dw=fh/ar; }
-  const px=e.px==null?50:e.px, py=e.py==null?50:e.py;
-  return { x:e.x-(dw-fw)*px/100, y:e.y-(dh-fh)*py/100, w:dw, h:dh,
-           crop:Math.max(0,Math.round((1-(fw*fh)/(dw*dh))*100)) };
-}
-
 /* ---------- element ops ---------- */
 function addImageEl(assetId,cx,cy,pgIdx){
   if(pgIdx==null)pgIdx=curPage;
   const f=fmt(), m=state.settings.margin, a=assetId?state.assets[assetId]:null;
   let w=Math.min(f.w-2*m, f.w*0.62), h=w*0.75;
   if(a){ const ar=a.h/a.w; h=w*ar; const maxH=f.h-2*m; if(h>maxH){h=maxH;w=h/ar;} }
-  const e={id:uid(),type:'image',asset:assetId||null,fit:'cover',px:50,py:50,spread:false,
+  const e={id:uid(),type:'image',asset:assetId||null,spread:false,
     x:snapV((cx!=null?cx:f.w/2)-w/2), y:snapV((cy!=null?cy:f.h/2)-h/2), w:snapV(w), h:snapV(h)};
-  clampEl(e); pageAt(pgIdx).elements.push(e); selPg=pgIdx; selId=e.id;
+  clampEl(e); e.home={x:e.x,y:e.y,w:e.w,h:e.h}; ensureImg(e); imgFill(e);
+  pageAt(pgIdx).elements.push(e); selPg=pgIdx; selId=e.id;
   renderCanvas(); renderInspector(); renderTimeline(); touch(); return e;
 }
 function addTextEl(text,size,role,pgIdx){
@@ -1029,6 +1174,7 @@ function applyAspectToFrame(e){
   let w=e.w, h=w*ar;
   if(h>e.h){ h=e.h; w=h/ar; }
   e.w=w; e.h=h; e.x=cx-w/2; e.y=cy-h/2; clampEl(e);
+  if(e.img) imgFill(e);
 }
 function deleteSel(){ const e=el(); if(!e)return; const p=pageAt(selPg);
   p.elements=p.elements.filter(x=>x.id!==selId); selId=null;
@@ -1042,7 +1188,7 @@ function duplicateSel(){ const e=el(); if(!e)return; const c=JSON.parse(JSON.str
   renderCanvas(); renderInspector(); renderTimeline(); renderTextEditor(); touch(); }
 function applyTemplate(t){
   const f=fmt(), m=state.settings.margin, g=Math.max(GRID,m/2);
-  const W=f.w-2*m, H=f.h-2*m, mk=(x,y,w,h)=>({id:uid(),type:'image',asset:null,fit:'cover',px:50,py:50,spread:false,x,y,w,h});
+  const W=f.w-2*m, H=f.h-2*m, mk=(x,y,w,h)=>({id:uid(),type:'image',asset:null,spread:false,x,y,w,h,home:{x,y,w,h}});
   let fr=[];
   if(t==='full')  fr=[mk(0,0,f.w,f.h)];
   if(t==='inset') fr=[mk(m,m,W,H)];
@@ -1064,7 +1210,7 @@ function makeSpread(){
     e.x+=fmt().w; pageAt(sp.left).elements.push(e); selPg=sp.left;
   }
   e.spread=true;
-  const b=bleedAllow(); e.x=-b; e.y=-b; e.w=fmt().w*2+2*b; e.h=fmt().h+2*b; e.px=50; e.py=50;
+  const b=bleedAllow(); e.x=-b; e.y=-b; e.w=fmt().w*2+2*b; e.h=fmt().h+2*b; imgFill(e);
   if(view.mode!=='spread'){ view.mode='spread'; syncViewBar(); }
   curPage=sp.left;
   renderCanvas(); renderInspector(); renderTimeline(); touch();
@@ -1125,6 +1271,10 @@ function updateSelectionDom(){
     const hd=document.createElement('div'); hd.className='hd '+hn;
     hd.addEventListener('pointerdown',ev=>startDrag(ev,selPg,e.id,hn)); d.appendChild(hd);
   });
+  if(e.type==='image'&&e.asset){
+    const r=document.createElement('div'); r.className='hd rot'; r.title='Rotate (⇧ snaps to 15°)';
+    r.addEventListener('pointerdown',ev=>startDrag(ev,selPg,e.id,'rot')); d.appendChild(r);
+  }
 }
 function select(pg,id){ selPg=pg; selId=id; updateSelectionDom(); renderInspector(); }
 
@@ -1164,7 +1314,7 @@ function renderCanvas(){
   vps.forEach(({pi,dx})=>{
     if(G.margins) addGuide(P,'margin',dx+m,m,f.w-2*m,f.h-2*m);
     if(G.safe)    addGuide(P,'safe',dx+m+0.125,m+0.125,f.w-2*(m+0.125),f.h-2*(m+0.125));
-    if(G.bleedG&&state.settings.bleed){ const g=addGuide(P,'bleed',dx-BLEED,-BLEED,f.w+2*BLEED,f.h+2*BLEED); g.style.overflow='visible'; }
+    if(G.bleedG&&state.settings.bleed){ const g=addGuide(P,'bleed',dx-bleedIn(),-bleedIn(),f.w+2*bleedIn(),f.h+2*bleedIn()); g.style.overflow='visible'; }
     if(state.settings.pageNumsPreview && pi!==0 && pi!==state.pages.length-1){
       const n=document.createElement('div'); n.className='pnum'; n.textContent=pi+1;
       const isLeft = view.mode==='spread' ? dx===0 && vps.length===2 : (pi%2===1);
@@ -1202,14 +1352,14 @@ function addGuide(P,cls,x,y,w,h){
 }
 function renderEl(P,e,pgIdx,dxIn,z,interactive){
   const d=document.createElement('div');
-  d.className='el '+(e.type==='image'?('img fit-'+e.fit+(e.asset?'':' empty')):'txt');
+  d.className='el '+(e.type==='image'?('img'+(e.asset?'':' empty')):'txt');
   d.style.left=((e.x+dxIn)*scale)+'px'; d.style.top=(e.y*scale)+'px';
   d.style.width=(e.w*scale)+'px'; d.style.height=(e.h*scale)+'px';
   d.style.zIndex=10+z; d.dataset.id=e.id; d.dataset.pg=pgIdx;
   if(e.type==='image'&&e.asset){
     const im=document.createElement('img'); im.draggable=false; im.setAttribute('decoding','async');
     hydrate(im,e.asset,'preview');
-    im.style.objectPosition=(e.px==null?50:e.px)+'% '+(e.py==null?50:e.py)+'%'; d.appendChild(im);
+    im.style.cssText=imgStyle(e,scale); d.appendChild(im);
     d.addEventListener('dblclick',ev=>{ ev.stopPropagation(); openLightbox(e.asset); });
   }
   if(e.spread){ const b=document.createElement('span'); b.className='spreadBadge'; b.textContent='SPREAD'; d.appendChild(b); }
@@ -1224,9 +1374,9 @@ function renderEl(P,e,pgIdx,dxIn,z,interactive){
       d.addEventListener('dragleave',()=>d.classList.remove('dropTarget'));
       d.addEventListener('drop',ev=>{ d.classList.remove('dropTarget');
         const id=ev.dataTransfer.getData('text/zineit-asset');
-        if(id){ ev.preventDefault(); ev.stopPropagation(); e.asset=id; e.px=50; e.py=50;
+        if(id){ ev.preventDefault(); ev.stopPropagation(); e.asset=id;
           if(state.settings.keepAspect!==false && !e.spread) applyAspectToFrame(e);
-          renderCanvas(); renderTimeline(); touch(); }});
+          imgFill(e); renderCanvas(); renderTimeline(); touch(); }});
     }
   } else d.classList.add('locked');
   P.appendChild(d);
@@ -1240,7 +1390,8 @@ function renderPageTag(){
   if(e&&e.type==='image'&&e.asset){
     const mv=e.spread?[]:marginViolation(e);
     if(mv.length&&state.settings.warnMargins&&!state.settings.bleed) warn=` · <span class="warnTxt">⚠ crosses margin (${mv.join(', ')}) — enable bleed if intentional</span>`;
-    const ce=coverExtent(e); if(ce&&e.fit==='cover'&&ce.crop>0) warn+=` · crop ${ce.crop}%`;
+    const cp=imgCropPct(e); if(cp>0) warn+=` · crop ${cp}%`;
+    if(e.img&&e.img.rot) warn+=` · ${Math.round(e.img.rot)}°`;
   }
   $('pageTag').innerHTML=`<b>${escapeHtml(names)}</b> · page ${curPage+1}/${state.pages.length} · spread ${sp}/${total} · ${f.w}″×${f.h}″${warn}`;
 }
@@ -1260,8 +1411,9 @@ function startDrag(ev,pgIdx,id,handle){
   select(pgIdx,id);
   const pan=!handle && pe.type==='image' && pe.asset && (ev.shiftKey||ev.altKey||panMode);
   try{ if(ev.pointerId!=null&&ev.target.setPointerCapture)ev.target.setPointerCapture(ev.pointerId); }catch(e){}
+  const g0=pe.type==='image'?ensureImg(pe):null;
   drag={pgIdx,id,handle,pan,sx:ev.clientX,sy:ev.clientY,ox:pe.x,oy:pe.y,ow:pe.w,oh:pe.h,
-        opx:pe.px==null?50:pe.px,opy:pe.py==null?50:pe.py,moved:false};
+        oox:g0?g0.ox:0, ooy:g0?g0.oy:0, ow0:g0?g0.w:0, orot:g0?g0.rot:0, moved:false};
   window.addEventListener('pointermove',onDragMove);
   window.addEventListener('pointerup',endDrag,{once:true});
 }
@@ -1269,11 +1421,21 @@ function onDragMove(ev){
   if(!drag)return; const e=pageAt(drag.pgIdx).elements.find(x=>x.id===drag.id); if(!e)return;
   const dx=(ev.clientX-drag.sx)/scale, dy=(ev.clientY-drag.sy)/scale;
   if(Math.abs(dx)+Math.abs(dy)>0.02)drag.moved=true;
-  if(drag.pan){
-    e.px=Math.max(0,Math.min(100,drag.opx - dx/e.w*100));
-    e.py=Math.max(0,Math.min(100,drag.opy - dy/e.h*100));
+  if(drag.pan){                        // free movement — the photo may leave its frame entirely
+    const g=ensureImg(e);
+    g.ox=drag.oox+dx; g.oy=drag.ooy+dy;
     const im=document.querySelector(`#page .el[data-id="${e.id}"] img`);
-    if(im)im.style.objectPosition=e.px+'% '+e.py+'%';
+    if(im)im.style.cssText=imgStyle(e,scale);
+    drawCropGhost(e); renderPageTag(); return;
+  }
+  if(drag.handle==='rot'){             // rotate the photo about the frame centre
+    const P=$('page').getBoundingClientRect(), off=surfaceDx(drag.pgIdx,e);
+    const cx=P.left+(e.x+off+e.w/2)*scale, cy=P.top+(e.y+e.h/2)*scale;
+    let a=Math.atan2(ev.clientY-cy, ev.clientX-cx)*180/Math.PI+90;
+    if(ev.shiftKey) a=Math.round(a/15)*15;
+    ensureImg(e).rot=Math.round(a*10)/10;
+    const im=document.querySelector(`#page .el[data-id="${e.id}"] img`);
+    if(im)im.style.cssText=imgStyle(e,scale);
     drawCropGhost(e); renderPageTag(); return;
   }
   if(!drag.handle){ e.x=snapV(drag.ox+dx); e.y=snapV(drag.oy+dy); snapEdges(e); }
@@ -1298,13 +1460,13 @@ function onDragMove(ev){
   if(d){ const off=surfaceDx(drag.pgIdx,e);
     d.style.left=((e.x+off)*scale)+'px'; d.style.top=(e.y*scale)+'px';
     d.style.width=(e.w*scale)+'px'; d.style.height=(e.h*scale)+'px'; }
-  if(e.type==='image'&&e.asset&&e.fit==='cover') drawCropGhost(e);
+  if(e.type==='image'&&e.asset) drawCropGhost(e);
   renderPageTag();
 }
 function drawCropGhost(e){
   let g=$('cropGhost');
-  const ce=coverExtent(e);
-  if(!ce||e.fit!=='cover'){ if(g)g.remove(); return; }
+  const ce=imgBox(e);
+  if(!ce||!e.asset){ if(g)g.remove(); return; }
   if(!g){ g=document.createElement('div'); g.id='cropGhost'; $('page').appendChild(g); }
   const off=surfaceDx(selPg,e);
   g.style.left=((ce.x+off)*scale)+'px'; g.style.top=(ce.y*scale)+'px';
@@ -1339,8 +1501,9 @@ function snapIntoEmptyFrame(e){ // dropping a photo onto an empty placeholder sn
   const target=[...host.elements].reverse().find(t=>t!==e&&t.type==='image'&&!t.asset&&!t.spread&&
     cx>=t.x&&cx<=t.x+t.w&&cy>=t.y&&cy<=t.y+t.h);
   if(!target)return;
-  target.asset=e.asset; target.px=50; target.py=50;
+  target.asset=e.asset;
   if(state.settings.keepAspect!==false) applyAspectToFrame(target);
+  imgFill(target);
   host.elements=host.elements.filter(x=>x.id!==e.id);
   selId=target.id;
   toast('Snapped into the layout frame.','ok');
@@ -1353,6 +1516,12 @@ window.addEventListener('keydown',ev=>{
   if((ev.key==='Delete'||ev.key==='Backspace')&&e){ ev.preventDefault(); deleteSel(); return; }
   if((ev.ctrlKey||ev.metaKey)&&ev.key.toLowerCase()==='s'){ ev.preventDefault(); downloadBak(); return; }
   if((ev.ctrlKey||ev.metaKey)&&ev.key.toLowerCase()==='d'&&e){ ev.preventDefault(); duplicateSel(); return; }
+  if(e&&e.type==='image'&&!ev.ctrlKey&&!ev.metaKey&&!ev.altKey){
+    const k=ev.key.toLowerCase();
+    const acts={ f: ev.shiftKey?imgFill:imgFit, c: imgCentre, r: ev.shiftKey?imgResetFrame:imgResetCrop };
+    if(acts[k]){ ev.preventDefault(); imgAction(acts[k]);
+      toast({f:ev.shiftKey?'Fill':'Fit', c:'Centre', r:ev.shiftKey?'Frame reset':'Crop reset'}[k]); return; }
+  }
   if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(ev.key)){
     ev.preventDefault();
     if(e){ const step=ev.shiftKey?GRID:0.02;
@@ -1385,6 +1554,53 @@ pageEl.addEventListener('drop',ev=>{
 });
 pageEl.addEventListener('pointerdown',ev=>{ if(ev.target===pageEl||ev.target.classList.contains('guide')){ selId=null; updateSelectionDom(); renderInspector(); renderPageTag(); }});
 
+/* ---------- photo zoom: wheel (desktop) and pinch (touch) ---------- */
+pageEl.addEventListener('wheel',ev=>{
+  const e=el(); if(!e||e.type!=='image'||!e.asset)return;
+  const d=document.querySelector(`#page .el[data-id="${e.id}"]`);
+  if(!d||!d.contains(ev.target))return;
+  ev.preventDefault();
+  const g=ensureImg(e);
+  g.w=Math.max(0.15, Math.min(g.w*(ev.deltaY<0?1.06:1/1.06), surfW(e)*12));
+  const im=d.querySelector('img'); if(im)im.style.cssText=imgStyle(e,scale);
+  drawCropGhost(e); renderPageTag(); touch();
+},{passive:false});
+
+const pinch={pts:new Map(), base:0, startW:0, id:null};
+pageEl.addEventListener('pointerdown',ev=>{
+  if(ev.pointerType!=='touch')return;
+  const d=ev.target.closest&&ev.target.closest('.el.img'); if(!d)return;
+  pinch.pts.set(ev.pointerId,{x:ev.clientX,y:ev.clientY,id:d.dataset.id});
+});
+pageEl.addEventListener('pointermove',ev=>{
+  if(!pinch.pts.has(ev.pointerId))return;
+  pinch.pts.set(ev.pointerId,Object.assign(pinch.pts.get(ev.pointerId),{x:ev.clientX,y:ev.clientY}));
+  if(pinch.pts.size!==2)return;
+  const [a,b]=[...pinch.pts.values()];
+  const dist=Math.hypot(a.x-b.x,a.y-b.y);
+  if(!pinch.base){                       // second finger just landed
+    pinch.base=dist; pinch.id=a.id;
+    const e=pageAt(selPg).elements.find(x=>x.id===pinch.id);
+    pinch.startW=e?ensureImg(e).w:0;
+    drag=null;                           // a pinch is not a drag
+    return;
+  }
+  const e=pageAt(selPg).elements.find(x=>x.id===pinch.id); if(!e)return;
+  ev.preventDefault();
+  const g=ensureImg(e);
+  g.w=Math.max(0.15, Math.min(pinch.startW*(dist/pinch.base), surfW(e)*12));
+  const im=document.querySelector(`#page .el[data-id="${e.id}"] img`);
+  if(im)im.style.cssText=imgStyle(e,scale);
+  renderPageTag();
+},{passive:false});
+function endPinch(ev){
+  if(!pinch.pts.has(ev.pointerId))return;
+  pinch.pts.delete(ev.pointerId);
+  if(pinch.pts.size<2&&pinch.base){ pinch.base=0; renderCanvas(); touch(); }
+}
+window.addEventListener('pointerup',endPinch);
+window.addEventListener('pointercancel',endPinch);
+
 /* ---------- timeline ---------- */
 function pageIndicators(pi){
   const p=pageAt(pi), tags=[];
@@ -1394,7 +1610,6 @@ function pageIndicators(pi){
   if(spreads)tags.push('<span class="tag sp">⇔</span>');
   if(photos)tags.push('<span class="tag">▣'+photos+'</span>');
   if(texts)tags.push('<span class="tag">T'+texts+'</span>');
-  if(p.audio)tags.push('<span class="tag au">♪</span>');
   if(!p.elements.length)tags.push('<span class="tag warn">empty</span>');
   return tags.join('');
 }
@@ -1494,7 +1709,7 @@ function renderLibrary(){
 function renderInspector(){
   const e=el(), I=$('inspector');
   I.style.display=e?'flex':'none';
-  renderAudioSec(); updateMobEdit();
+  updateMobEdit();
   if(!e)return;
   $('inspImg').style.display=e.type==='image'?'flex':'none';
   $('inspTxt').style.display=e.type==='text'?'flex':'none';
@@ -1507,11 +1722,6 @@ function renderInspector(){
   if(e.type==='text'){ $('txtContent').value=e.text;
     $('txtSize').value=e.size; $('txtAlign').value=e.align;
     $('txtWeight').value=e.weight; $('txtFont').value=e.font||'Inter'; $('txtRole').value=e.role||'custom'; }
-}
-function renderAudioSec(){
-  const p=pageAt(curPage);
-  $('audioPlayBtn').disabled=!p.audio; $('audioDelBtn').disabled=!p.audio;
-  $('audioName').textContent=p.audio?('♪ '+p.audio.name):'Field audio for this page — editor only, never printed.';
 }
 
 /* ---------- text editor tab ---------- */
@@ -1594,7 +1804,9 @@ function renderPrintPage(pi,W,H){
     x.style.left=(e.x+dx)+'in'; x.style.top=e.y+'in'; x.style.width=e.w+'in'; x.style.height=e.h+'in';
     if(e.type==='image'){
       if(e.asset){ const im=document.createElement('img'); im.src=printSrc(e.asset);
-        im.style.objectFit=e.fit; im.style.objectPosition=(e.px==null?50:e.px)+'% '+(e.py==null?50:e.py)+'%';
+        const g=ensureImg(e), iw=g.w, ih=g.w*assetAR(e);
+        im.style.cssText='position:absolute;left:50%;top:50%;width:'+iw+'in;height:'+ih+'in;max-width:none;'
+          +'transform:translate(-50%,-50%) translate('+g.ox+'in,'+g.oy+'in) rotate('+g.rot+'deg);transform-origin:center center;';
         x.appendChild(im); }
       else return; // empty frames don't print
     } else {
@@ -1661,6 +1873,50 @@ function buildImpSheet(){
     : '';
   return {page,paper,scale:s,warn};
 }
+/* ---------- 16-page saddle stitch ----------
+   Four A4 sheets, printed both sides, flipped on the SHORT edge, folded together
+   and stapled through the spine. Page order on the sheets is nothing like the
+   reading order — that is what imposition means, and why the preview matters. */
+function readingOrder(){ return state.pages.map((p,i)=>({page:i+1,label:p.label})); }
+function saddleSheets(){
+  const n=state.pages.length, out=[];
+  for(let s=0; s<n/4; s++){
+    const a=n-2*s, b=1+2*s, c=2+2*s, d=n-1-2*s;
+    out.push({ sheet:s+1, side:'front', left:a, right:b });   // e.g. 16 | 1
+    out.push({ sheet:s+1, side:'back',  left:c, right:d });   // e.g.  2 | 15
+  }
+  return out;
+}
+function printOrder(){
+  return saddleSheets().map(s=>({
+    sheet:s.sheet, side:s.side, left:s.left, right:s.right,
+    note:`Sheet ${s.sheet} ${s.side}: page ${s.left} on the left, page ${s.right} on the right`
+  }));
+}
+function buildSaddlePrint(){
+  const f=fmt(), root=$('printRoot'); root.innerHTML='';
+  const PW=f.w*2, PH=f.h;                        // two pages side by side = one A4 landscape sheet
+  $('pageSizeStyle').textContent=`@page{size:${PW}in ${PH}in;margin:0}`;
+  saddleSheets().forEach(s=>{
+    const sheet=document.createElement('div'); sheet.className='pp';
+    sheet.style.width=PW+'in'; sheet.style.height=PH+'in';
+    [[s.left,0],[s.right,f.w]].forEach(([pageNo,dx])=>{
+      const cell=document.createElement('div'); cell.className='impPanel';
+      cell.style.left=dx+'in'; cell.style.top='0'; cell.style.width=f.w+'in'; cell.style.height=f.h+'in';
+      const inner=renderPrintPage(pageNo-1,f.w,f.h);
+      inner.style.pageBreakAfter='auto'; inner.style.breakAfter='auto';
+      cell.appendChild(inner); sheet.appendChild(cell);
+    });
+    const fold=document.createElement('div');
+    fold.style.cssText=`position:absolute;left:${f.w}in;top:0;width:0;height:${PH}in;border-left:1px dashed #9aa2a8;z-index:6`;
+    sheet.appendChild(fold);
+    const tag=document.createElement('div');
+    tag.style.cssText='position:absolute;left:0.12in;top:0.08in;font-family:ui-monospace,monospace;font-size:7pt;color:#888;z-index:7';
+    tag.textContent=`sheet ${s.sheet} · ${s.side} · pages ${s.left}–${s.right} · flip on SHORT edge`;
+    sheet.appendChild(tag);
+    root.appendChild(sheet);
+  });
+}
 function buildImposition(){
   const root=$('printRoot'); root.innerHTML='';
   const {page,paper}=buildImpSheet();
@@ -1697,11 +1953,160 @@ async function doPrint(mode){
   try{
     toast('Preparing full-resolution photos…');
     await ensureFullRes();
-    if(mode==='imp')buildImposition(); else buildSequentialPrint();
+    if(mode==='imp')buildImposition(); else if(mode==='saddle')buildSaddlePrint(); else buildSequentialPrint();
     setTimeout(()=>{ printing=false; window.print(); },150);
   }catch(e){ printing=false; toast('Could not prepare photos for print','err'); }
 }
 window.addEventListener('afterprint',()=>{ $('printRoot').innerHTML=''; });
+
+
+/* ================= HIGH-RESOLUTION JPG EXPORT =================
+   Renders each page to a canvas at a true 300 DPI target, using the ORIGINAL
+   photos (not the screen previews) and the same non-destructive transform the
+   editor shows. Pages are numbered in reading order; spreads are numbered
+   separately. Packaged as a store-only ZIP (JPEGs are already compressed, so
+   deflating them would cost time and save nothing). */
+const DPI=300;
+
+async function loadFullImage(assetId){
+  const u=await assetStore.url(assetId,'full')||assetStore.cachedUrl(assetId,'preview');
+  if(!u)throw new Error('photo missing');
+  return await new Promise((res,rej)=>{ const im=new Image();
+    im.onload=()=>res(im); im.onerror=()=>rej(new Error('photo unreadable')); im.src=u; });
+}
+function drawTextEl(ctx,e,px,dx){
+  ctx.save();
+  ctx.fillStyle='#1b1b1b';
+  ctx.font=`${e.weight||400} ${e.size/72*px}px ${fontStack(e.font).replace(/'/g,'"')}`;
+  ctx.textBaseline='top';
+  const pad=0.02*px, maxW=e.w*px-2*pad;
+  const words=String(e.text||'').split(/\s+/); const lines=[]; let line='';
+  for(const w of words){
+    const t=line?line+' '+w:w;
+    if(ctx.measureText(t).width>maxW&&line){ lines.push(line); line=w; } else line=t;
+  }
+  if(line)lines.push(line);
+  const lh=e.size/72*px*1.32;
+  lines.forEach((ln,i)=>{
+    let x=(e.x+dx)*px+pad;
+    if(e.align==='center') x=(e.x+dx)*px+(e.w*px-ctx.measureText(ln).width)/2;
+    if(e.align==='right')  x=(e.x+dx)*px+e.w*px-pad-ctx.measureText(ln).width;
+    ctx.fillText(ln,x,e.y*px+pad+i*lh);
+  });
+  ctx.restore();
+}
+async function renderPageCanvas(pi,opts){
+  opts=opts||{};
+  const f=fmt(), b=(state.settings.bleed&&opts.bleed!==false)? bleedIn():0;
+  const W=(opts.spreadW||f.w)+2*b, H=f.h+2*b;
+  const c=document.createElement('canvas');
+  c.width=Math.round(W*DPI); c.height=Math.round(H*DPI);
+  const ctx=c.getContext('2d');
+  if(!ctx)throw new Error('canvas unavailable');
+  ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,c.width,c.height);
+  ctx.translate(b*DPI,b*DPI);                 // page origin, bleed around it
+  const items=(opts.items)||pagePrintElements(pi);
+  for(const {e,dx} of items){
+    if(e.type==='image'){
+      if(!e.asset)continue;
+      let im; try{ im=await loadFullImage(e.asset); }catch(err){ continue; }
+      const g=ensureImg(e), iw=g.w*DPI, ih=g.w*assetAR(e)*DPI;
+      ctx.save();
+      ctx.beginPath();                         // the frame is the clipping mask
+      ctx.rect((e.x+dx)*DPI,e.y*DPI,e.w*DPI,e.h*DPI); ctx.clip();
+      ctx.translate((e.x+dx+e.w/2+g.ox)*DPI,(e.y+e.h/2+g.oy)*DPI);
+      ctx.rotate((g.rot||0)*Math.PI/180);
+      ctx.drawImage(im,-iw/2,-ih/2,iw,ih);     // aspect preserved — never stretched
+      ctx.restore();
+    } else {
+      drawTextEl(ctx,e,DPI,dx);
+    }
+  }
+  if(state.settings.pageNumsPrint && pi!==0 && pi!==state.pages.length-1 && !opts.spreadW){
+    ctx.fillStyle='#444'; ctx.font=`${8.5/72*DPI}px ui-monospace,monospace`; ctx.textBaseline='bottom';
+    const t=String(pi+1), w=ctx.measureText(t).width;
+    ctx.fillText(t, (pi%2===1)? 0.18*DPI : (f.w-0.18)*DPI-w, (f.h-0.12)*DPI);
+  }
+  return c;
+}
+function canvasToJpeg(c,q){ return new Promise(res=>{
+  try{ if(c.toBlob)return c.toBlob(b=>res(b),'image/jpeg',q==null?0.95:q); }catch(e){}
+  try{ res(dataURLtoBlob(c.toDataURL('image/jpeg',q==null?0.95:q))); }catch(e){ res(null); } }); }
+
+/* --- minimal store-only ZIP (no dependency, no recompression) --- */
+function crc32(u8){
+  let c, t=crc32.t;
+  if(!t){ t=crc32.t=[]; for(let n=0;n<256;n++){ c=n; for(let k=0;k<8;k++) c=c&1?0xEDB88320^(c>>>1):c>>>1; t[n]=c>>>0; } }
+  let crc=0xFFFFFFFF;
+  for(let i=0;i<u8.length;i++) crc=(crc>>>8)^t[(crc^u8[i])&0xFF];
+  return (crc^0xFFFFFFFF)>>>0;
+}
+function zipStore(files){          // files: [{name, data:Uint8Array}]
+  const enc=new TextEncoder(), chunks=[], central=[]; let off=0;
+  const u16=v=>[v&255,(v>>8)&255], u32=v=>[v&255,(v>>8)&255,(v>>16)&255,(v>>>24)&255];
+  for(const f of files){
+    const name=enc.encode(f.name), crc=crc32(f.data), n=f.data.length;
+    const lh=[...u32(0x04034b50),...u16(20),...u16(0),...u16(0),...u16(0),...u16(0),
+              ...u32(crc),...u32(n),...u32(n),...u16(name.length),...u16(0)];
+    chunks.push(new Uint8Array(lh),name,f.data);
+    central.push({name,crc,n,off});
+    off+=lh.length+name.length+n;
+  }
+  const cd=[]; let cdLen=0;
+  for(const c of central){
+    const h=[...u32(0x02014b50),...u16(20),...u16(20),...u16(0),...u16(0),...u16(0),...u16(0),
+             ...u32(c.crc),...u32(c.n),...u32(c.n),...u16(c.name.length),...u16(0),...u16(0),
+             ...u16(0),...u16(0),...u32(0),...u32(c.off)];
+    cd.push(new Uint8Array(h),c.name); cdLen+=h.length+c.name.length;
+  }
+  const end=new Uint8Array([...u32(0x06054b50),...u16(0),...u16(0),...u16(central.length),
+    ...u16(central.length),...u32(cdLen),...u32(off),...u16(0)]);
+  return new Blob([...chunks,...cd,end],{type:'application/zip'});
+}
+function saveBlob(blob,name){
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
+  a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),8000);
+}
+function spreadItemsFor(sp){
+  const f=fmt(), out=[];
+  pagePrintElements(sp.left).forEach(({e,dx})=>out.push({e,dx}));
+  if(sp.right!=null) pageAt(sp.right).elements.forEach(e=>out.push({e,dx:f.w}));
+  return out;
+}
+async function exportJpgs(opts){
+  opts=opts||{what:'pages',zip:true};
+  const base=exportBase(); const files=[];
+  const total=(opts.what!=='spreads'?state.pages.length:0)+(opts.what!=='pages'?buildSpreads().filter(fullSpread).length:0);
+  let done=0;
+  const tick=()=>toast(`Rendering at ${DPI} DPI — ${++done}/${total}…`);
+  if(opts.what!=='spreads'){
+    for(let i=0;i<state.pages.length;i++){
+      tick();
+      const c=await renderPageCanvas(i);
+      const b=await canvasToJpeg(c,opts.quality);
+      if(b) files.push({name:`${base}_${String(i+1).padStart(3,'0')}.jpg`, blob:b});
+    }
+  }
+  if(opts.what!=='pages'){
+    const sps=buildSpreads().filter(fullSpread); let n=0;
+    for(const sp of sps){
+      tick();
+      const c=await renderPageCanvas(sp.left,{spreadW:fmt().w*2, items:spreadItemsFor(sp)});
+      const b=await canvasToJpeg(c,opts.quality);
+      if(b) files.push({name:`${base}_Spread-${String(++n).padStart(3,'0')}.jpg`, blob:b});
+    }
+  }
+  if(!files.length){ toast('Nothing to export.','err'); return []; }
+  if(opts.zip){
+    const parts=[];
+    for(const f of files) parts.push({name:f.name, data:new Uint8Array(await f.blob.arrayBuffer())});
+    saveBlob(zipStore(parts), fileName('export','zip'));
+  } else {
+    for(const f of files){ saveBlob(f.blob,f.name); await new Promise(r=>setTimeout(r,120)); }
+  }
+  toast(`${files.length} JPG${files.length>1?'s':''} exported at ${DPI} DPI ✓ — numbered in reading order`,'ok');
+  return files.map(f=>f.name);
+}
 
 /* ---------- format info / renderAll ---------- */
 function initFormatSelect(){
@@ -1715,6 +2120,7 @@ function renderFormatInfo(){
   $('fmtDims').textContent=f.w+'″ × '+f.h+'″';
   $('fmtPages').textContent=(f.fixed? f.fixed+' pages (fixed)': state.pages.length+' pages');
   $('impBtn').style.display=f.imposition?'inline-flex':'none';
+  $('saddleBtn').style.display=f.saddle?'inline-flex':'none';
   $('fmtSel').value=state.format;
 }
 function renderAll(){
@@ -1724,6 +2130,7 @@ function renderAll(){
   $('marginSel').value=String(st.margin); $('dailyChk').checked=st.daily;
   $('aspectChk').checked=st.keepAspect!==false;
   $('bleedChk').checked=!!st.bleed; $('warnChk').checked=st.warnMargins!==false;
+  $('bleedMmSel').value=String(st.bleedMm===5?5:3);
   $('gMargins').checked=st.guides.margins; $('gSafe').checked=st.guides.safe;
   $('gBleed').checked=st.guides.bleedG; $('gFold').checked=st.guides.fold;
   syncViewBar();
@@ -1826,6 +2233,8 @@ $('bleedChk').addEventListener('change',e=>{ state.settings.bleed=e.target.check
   renderCanvas(); touch();
   toast(e.target.checked?'Bleed on — controlled ⅛″ spill past trim, including across the gutter.':'Bleed off — everything pulled back inside the trim.'); });
 $('warnChk').addEventListener('change',e=>{ state.settings.warnMargins=e.target.checked; renderCanvas(); touch(); });
+$('bleedMmSel').addEventListener('change',e=>{ state.settings.bleedMm=parseInt(e.target.value,10)===5?5:3;
+  state.pages.forEach(p=>p.elements.forEach(clampEl)); renderCanvas(); touch(); });
 
 /* insert */
 $('addTextBtn').addEventListener('click',()=>addTextEl('Caption — who, where, when.',10,'caption'));
@@ -1839,11 +2248,18 @@ $('addDateBtn').addEventListener('click',()=>{
 });
 
 /* inspector */
-$('fitBtn').addEventListener('click',()=>{ const e=el(); if(e){e.fit='contain';renderCanvas();touch();} });
-$('fillBtn').addEventListener('click',()=>{ const e=el(); if(e){e.fit='cover';renderCanvas();touch();} });
-$('centreBtn').addEventListener('click',()=>{ const e=el(); if(e){e.px=50;e.py=50;renderCanvas();touch();} });
-$('resetCropBtn').addEventListener('click',()=>{ const e=el(); if(e){e.px=50;e.py=50;e.fit='cover';renderCanvas();touch();} });
-$('resetFrameBtn').addEventListener('click',()=>{ const e=el(); if(e&&e.asset&&!e.spread){applyAspectToFrame(e);renderCanvas();renderTimeline();touch();} });
+function imgAction(fn){ const e=el(); if(!e||e.type!=='image')return; fn(e); renderCanvas(); renderTimeline(); touch(); }
+$('fitBtn').addEventListener('click',()=>imgAction(imgFit));
+$('fillBtn').addEventListener('click',()=>imgAction(imgFill));
+$('centreBtn').addEventListener('click',()=>imgAction(imgCentre));
+$('resetCropBtn').addEventListener('click',()=>imgAction(imgResetCrop));
+$('resetFrameBtn').addEventListener('click',()=>imgAction(imgResetFrame));
+function imgZoom(mult){ imgAction(e=>{ const g=ensureImg(e); g.w=Math.max(0.15, Math.min(g.w*mult, surfW(e)*12)); }); }
+$('zoomInImg').addEventListener('click',()=>imgZoom(1.1));
+$('zoomOutImg').addEventListener('click',()=>imgZoom(1/1.1));
+$('rotL').addEventListener('click',()=>imgAction(e=>{ensureImg(e).rot-=90;}));
+$('rotR').addEventListener('click',()=>imgAction(e=>{ensureImg(e).rot+=90;}));
+$('rotReset').addEventListener('click',()=>imgAction(e=>{ensureImg(e).rot=0;}));
 $('spreadBtn').addEventListener('click',()=>{ const e=el(); if(!e)return; e.spread?unSpread():makeSpread(); });
 $('panModeBtn').addEventListener('click',()=>{ panMode=!panMode;
   $('panModeBtn').textContent='Pan mode: '+(panMode?'on':'off');
@@ -1858,23 +2274,6 @@ $('txtAlign').addEventListener('change',e=>{ const t=el(); if(t){t.align=e.targe
 $('txtWeight').addEventListener('change',e=>{ const t=el(); if(t){t.weight=e.target.value;renderCanvas();touch();} });
 $('txtFont').addEventListener('change',e=>{ const t=el(); if(t){t.font=e.target.value;renderCanvas();touch();} });
 $('txtRole').addEventListener('change',e=>{ const t=el(); if(t){t.role=e.target.value;touch();} });
-
-/* audio */
-let audioObj=null;
-$('audioAttachBtn').addEventListener('click',()=>$('audioInput').click());
-$('audioInput').addEventListener('change',e=>{
-  const f=e.target.files[0]; e.target.value=''; if(!f)return;
-  const r=new FileReader();
-  r.onload=()=>{ pageAt(curPage).audio={name:f.name,src:r.result}; renderAudioSec(); renderTimeline(); touch(); toast('Audio note attached to this page.','ok'); };
-  r.readAsDataURL(f);
-});
-$('audioPlayBtn').addEventListener('click',()=>{
-  const p=pageAt(curPage); if(!p.audio)return;
-  if(audioObj){ audioObj.pause(); audioObj=null; $('audioPlayBtn').textContent='Play'; return; }
-  audioObj=new Audio(p.audio.src); audioObj.play(); $('audioPlayBtn').textContent='Stop';
-  audioObj.onended=()=>{ audioObj=null; $('audioPlayBtn').textContent='Play'; };
-});
-$('audioDelBtn').addEventListener('click',()=>{ pageAt(curPage).audio=null; if(audioObj){audioObj.pause();audioObj=null;} renderAudioSec(); renderTimeline(); touch(); });
 
 /* view bar */
 $('tabLayout').addEventListener('click',()=>setTab('layout'));
@@ -1906,9 +2305,29 @@ $('teAddBtn').addEventListener('click',()=>{
 });
 
 /* export */
+$('jpgBtn').addEventListener('click',()=>$('jpgModalBk').classList.add('show'));
+$('jpgClose').addEventListener('click',()=>$('jpgModalBk').classList.remove('show'));
+$('jpgGo').addEventListener('click',async()=>{
+  $('jpgModalBk').classList.remove('show');
+  const btn=$('jpgGo'); btn.disabled=true;
+  try{ await exportJpgs({ what:$('jpgWhat').value, zip:$('jpgZip').checked, quality:parseFloat($('jpgQ').value) }); }
+  catch(e){ toast('Export failed: '+escapeHtml(String(e.message||e)),'err'); }
+  btn.disabled=false;
+});
 $('pdfBtn').addEventListener('click',()=>{ toast('In the print dialog choose <b>Save as PDF</b> · margins <b>None</b> · scale <b>100%</b> · background graphics <b>on</b>.'); doPrint('seq'); });
 $('printBtn').addEventListener('click',()=>{ toast('For best quality: 100% scale, margins None, highest print quality in printer settings.'); doPrint('seq'); });
 $('impBtn').addEventListener('click',openImpModal);
+$('saddleBtn').addEventListener('click',()=>{
+  $('printOrderList').innerHTML=printOrder().map(s=>
+    `<div>Sheet <b>${s.sheet}</b> ${s.side.padEnd(5)} — left: page <b>${s.left}</b> · right: page <b>${s.right}</b></div>`).join('');
+  $('readOrderList').innerHTML=readingOrder().map(p=>
+    `<div>Page <b>${p.page}</b> — ${escapeHtml(p.label)}</div>`).join('');
+  $('saddlePnChk').checked=!!state.settings.pageNumsPrint;
+  $('saddleModalBk').classList.add('show');
+});
+$('saddlePnChk').addEventListener('change',e=>{ state.settings.pageNumsPrint=e.target.checked; syncViewBar(); touch(); });
+$('saddleGo').addEventListener('click',()=>{ $('saddleModalBk').classList.remove('show'); doPrint('saddle'); });
+$('saddleClose').addEventListener('click',()=>$('saddleModalBk').classList.remove('show'));
 $('foldGo').addEventListener('click',()=>{ $('foldModalBk').classList.remove('show'); doPrint('imp'); });
 $('foldClose').addEventListener('click',()=>$('foldModalBk').classList.remove('show'));
 [['impPaperLetter',()=>{state.settings.imp.paper='letter';}],
@@ -2009,10 +2428,15 @@ window.__zineit={
   get state(){return state}, get view(){return view}, get curPage(){return curPage},
   get selPg(){return selPg}, get selId(){return selId}, get scale(){return scale},
   newProject, migrate, validateProject, buildSpreads, spreadIndexOf,
-  addImageEl, addTextEl, applyTemplate, applyAspectToFrame, coverExtent, marginViolation,
+  addImageEl, addTextEl, applyTemplate, applyAspectToFrame, marginViolation,
+  ensureImg, imgBox, imgFit, imgFill, imgCentre, imgResetCrop, imgResetFrame, imgCropPct, imgStyle,
+  containW, coverW, assetAR,
   makeSpread, unSpread, goPage, stepPage, stepSpread, setTab, select, clampEl,
   deleteSel, duplicateSel, snapIntoEmptyFrame, transferAcrossFold,
   buildSequentialPrint, buildImposition, buildImpSheet, renderImpPreview, openImpModal,
+  buildSaddlePrint, saddleSheets, readingOrder, printOrder,
+  fileName, sanitizeName, exportBase, exportJpgs, renderPageCanvas, zipStore, crc32,
+  bleedMm, bleedIn, bleedAllow, FORMATS, blankPage,
   applyMobile, isMobile, openDrawer, closeDrawers, toggleRail, toggleFS,
   renderAll, renderTextEditor, persist,
   assetStore, buildBakJson, restoreBak, ingestLegacy, printSrc, usedAssetIds, isHeic, dataURLtoBlob,
@@ -2027,7 +2451,7 @@ catch(e){
   document.body.insertAdjacentHTML('beforeend',
     '<div style="position:fixed;inset:0;background:#141619;color:#dde1e7;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:sans-serif;line-height:1.7;z-index:9999">'
     +'ZineIt could not start.<br>Refresh the page — your work is autosaved.<br>'
-    +'If it keeps happening, please email <b>&nbsp;bryanjaybee@gmail.com</b></div>');
+    +'If it keeps happening, please email <b>&nbsp;hello@storitellah.com</b></div>');
 }
 </script>
 </body>

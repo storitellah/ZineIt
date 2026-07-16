@@ -37,6 +37,26 @@ Every project automatically includes a **front cover** and **back cover**; inter
 
 
 
+
+### New in v4.0 — a real print tool
+
+- **Photos behave like they do in InDesign.** The frame is a mask: move a photo
+  anywhere, even outside its frame, zoom past it, rotate it — only what's inside
+  prints, and your original file is never touched. `F` fit · `⇧F` fill · `C` centre ·
+  `R` reset crop · `⇧R` reset frame. Scroll or pinch to zoom.
+- **16-page saddle-stitch zine**, with the imposition worked out for you and both
+  reading order and print order shown before you waste paper. See
+  [`docs/MINI-ZINE-GUIDE.md`](docs/MINI-ZINE-GUIDE.md).
+- **Full-bleed A4**, portrait and landscape, with 3 mm or 5 mm bleed.
+- **Download all pages as 300 DPI JPGs**, numbered in reading order, rendered from
+  your originals, packaged as a ZIP.
+- **3:2 and 2:3 photobooks.**
+- Brand system applied throughout; page audio notes removed.
+
+v4.0 is Phase 1 of a larger brief — rulers, guides, the template library, colour
+proofing, panorama books, mockups and the printmaker guide are sequenced in
+[`docs/ROADMAP.md`](docs/ROADMAP.md).
+
 ### New in v3.3 — Lightroom Classic plug-in
 
 Select photos in Lightroom, choose a zine format, and get a laid-out ZineIt project: your develop settings rendered in, your IPTC captions carried across, one photo per page at its true proportions. The editor stays in ZineIt (Lightroom's SDK has no canvas to host it) — Lightroom does the selecting and developing, ZineIt does the layout. Install `lightroom/zineit.lrplugin` via **File ▸ Plug-in Manager ▸ Add**; full guide in [`docs/LIGHTROOM.md`](docs/LIGHTROOM.md).
@@ -112,6 +132,7 @@ Nothing is ever sent anywhere. The `.bak` lives wherever your downloads go — m
 
 ```
 index.html            the entire product — zero-build, works offline
+docs/ROADMAP.md       what shipped in v4.0 and what is sequenced next
 lightroom/            Lightroom Classic plug-in (Lua) + its tests
 run-tests.sh          runs every suite in one command
 PROMPT.md             the full build prompt, requirements, and version record

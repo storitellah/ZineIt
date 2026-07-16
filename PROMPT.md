@@ -259,3 +259,49 @@ encoder in the fixture tooling.
 Unverifiable here, and stated plainly in docs/LIGHTROOM.md and TESTING.md: Adobe's own
 APIs (encodeBase64, croppedDimensions, metadata field names, the rendition flow) exist
 only inside Lightroom. The plug-in needs one real-catalogue run before it ships.
+
+---
+
+## v4.0 build prompt (professional print application + brand guidelines)
+
+> Update and expand the ZineIt tool into a professional zine and photobook layout
+> application with stronger print controls, improved image positioning, ready-made
+> templates, high-resolution exports, and a complete 16-page mini zine workflow.
+> [Full brief: 16-page zine + wizard, folding/binding/mockup instructions, improved
+> photo dragging and crop positioning, full-bleed A4, remove audio notes, rulers and
+> print guides, colour profile controls, professional templates, high-resolution
+> numbered JPG export, improved file naming, 3:2 photobook layouts, equirectangular
+> panorama support, printmaker guide, PWA, plus brand guidelines document.]
+
+### v4.0 version note
+
+The brief is a product roadmap, not a task — six to ten weeks of work across ten
+subsystems. Attempting all of it in one pass would have produced twenty half-features
+and a tool that photographs well and fails on deadline. So v4.0 is Phase 1: the
+foundation everything else sits on, shipped whole and tested, with the rest sequenced
+honestly in `docs/ROADMAP.md`.
+
+The centrepiece is the image engine. "Move it beyond the frame, enlarge it, rotate it,
+crop it visually, never alter the original" is not a feature list — it is a different
+data model. v3 stored `object-fit` plus `object-position` percentages, which cannot
+express a photo that sits outside its frame at all. v4 stores a real transform:
+displayed width in inches, offset from the frame centre, rotation. The frame becomes a
+clipping mask; the photo is free. Fit, Fill, Centre, Reset Crop and Reset Frame all
+fall out of that model as one-liners, which is the sign the model is right.
+
+Typography came from the brand document, not from the previous release: Poppins
+ExtraBold display, Poppins Bold headings, Inter UI, Source Serif 4 body, Manrope
+captions — replacing v3.2's Bebas Neue/Source Sans. One accessibility decision worth
+recording: Warm Yellow buttons carry **ink** text, not white, because white on #FFC43D
+fails 4.5:1 and the guidelines ask for 4.5:1.
+
+The 16-page zine is where domain knowledge matters more than code. The imposition has
+an invariant — every sheet-side pairs to *pages + 1* — and the tests assert it, along
+with "every page printed exactly once". The instructions say *flip on the short edge*
+in bold because that is the mistake everyone makes once, and they say print a paper
+mockup first because one sheet is cheaper than a ruined run.
+
+Deferred deliberately, with reasons in the roadmap: rulers/guides, the template
+library, colour profiles and soft-proofing (a browser cannot do a true ICC CMYK
+conversion — Phase 4 will say so plainly rather than imply otherwise and cost someone
+a print run), panorama books, mockups, printmaker guide, PWA.

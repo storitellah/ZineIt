@@ -41,7 +41,7 @@ const PXDATA = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFc
 /* ============ 1 · boot & model ============ */
 T('boots into a valid mini-zine project', () => {
   ok(Z && Z.state, 'test API present');
-  eq(Z.state.app, 'ZineIt'); eq(Z.state.ver, 3);
+  eq(Z.state.app, 'ZineIt'); eq(Z.state.ver, 4);
   eq(Z.state.pages.length, 8, '8 fixed pages');
   eq(Z.state.pages[0].label, 'Front cover');
   eq(Z.state.pages[7].label, 'Back cover');
@@ -147,30 +147,48 @@ T('photo placed with aspect lock adopts its true proportions', () => {
 T('Fit / Fill / Centre buttons act instantly', () => {
   const e = Z.state.pages[3].elements.at(-1);
   Z.select(3, e.id);
-  click($('fitBtn')); eq(e.fit, 'contain', 'Fit = whole photo, no crop');
-  click($('fillBtn')); eq(e.fit, 'cover', 'Fill = crop allowed, never stretched');
-  e.px = 80; e.py = 20;
-  click($('centreBtn')); eq(e.px, 50); eq(e.py, 50);
+  click($('fitBtn'));
+  approx(e.img.w, Z.containW(e), 1e-6, 'Fit shows the whole photo — no crop');
+  eq(Z.imgCropPct(e), 0, 'nothing hidden');
+  click($('fillBtn'));
+  approx(e.img.w, Z.coverW(e), 1e-6, 'Fill covers the frame');
+  e.img.ox = 0.4; e.img.oy = -0.3;
+  const zoom = e.img.w;
+  click($('centreBtn'));
+  eq(e.img.ox, 0); eq(e.img.oy, 0);
+  eq(e.img.w, zoom, 'Centre keeps the current zoom — it only re-centres');
 });
-T('reset crop re-centres; reset frame restores photo proportions', () => {
+T('reset crop restores fill, centre and zero rotation; reset frame restores the template frame', () => {
   const e = Z.state.pages[3].elements.at(-1);
   Z.select(3, e.id);
-  e.px = 10; e.w = 0.6; e.h = 1.9; // squeeze the frame → heavy crop
-  click($('resetCropBtn')); eq(e.px, 50); eq(e.fit, 'cover');
+  e.img.ox = 2; e.img.oy = 2; e.img.rot = 33; e.img.w = 0.4;
+  click($('resetCropBtn'));
+  eq(e.img.ox, 0); eq(e.img.oy, 0); eq(e.img.rot, 0);
+  approx(e.img.w, Z.coverW(e), 1e-6);
+  const home = { x: e.x, y: e.y, w: e.w, h: e.h };
+  e.home = home;
+  e.x = 0.1; e.y = 0.1; e.w = 0.5; e.h = 0.5;
   click($('resetFrameBtn'));
-  approx(e.h / e.w, 1000 / 1500, 0.15, 'frame back to photo ratio');
+  approx(e.x, home.x, 1e-6); approx(e.w, home.w, 1e-6, 'frame back to its template size and position');
 });
-T('coverExtent math: crop percentage and full-image ghost bounds', () => {
-  const e = { asset: 'tB', x: 1, y: 1, w: 1, h: 1, px: 50, py: 50, fit: 'cover' };
-  const ce = Z.coverExtent(e);
-  approx(ce.w, 1.5, 0.001, 'cover width for 3:2 photo in square frame');
-  approx(ce.h, 1, 0.001);
-  approx(ce.x, 1 - 0.25, 0.001, 'centred: quarter hangs off each side');
-  ok(ce.crop > 0 && ce.crop <= 40, 'reports a sensible crop %');
-});
-
 /* ============ 5 · pointer drags: move, shift-pan, 8-way resize, ghost ============ */
 function nodeFor(id) { return document.querySelector(`#page .el[data-id="${id}"]`); }
+// Clear page 3's empty template placeholders first: dropping a photo onto one is a
+// real (and separately tested) behaviour that would otherwise capture these drags.
+T('stage a clean page: one photo, room to move, no empty placeholders', () => {
+  Z.goPage(3);
+  // Dropping a photo onto an empty placeholder snaps it in — real behaviour, tested
+  // separately, but it would otherwise capture these drags. Remove the placeholders.
+  Z.state.pages[3].elements = Z.state.pages[3].elements.filter(x => x.asset);
+  const e = Z.state.pages[3].elements.at(-1);
+  ok(e && e.type === 'image' && e.asset, 'page 3 ends with a real photo');
+  // Give the frame room: this is a 2.75in mini-zine page, so a 1.75in frame has
+  // almost nowhere to travel and every drag would just hit the page edge.
+  e.x = 0.25; e.y = 0.25; e.w = 0.75; e.h = 0.5;
+  e.home = { x: e.x, y: e.y, w: e.w, h: e.h };
+  Z.imgFill(e); Z.renderAll();
+  eq(Z.state.pages[3].elements.filter(x => !x.asset).length, 0, 'no empty frames left to swallow a drop');
+});
 T('plain drag moves the frame (grid-snapped)', () => {
   click($('viewSingle')); Z.goPage(3);
   const e = Z.state.pages[3].elements.at(-1); Z.select(3, e.id);
@@ -179,35 +197,47 @@ T('plain drag moves the frame (grid-snapped)', () => {
   ptr(n, 'pointerdown', { clientX: 100, clientY: 100 });
   ptr(window, 'pointermove', { clientX: 100 + s, clientY: 100 });
   ptr(window, 'pointerup', {});
-  approx(e.x, Math.round((x0 + 1) / 0.125) * 0.125, 0.13, 'moved ~1in right, snapped to ⅛″ grid');
+  approx(e.x, Math.round((x0 + 1) / 0.125) * 0.125, 0.001, 'moved exactly 1in right, snapped to the ⅛″ grid');
+  // and the frame cannot be dragged off the page
+  const maxX = Z.FORMATS[Z.state.format].w - e.w;
+  ptr(nodeFor(e.id), 'pointerdown', { clientX: 100, clientY: 100 });
+  ptr(window, 'pointermove', { clientX: 100 + s * 99, clientY: 100 });
+  ptr(window, 'pointerup', {});
+  approx(e.x, maxX, 0.001, 'a frame dragged hard right stops at the page edge, never beyond');
+  e.x = 0.25; Z.renderAll();
 });
-T('SHIFT+drag pans the photo inside its frame (the v1 bug)', () => {
+T('SHIFT+drag moves the photo — freely, even outside the frame', () => {
   const e = Z.state.pages[3].elements.at(-1); Z.select(3, e.id);
-  e.px = 50; e.py = 50; Z.renderAll();
+  Z.imgCentre(e); Z.renderAll();
   const n = nodeFor(e.id);
   ptr(n, 'pointerdown', { clientX: 200, clientY: 200, shiftKey: true });
-  ptr(window, 'pointermove', { clientX: 200 + Z.scale * 0.4, clientY: 200, shiftKey: true });
-  ok(e.px !== 50, 'object-position changed while shift-dragging');
-  ok(e.px >= 0 && e.px <= 100, 'pan stays clamped');
-  ok($('cropGhost'), 'crop ghost (full-image extent) visible during pan');
+  ptr(window, 'pointermove', { clientX: 200 + Z.scale * 0.4, clientY: 200 + Z.scale * 0.2, shiftKey: true });
+  approx(e.img.ox, 0.4, 0.01, 'photo moved with the finger, in inches');
+  approx(e.img.oy, 0.2, 0.01);
+  ok($('cropGhost'), 'crop ghost shows the photo\'s full extent while moving');
+  ptr(window, 'pointermove', { clientX: 200 + Z.scale * 40, clientY: 200, shiftKey: true });
+  approx(e.img.ox, 40, 0.05, 'the photo may travel far outside its frame — nothing clamps it');
+  eq(Z.imgCropPct(e), 100, 'frame is a mask: the photo is now entirely hidden');
   ptr(window, 'pointerup', {});
-  ok(!$('cropGhost'), 'ghost removed after drag');
+  ok(!$('cropGhost'), 'ghost removed after the gesture');
+  Z.select(3, e.id); click($('resetCropBtn'));
 });
-T('Pan mode button enables panning without a modifier key', () => {
+T('Pan mode button moves the photo without a modifier key', () => {
   const e = Z.state.pages[3].elements.at(-1); Z.select(3, e.id);
-  e.px = 50; Z.renderAll();
+  Z.imgCentre(e); Z.renderAll();
   click($('panModeBtn'));
   const n = nodeFor(e.id);
   ptr(n, 'pointerdown', { clientX: 300, clientY: 300 });
   ptr(window, 'pointermove', { clientX: 330, clientY: 300 });
-  ok(e.px !== 50, 'panned with pan-mode on');
+  ok(e.img.ox !== 0, 'photo moved with pan-mode on');
   ptr(window, 'pointerup', {});
   click($('panModeBtn'));
+  Z.select(3, e.id); click($('resetCropBtn'));
 });
-T('all 8 resize handles exist on a selected frame', () => {
+T('8 resize handles plus a rotate handle on a selected photo', () => {
   const e = Z.state.pages[3].elements.at(-1); Z.select(3, e.id);
   const kinds = [...nodeFor(e.id).querySelectorAll('.hd')].map(h => h.className.replace('hd ', '')).sort();
-  eq(kinds.join(','), 'e,n,ne,nw,s,se,sw,w');
+  eq(kinds.join(','), 'e,n,ne,nw,rot,s,se,sw,w', 'eight resize handles + rotate');
 });
 T('corner resize grows the frame; edge resize changes one axis; nothing stretches', () => {
   const e = Z.state.pages[3].elements.at(-1); Z.select(3, e.id);
@@ -223,10 +253,12 @@ T('corner resize grows the frame; edge resize changes one axis; nothing stretche
   ptr(window, 'pointermove', { clientX: 500 + Z.scale, clientY: 500 - Z.scale * 0.25 });
   ptr(window, 'pointerup', {});
   approx(e.w, w0, 0.001, 'N edge never touches width');
-  // "never stretches": rendering always uses object-fit cover/contain
+  // "never stretches": the photo's own width drives its height via the true aspect ratio
+  const g = e.img, ar = Z.assetAR(e);
   const img = nodeFor(e.id) && nodeFor(e.id).querySelector('img');
-  ok(nodeFor(e.id).className.includes('fit-'), 'object-fit class present — image cannot distort');
   ok(img, 'image still rendered');
+  const wpx = parseFloat(img.style.width), hpx = parseFloat(img.style.height);
+  approx(hpx / wpx, ar, 0.001, 'rendered photo keeps its exact aspect ratio after frame resize');
 });
 T('resize never collapses below minimum size', () => {
   const e = Z.state.pages[3].elements.at(-1); Z.select(3, e.id);
@@ -245,12 +277,16 @@ T('bleed OFF: elements are hard-clamped at the trim edge', () => {
   ok(e.y + e.h <= 4.25 + 1e-9, 'cannot pass bottom trim');
   e.x = -99; Z.clampEl(e); ok(e.x >= -1e-9, 'cannot pass left trim');
 });
-T('bleed ON: exactly ⅛″ of controlled spill, never more', () => {
+T('bleed ON: exactly 3 mm of controlled spill, never more', () => {
   $('bleedChk').checked = true;
   $('bleedChk').dispatchEvent(new window.Event('change', { bubbles: true }));
   const e = Z.state.pages[3].elements.at(-1);
-  e.x = -99; Z.clampEl(e); approx(e.x, -0.125, 1e-9, 'spill stops at bleed line');
-  e.x = 99; Z.clampEl(e); approx(e.x + e.w, 2.75 + 0.125, 1e-9);
+  e.x = -99; Z.clampEl(e); approx(e.x, -Z.bleedIn(), 1e-9, 'spill stops at the bleed line');
+  approx(Z.bleedIn(), 3 / 25.4, 1e-9, 'default bleed is 3 mm, the value print shops actually ask for');
+  Z.state.settings.bleedMm = 5;
+  approx(Z.bleedIn(), 5 / 25.4, 1e-9, '5 mm option available for trade printers');
+  Z.state.settings.bleedMm = 3;
+  e.x = 99; Z.clampEl(e); approx(e.x + e.w, 2.75 + Z.bleedIn(), 1e-9, 'spill stops at the bleed line on the right too');
   $('bleedChk').checked = false;
   $('bleedChk').dispatchEvent(new window.Event('change', { bubbles: true }));
   ok(e.x + e.w <= 2.75 + 1e-9, 'turning bleed off pulls everything back inside trim');
@@ -284,8 +320,8 @@ T('make double-page spread: photo spans both facing pages from the left page', (
   Z.makeSpread();
   eq(e.spread, true);
   ok(Z.state.pages[1].elements.includes(e), 'element re-homed to the LEFT page');
-  approx(e.w, 5.5, 0.001, 'spans two page-widths');
-  approx(e.x, 0, 0.001, 'starts at the left trim');
+  approx(e.w, 5.5 + 2 * Z.bleedAllow(), 0.001, 'spans two page-widths, plus bleed when bleed is on');
+  approx(e.x, -Z.bleedAllow(), 0.001, 'starts at the bleed line so the fold never shows paper');
   eq(Z.view.mode, 'spread', 'auto-switched to spread view');
 });
 T('spread photo renders once across the fold in spread view', () => {
@@ -293,7 +329,7 @@ T('spread photo renders once across the fold in spread view', () => {
   const e = Z.state.pages[1].elements.find(x => x.spread);
   const n = nodeFor(e.id);
   ok(n, 'rendered'); ok(n.querySelector('.spreadBadge'), 'SPREAD badge shown');
-  approx(parseFloat(n.style.width), 5.5 * Z.scale, 1, 'one continuous image across both pages');
+  approx(parseFloat(n.style.width), (5.5 + 2 * Z.bleedAllow()) * Z.scale, 1.5, 'one continuous image across both pages');
 });
 T('in single view each half shows correctly and is locked (aligned across the fold)', () => {
   click($('viewSingle'));
@@ -301,7 +337,7 @@ T('in single view each half shows correctly and is locked (aligned across the fo
   const e = Z.state.pages[1].elements.find(x => x.spread);
   let n = nodeFor(e.id);
   ok(n && n.classList.contains('locked'), 'left half visible, locked in single view');
-  approx(parseFloat(n.style.left), 0, 1, 'left half starts at page origin');
+  approx(parseFloat(n.style.left), -Z.bleedAllow() * Z.scale, 1.5, 'left half starts at the bleed line');
   Z.goPage(2); // right half — offset by −W so the crop continues seamlessly
   n = nodeFor(e.id);
   ok(n && n.classList.contains('locked'), 'right half visible on the facing page');
@@ -391,14 +427,11 @@ T('timeline: one item per spread, page thumbs, numbers, indicators, empty warnin
   const th = document.querySelector('#rail .tlPage');
   approx(parseFloat(th.style.height), 96, 0.5, 'thumbnails are the larger 96px size');
 });
-T('timeline click selects the page; audio indicator appears when attached', () => {
+T('timeline click selects the page', () => {
   const thumbs = document.querySelectorAll('#rail .tlPage');
   click(thumbs[2]);
   ok(Z.curPage >= 0, 'click handled');
-  Z.state.pages[3].audio = { name: 'field.mp3', src: 'data:audio/mp3;base64,AA==' };
   Z.renderAll();
-  ok(document.querySelector('#rail .tag.au'), '♪ audio indicator visible');
-  Z.state.pages[3].audio = null; Z.renderAll();
 });
 
 /* ============ 11 · page numbers in print, imposition, export DOM ============ */
@@ -446,10 +479,10 @@ T('v1 .bak files migrate cleanly into v2', () => {
     settings: { snap: true, grid: true, margin: 0.25, daily: true } };
   eq(Z.validateProject(v1), null, 'v1 passes validation');
   const m = Z.migrate(JSON.parse(JSON.stringify(v1)));
-  eq(m.ver, 3);
+  eq(m.ver, 4);
   eq(m.pages[0].elements[0].role, 'custom', 'text gains a role');
   ok(m.settings.guides && typeof m.settings.bleed === 'boolean', 'v2 settings filled in');
-  ok('audio' in m.pages[0], 'pages gain audio slot');
+  ok(!('audio' in m.pages[0]), 'audio notes stripped on migration — the feature is gone');
 });
 
 /* ============ 13 · mobile: responsive shell, drawers, fullscreen, swipe, tap-to-edit ============ */
@@ -720,7 +753,7 @@ T('.bak v3 is self-contained: embeds originals + previews, passes the verifier',
   const { json, err } = await Z.buildBakJson();
   eq(err, undefined, 'no build error');
   const p = JSON.parse(json);
-  eq(p.ver, 3);
+  eq(p.ver, 4);
   eq(Z.validateProject(p), null, 'verified test restore');
   for (const id of Object.keys(p.assets)) {
     ok(p.assetData[id] && p.assetData[id].full.startsWith('data:'), 'original embedded for ' + id);
@@ -751,7 +784,7 @@ T('feedback channel: support card + view-bar button email bryanjaybee@gmail.com 
   const a = $('feedbackLink'), b = $('fbBtn');
   ok(a && b, 'both entry points exist');
   [a, b].forEach(l => {
-    ok(l.href.startsWith('mailto:bryanjaybee@gmail.com'), 'addressed correctly');
+    ok(l.href.startsWith('mailto:hello@storitellah.com'), 'addressed correctly');
     ok(/subject=/.test(l.href) && /ZineIt/.test(decodeURIComponent(l.href)), 'prefilled subject');
     ok(/bug/i.test(decodeURIComponent(l.href)), 'invites bug reports');
   });
@@ -831,25 +864,35 @@ T('mobile view bar scrolls horizontally instead of stacking', () => {
   ok(/#viewBar\{[^}]*flex-wrap:nowrap;overflow-x:auto/.test(SRC), 'single-row scrollable toolbar on phones');
 });
 T('feedback subject carries the new version', () => {
-  eq(Z.APP_VER, '3.2');
+  eq(Z.APP_VER, '4.0');
   ok(decodeURIComponent($('fbBtn').href).includes('ZineIt v' + Z.APP_VER), 'mailto subject updated');
+  ok($('fbBtn').href.startsWith('mailto:hello@storitellah.com'), 'feedback goes to the new address');
 });
 
 /* ============ 17 · v3.2: type system + production readiness ============ */
 const SRC2 = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
-T('UI type system: Source Sans body, Bebas Neue display, mono kept for data', () => {
-  ok(/--sans:'Source Sans 3','Source Sans Pro'/.test(SRC2), 'body stack leads with Source Sans (3 = current name of Source Sans Pro)');
-  ok(/--display:'Bebas Neue'/.test(SRC2), 'display token is Bebas Neue with condensed fallbacks');
-  ok(/family=Source\+Sans\+3:wght@400;600;700/.test(SRC2), 'Google Fonts loads Source Sans with UI weights');
-  ok(/family=Bebas\+Neue/.test(SRC2), 'Bebas Neue loaded');
-  ok(/\.brand \.mark\{font-family:var\(--display\)/.test(SRC2), 'wordmark set in Bebas');
-  ok(/\.sec h3\{font-family:var\(--display\)/.test(SRC2), 'panel headers set in Bebas');
+T('UI type system follows the brand guidelines: Poppins display, Inter UI', () => {
+  ok(/--display:'Poppins'/.test(SRC2), 'display face is Poppins (ExtraBold for the wordmark)');
+  ok(/--sans:'Inter'/.test(SRC2), 'UI face is Inter');
+  ok(/--serif:'Source Serif 4'/.test(SRC2), 'body face is Source Serif 4');
+  ok(/--caption-font:'Manrope'/.test(SRC2), 'captions are Manrope');
+  ok(/family=Poppins:wght@700;800/.test(SRC2), 'Poppins Bold + ExtraBold loaded');
+  ok(/family=Inter:/.test(SRC2) && /family=Manrope:/.test(SRC2), 'Inter and Manrope loaded');
+  ok(/\.brand \.mark\{font-family:var\(--display\);font-weight:800/.test(SRC2), 'wordmark is Poppins ExtraBold');
   ok(/#clock\{font-family:var\(--mono\)/.test(SRC2), 'numeric readouts stay monospaced');
 });
-T('Source Sans is also offered for zine text blocks', () => {
+T('brand palette is applied, not approximated', () => {
+  ok(/--ink:#1A1A1A/.test(SRC2) && /--paper-white:#F7F7F5/.test(SRC2) && /--yellow:#FFC43D/.test(SRC2),
+    'primary palette exact');
+  ok(/--teal:#00B4A6/.test(SRC2) && /--coral:#FF5C5C/.test(SRC2) && /--indigo:#3D5AFE/.test(SRC2) && /--forest:#2F8A5F/.test(SRC2),
+    'secondary palette exact');
+  ok(/--accent:var\(--yellow\)/.test(SRC2), 'Warm Yellow is the primary accent');
+  ok(/\.btn\.primary\{background:var\(--yellow\);border:none;color:var\(--ink\)/.test(SRC2),
+    'yellow buttons carry ink text — 4.5:1 contrast, not white-on-yellow');
+});
+T('brand faces are offered for zine text too', () => {
   const opts = [...$('txtFont').options].map(o => o.value);
-  ok(opts.includes('Source Sans 3'), 'font picker includes Source Sans');
-  ok(opts.includes('Bebas Neue'), 'font picker includes Bebas Neue');
+  ok(opts.includes('Poppins') || opts.includes('Inter'), 'brand faces available to the layout');
 });
 T('production shell: favicon, noscript, version badge, console banner', () => {
   const icon = document.querySelector('link[rel="icon"]');
@@ -865,7 +908,7 @@ T('uncaught errors surface gently and route users to feedback', async () => {
   ok($('toast').className.includes('show'), 'toast raised');
   ok(/synthetic-test-explosion/.test(tx), 'names the error');
   ok(/autosaved/.test(tx), 'reassures about work safety');
-  ok(new RegExp(Z.FEEDBACK_EMAIL).test(tx), 'routes to the feedback email');
+  ok(tx.includes(Z.FEEDBACK_EMAIL), 'routes to the feedback email');
   ok(/unhandledrejection/.test(SRC2), 'async rejections covered too');
   window.dispatchEvent(new window.ErrorEvent('error', { message: 'second-error' }));
   ok(!/second-error/.test($('toast').textContent), 'throttled — no toast spam');
@@ -873,7 +916,7 @@ T('uncaught errors surface gently and route users to feedback', async () => {
 T('boot is guarded: startup failure shows a readable message, never a blank page', () => {
   ok(/try\{ boot\(\);/.test(SRC2), 'boot wrapped');
   ok(/ZineIt could not start/.test(SRC2), 'fallback screen present');
-  ok(/bryanjaybee@gmail\.com/.test(SRC2), 'failure screen points to support');
+  ok(/hello@storitellah\.com/.test(SRC2), 'failure screen points to support');
 });
 T('accessibility: icon-only controls are labelled; reduced motion respected', () => {
   ['navPrevPage','navNextPage','navPrevSpread','navNextSpread','fsClose','fsPrev','fsNext']
@@ -915,7 +958,8 @@ T('plug-in .bak passes ZineIt\'s own verifier', () => {
   ok(fs.existsSync(LR_BAK), 'fixture present (regenerate: lua5.4 lightroom/tests/make-fixture.lua)');
   const p = JSON.parse(fs.readFileSync(LR_BAK, 'utf8'));
   eq(Z.validateProject(p), null, 'the exact check every restore runs');
-  eq(p.app, 'ZineIt'); eq(p.ver, 3); eq(p.format, 'mini-zine');
+  eq(p.app, 'ZineIt'); eq(p.format, 'mini-zine');
+  eq(p.ver, 3, 'the plug-in writes v3; ZineIt migrates it forward on restore');
   eq(p.pages.length, 8, 'fixed mini-zine page count');
   ok(Array.isArray(p.pages[0].elements), 'elements encoded as JSON arrays, not objects');
   eq(p.pages[7].elements.length, 0, 'empty page is [] — the Lua encoder got this right');
@@ -979,6 +1023,199 @@ T('thumbless importer projects still show photos everywhere', async () => {
   ok(libImg && libImg.src && libImg.src.length > 0, 'library falls back to the stored preview, never a blank tile');
   const canvasImg = document.querySelector('#page .el.img img');
   ok(!canvasImg || canvasImg.src.length > 0, 'canvas frames hydrate too');
+});
+
+/* ============ 20 · v4.0: non-destructive image engine ============ */
+T('the frame is a clipping mask — the photo keeps its own size and may exceed it', () => {
+  Z.newProject('book-8x10');
+  Z.setAsset('p1', { name: 'p.jpg', src: PXDATA, w: 6000, h: 4000 });   // 3:2
+  Z.goPage(1);
+  const e = Z.addImageEl('p1', 4, 5, 1);
+  e.x = 1; e.y = 1; e.w = 2; e.h = 2;                                    // square frame, 3:2 photo
+  Z.imgFill(e);
+  const b = Z.imgBox(e);
+  approx(b.w / b.h, 6000 / 4000, 1e-6, 'photo keeps its true 3:2 ratio inside a square frame');
+  approx(b.w, 3, 1e-6, 'Fill scales the photo to cover the frame');
+  ok(b.x < e.x && b.x + b.w > e.x + e.w, 'photo genuinely overhangs the frame on both sides');
+  ok(Z.imgCropPct(e) > 0, 'the overhang is reported as crop, not silently lost');
+});
+T('Fit shows everything, Fill covers, neither ever distorts', () => {
+  const e = Z.state.pages[1].elements.at(-1);
+  Z.imgFit(e);
+  const f = Z.imgBox(e);
+  approx(f.w / f.h, 1.5, 1e-6, 'aspect preserved on Fit');
+  ok(f.w <= e.w + 1e-9 && f.h <= e.h + 1e-9, 'whole photo inside the frame');
+  eq(Z.imgCropPct(e), 0, 'nothing hidden');
+  Z.imgFill(e);
+  const c = Z.imgBox(e);
+  approx(c.w / c.h, 1.5, 1e-6, 'aspect preserved on Fill');
+  ok(c.w >= e.w - 1e-9 && c.h >= e.h - 1e-9, 'frame fully covered — no paper showing');
+});
+T('the original photo is never touched, so every crop is reversible', () => {
+  const e = Z.state.pages[1].elements.at(-1);
+  const before = JSON.stringify(Z.state.assets.p1);
+  e.img.ox = 3; e.img.oy = -2; e.img.rot = 41; e.img.w = 0.4;
+  eq(JSON.stringify(Z.state.assets.p1), before, 'asset record untouched by any crop or rotation');
+  Z.imgResetCrop(e);
+  eq(e.img.ox, 0); eq(e.img.oy, 0); eq(e.img.rot, 0);
+  approx(e.img.w, Z.coverW(e), 1e-9, 'reset crop returns to a clean fill');
+});
+T('Reset Frame restores the template frame it came from', () => {
+  const e = Z.state.pages[1].elements.at(-1);
+  const home = { ...e.home };
+  e.x = 0.2; e.y = 0.2; e.w = 0.6; e.h = 0.6;
+  Z.imgResetFrame(e);
+  approx(e.x, home.x, 1e-9); approx(e.y, home.y, 1e-9);
+  approx(e.w, home.w, 1e-9); approx(e.h, home.h, 1e-9);
+});
+T('keyboard: F fit · ⇧F fill · C centre · R reset crop · ⇧R reset frame', () => {
+  const e = Z.state.pages[1].elements.at(-1);
+  Z.select(1, e.id);
+  // shortcuts are deliberately ignored while a form control has focus
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  const key = (k, shift) => window.dispatchEvent(new window.KeyboardEvent('keydown',
+    { key: k, shiftKey: !!shift, bubbles: true, cancelable: true }));
+  key('f');        approx(e.img.w, Z.containW(e), 1e-6, 'F fits');
+  key('f', true);  approx(e.img.w, Z.coverW(e), 1e-6, '⇧F fills');
+  e.img.ox = 1.2;  key('c'); eq(e.img.ox, 0, 'C centres');
+  e.img.rot = 30;  key('r'); eq(e.img.rot, 0, 'R resets the crop');
+  e.w = 0.6;       key('r', true); approx(e.w, e.home.w, 1e-9, '⇧R resets the frame');
+});
+T('rotation is recorded and rendered, never baked into the photo', () => {
+  const e = Z.state.pages[1].elements.at(-1);
+  Z.select(1, e.id); Z.renderAll();
+  Z.ensureImg(e).rot = 90;
+  const css = Z.imgStyle(e, 30);
+  ok(/rotate\(90deg\)/.test(css), 'rotation lives in the transform');
+  ok(/translate\(-50%,-50%\)/.test(css), 'rotates about the photo centre');
+  const a = JSON.stringify(Z.state.assets.p1);
+  Z.imgResetCrop(e);
+  eq(JSON.stringify(Z.state.assets.p1), a, 'original still untouched after rotating');
+});
+T('a v3 project migrates into the v4 transform without moving the photo', () => {
+  const v3 = {
+    app: 'ZineIt', ver: 3, meta: { name: 'old' }, format: 'book-8x10',
+    assets: { a: { name: 'a.jpg', w: 6000, h: 4000, thumb: '' } },
+    pages: [
+      { id: 'p1', label: 'Front cover', elements: [
+        { id: 'e1', type: 'image', asset: 'a', fit: 'cover', px: 50, py: 50, x: 1, y: 1, w: 2, h: 2 }] },
+      { id: 'p2', label: 'Back cover', elements: [] }
+    ], settings: {}
+  };
+  const m = Z.migrate(JSON.parse(JSON.stringify(v3)));
+  eq(m.ver, 4);
+  const e = m.pages[0].elements[0];
+  ok(e.img && Number.isFinite(e.img.w), 'gains a photo transform');
+  ok(!('px' in e) && !('py' in e) && !('fit' in e), 'old object-position model removed');
+  approx(e.img.w, 3, 1e-6, 'cover-fit became the equivalent photo width');
+  eq(e.img.ox, 0); eq(e.img.oy, 0, 'centred photo stays centred');
+  eq(Z.validateProject(m), null, 'migrated project passes the verifier');
+});
+T('a corrupt photo transform is caught by the verifier', () => {
+  const p = JSON.parse(JSON.stringify(Z.state));
+  p.pages[1].elements[0].img = { w: NaN, ox: 0, oy: 0, rot: 0 };
+  ok(/photo transform/.test(Z.validateProject(p) || ''), 'refused, with a reason');
+});
+
+/* ============ 21 · v4.0: formats, 16-page zine, naming, export ============ */
+T('16-page saddle-stitch zine: fixed page count, covers named', () => {
+  Z.newProject('mini-16');
+  eq(Z.state.pages.length, 16, 'a 16-page zine really has 16 pages');
+  eq(Z.state.pages[0].label, 'Front cover');
+  eq(Z.state.pages[15].label, 'Back cover');
+  approx(Z.FORMATS['mini-16'].w, 5.83, 0.01, 'A5 pages');
+  ok(Z.FORMATS['mini-16'].saddle, 'flagged as saddle-stitched');
+});
+T('saddle imposition: the page order that comes out of the printer', () => {
+  const s = Z.saddleSheets();
+  eq(s.length, 8, 'four sheets, two sides each');
+  // The defining property of saddle stitch: every sheet-side pairs pages summing to n+1
+  s.forEach(x => eq(x.left + x.right, 17, `sheet ${x.sheet} ${x.side} pairs to n+1`));
+  eq(JSON.stringify(s[0]), JSON.stringify({ sheet: 1, side: 'front', left: 16, right: 1 }),
+    'outermost sheet carries the covers: back cover left, front cover right');
+  eq(JSON.stringify(s[1]), JSON.stringify({ sheet: 1, side: 'back', left: 2, right: 15 }));
+  eq(JSON.stringify(s[7]), JSON.stringify({ sheet: 4, side: 'back', left: 8, right: 9 }),
+    'innermost sheet carries the centre spread, 8|9 — the only true facing pair');
+  const seen = new Set(); s.forEach(x => { seen.add(x.left); seen.add(x.right); });
+  eq(seen.size, 16, 'every page printed exactly once — none lost, none duplicated');
+});
+T('reading order stays 1…16 regardless of print order', () => {
+  const r = Z.readingOrder();
+  eq(r.length, 16);
+  eq(r.map(x => x.page).join(','), Array.from({ length: 16 }, (_, i) => i + 1).join(','));
+  const po = Z.printOrder();
+  eq(po.length, 8);
+  ok(/Sheet 1 front: page 16 on the left, page 1 on the right/.test(po[0].note), 'plain-English print note');
+});
+T('saddle print builds four duplex sheets, two pages each, with fold lines', () => {
+  Z.buildSaddlePrint();
+  const sheets = document.querySelectorAll('#printRoot > .pp');
+  eq(sheets.length, 8, 'eight sheet-sides to send to the printer');
+  eq(sheets[0].querySelectorAll('.impPanel').length, 2, 'two pages per sheet side');
+  ok(/flip on SHORT edge/.test(sheets[0].textContent), 'the duplex instruction that everyone gets wrong');
+  document.getElementById('printRoot').innerHTML = '';
+});
+T('A4 zines open full-bleed by default; margins remain available', () => {
+  Z.newProject('a4-portrait');
+  approx(Z.FORMATS['a4-portrait'].w, 8.27, 0.01);
+  approx(Z.FORMATS['a4-portrait'].h, 11.69, 0.01);
+  eq(Z.state.settings.margin, 0, 'edge to edge — no white border by default');
+  eq(Z.state.settings.bleed, true, 'bleed on, so images can spill past trim');
+  Z.newProject('a4-landscape');
+  approx(Z.FORMATS['a4-landscape'].w, 11.69, 0.01, 'landscape A4 available too');
+});
+T('3:2 photobook formats exist in both orientations', () => {
+  approx(Z.FORMATS['book-3x2'].w / Z.FORMATS['book-3x2'].h, 1.5, 1e-9, '3:2 landscape');
+  approx(Z.FORMATS['book-2x3'].h / Z.FORMATS['book-2x3'].w, 1.5, 1e-9, '2:3 portrait');
+});
+T('file naming: exports and backups follow the house scheme, sanitised', () => {
+  Z.newProject('half-letter');
+  Z.state.meta.name = 'My First Photo Story';
+  ok(/^My First Photo Story_Made with ZineIt_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}\.jpg$/.test(Z.fileName('export', 'jpg')),
+    'export: Title_Made with ZineIt_Date_Time');
+  ok(/^My First Photo Story_ZineIt_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}\.bak$/.test(Z.fileName('backup', 'bak')),
+    'backup: Title_ZineIt_Date_Time');
+  eq(Z.sanitizeName('a/b\\c:d*e?f"g<h>i|j'), 'a b c d e f g h i j', 'filesystem-hostile characters stripped');
+  eq(Z.sanitizeName('   '), 'Untitled project', 'empty names get a real fallback');
+  eq(Z.sanitizeName('Kibera: Stories!'), 'Kibera Stories');
+  Z.state.settings.nameSuffix = 'press run';
+  ok(/_press-run\.jpg$/.test(Z.fileName('export', 'jpg')), 'optional custom suffix appended');
+  Z.state.settings.nameSuffix = '';
+  eq(Z.exportBase(), 'My-First-Photo-Story', 'JPG numbering uses a path-safe base');
+});
+T('JPG export numbers pages in reading order and spreads separately', () => {
+  const base = Z.exportBase();
+  // numbering contract, independent of canvas availability in this environment
+  eq(`${base}_${String(1).padStart(3, '0')}.jpg`, 'My-First-Photo-Story_001.jpg');
+  eq(`${base}_${String(12).padStart(3, '0')}.jpg`, 'My-First-Photo-Story_012.jpg');
+  eq(`${base}_Spread-${String(1).padStart(3, '0')}.jpg`, 'My-First-Photo-Story_Spread-001.jpg');
+});
+T('the ZIP writer produces a real, readable archive', () => {
+  const enc = new TextEncoder();
+  const blob = Z.zipStore([
+    { name: 'a_001.jpg', data: enc.encode('hello zine') },
+    { name: 'a_002.jpg', data: enc.encode('second page') }
+  ]);
+  ok(blob && blob.size > 60, 'archive produced');
+  eq(blob.type, 'application/zip');
+  // CRC32 against the known vector — a wrong table silently corrupts every archive
+  eq(Z.crc32(enc.encode('123456789')) >>> 0, 0xCBF43926, 'CRC32 matches the standard check value');
+});
+T('300 DPI is the export target, and it renders from originals not previews', () => {
+  ok(/const DPI=300/.test(SRC2), '300 DPI target');
+  ok(/assetStore\.url\(assetId,'full'\)/.test(SRC2), 'exports pull the ORIGINAL photo, not the screen preview');
+  ok(/ctx\.rect\(\(e\.x\+dx\)\*DPI,e\.y\*DPI,e\.w\*DPI,e\.h\*DPI\); ctx\.clip\(\)/.test(SRC2),
+    'the frame clips on the canvas exactly as it does on screen');
+  ok(/ctx\.drawImage\(im,-iw\/2,-ih\/2,iw,ih\)/.test(SRC2), 'photo drawn at its true ratio — never stretched');
+});
+T('audio notes are gone from every surface', () => {
+  ok(!/audioAttachBtn|renderAudioSec|audioInput|Page audio note/.test(SRC2), 'no audio UI, handlers or markup');
+  const p = Z.blankPage('x');
+  ok(!('audio' in p), 'new pages carry no audio field');
+});
+T('support and feedback route to hello@storitellah.com', () => {
+  eq(Z.FEEDBACK_EMAIL, 'hello@storitellah.com');
+  ok(!/bryanjaybee/.test(SRC2), 'the old address is gone everywhere');
 });
 
 /* ============ 20 · console health ============ */

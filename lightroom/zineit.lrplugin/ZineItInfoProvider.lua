@@ -9,7 +9,7 @@ local LrColor = import 'LrColor'
 local Info = {}
 
 Info.VERSION_STRING   = '1.0.0'
-Info.FEEDBACK_EMAIL   = 'bryanjaybee@gmail.com'
+Info.FEEDBACK_EMAIL   = 'hello@storitellah.com'
 Info.ZINEIT_URL       = 'https://zineit.pages.dev/'
 Info.REPO_URL         = 'https://github.com/storitellah/zineit'
 

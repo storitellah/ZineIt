@@ -1,5 +1,65 @@
 # Changelog — ZineIt by Storitellah
 
+## v4.0 — 2026-07-16
+Brand system, a real image engine, the 16-page zine, and high-resolution export.
+**Phase 1 of the v4 brief** — see `docs/ROADMAP.md` for what is sequenced next and why.
+
+### Added — non-destructive image engine (the heart of this release)
+- **The frame is now a clipping mask.** A photo may be moved anywhere — including far
+  outside its frame — scaled beyond it, or rotated, and only the part inside the frame
+  prints. The behaviour photographers expect from Illustrator, InDesign, or Fundy.
+- **The original is never altered.** Crops, zooms and rotations live in a transform
+  (`{w, ox, oy, rot}` in inches and degrees) attached to the element, not baked into the
+  photo. Every crop is reversible, always.
+- **Fit / Fill / Centre / Reset Crop / Reset Frame**, each instant, with keyboard
+  shortcuts **F**, **⇧F**, **C**, **R**, **⇧R**. Centre keeps your zoom; Reset Frame
+  restores the template frame the photo came from.
+- **Zoom** by scroll wheel or two-finger pinch; **rotate** by handle (⇧ snaps to 15°)
+  or 90° buttons; eight resize handles crop the frame without ever stretching the photo.
+- v3 projects migrate automatically: `object-position` percentages and `object-fit`
+  become an equivalent transform, with the photo left exactly where it was.
+
+### Added — print and export
+- **16-page saddle-stitch mini zine**: fixed 16-page format, correct imposition across
+  four duplex sheets, **reading-order and print-order previews**, and fold/staple/
+  stitch/trim instructions. Full guide in `docs/MINI-ZINE-GUIDE.md`.
+- **Full-bleed A4** zines, portrait and landscape — edge to edge by default, margins
+  still available on request.
+- **Bleed in millimetres**: 3 mm default, 5 mm option (replaces the ⅛″ assumption).
+- **3:2 and 2:3 photobook formats.**
+- **Download all pages as high-resolution JPGs**: rendered at a true **300 DPI** from
+  your *original* photos, not the screen previews, with the same clipping and transform
+  the editor shows. Numbered in reading order (`Project-Name_001.jpg`), spreads
+  numbered separately (`_Spread-001.jpg`), optional single-ZIP packaging via a
+  dependency-free store-only archive.
+- **File naming scheme**: exports as `Title_Made with ZineIt_Date_Time`, backups as
+  `Title_ZineIt_Date_Time`, sanitised for every filesystem, with an optional suffix.
+
+### Changed
+- **Brand system applied from the official guidelines**: Ink Black, Paper White and
+  Warm Yellow with teal/coral/indigo/forest secondaries; Poppins ExtraBold wordmark,
+  Poppins Bold headings, Inter UI, Source Serif 4 body, Manrope captions; dark
+  workspace against a light page canvas; yellow buttons carry ink text so contrast
+  stays above 4.5:1 rather than the white-on-yellow that would fail it.
+- Support and feedback now go to **hello@storitellah.com** everywhere — Support panel,
+  ✉ Feedback button, error toasts, boot-failure screen, and the Lightroom plug-in.
+
+### Removed
+- **Page audio notes**, completely: markup, state, handlers, timeline indicator,
+  migration. Old projects are stripped of the field on load. No dead controls left.
+
+### Fixed
+- `.bak` files were stamped `ver:3` even after the v4 model landed — a saved project
+  would have described itself incorrectly to a future importer. Now stamps v4.
+
+### Testing
+- 118 app tests + 22 Lua tests, all passing. New coverage: clipping-mask overhang,
+  aspect preservation on Fit/Fill, original-untouched guarantees, keyboard shortcuts,
+  rotation, v3→v4 migration, corrupt-transform rejection, 16-page imposition (including
+  the pages-sum-to-17 invariant and every-page-printed-once), A4 full bleed, 3:2 ratios,
+  mm bleed, file naming, JPG numbering, CRC32/ZIP correctness, 300 DPI export path,
+  audio removal, brand palette and type system.
+
 ## v3.3 — 2026-07-15
 Lightroom Classic plug-in (plug-in v1.0.0).
 
