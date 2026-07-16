@@ -1,4 +1,4 @@
-ZineIt v4.0 test run — 2026-07-16T12:39:22.660Z
+ZineIt v4.0 test run — 2026-07-16T19:52:30.917Z
 PASS  boots into a valid mini-zine project
 PASS  spread model: cover alone · 3 interior pairs · back alone
 PASS  forward/backward page navigation, no skips, covers included
@@ -96,6 +96,21 @@ PASS  plug-in .bak carries every photo as an embedded data URL
 PASS  ZineIt restores the plug-in project: pages, photos, captions, title all land
 PASS  restored plug-in project renders and prints like any other ZineIt project
 PASS  thumbless importer projects still show photos everywhere
+PASS  every template supplies all eleven page types
+PASS  the brand guidelines' named templates are all present
+PASS  recipes are page-relative: they fit every format without being rewritten
+PASS  type scales with the page instead of staying stuck at one size
+PASS  applying a template to a page lays out frames and text
+PASS  replacing a template keeps the photos and the words — the whole point
+PASS  more photos than the new template has frames: none are thrown away
+PASS  text carries across by role, not by luck
+PASS  applying to the whole zine assigns covers, intro and closing automatically
+PASS  a template applied to 16 pages leaves a valid, saveable project
+PASS  custom templates: save from a page, duplicate, export, import
+PASS  a junk file cannot poison the template library
+PASS  custom templates persist across sessions
+PASS  text colour is part of the model, rendered and exported
+PASS  the template browser opens, previews and applies
 PASS  the frame is a clipping mask — the photo keeps its own size and may exceed it
 PASS  Fit shows everything, Fill covers, neither ever distorts
 PASS  the original photo is never touched, so every crop is reversible
@@ -118,4 +133,4 @@ PASS  audio notes are gone from every surface
 PASS  support and feedback route to hello@storitellah.com
 PASS  no page errors or uncaught exceptions across the whole run
 
-118 passed · 0 failed
+133 passed · 0 failed

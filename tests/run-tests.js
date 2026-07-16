@@ -1025,6 +1025,183 @@ T('thumbless importer projects still show photos everywhere', async () => {
   ok(!canvasImg || canvasImg.src.length > 0, 'canvas frames hydrate too');
 });
 
+/* ============ 19b · v4.0: template library ============ */
+T('every template supplies all eleven page types', () => {
+  const types = Z.TPL_TYPES.map(x => x[0]);
+  eq(types.length, 11, 'the eleven page types from the brief');
+  Object.keys(Z.TEMPLATES).forEach(k => {
+    types.forEach(ty => {
+      const r = Z.tplRecipe(k, ty);
+      ok(Array.isArray(r), `${k}/${ty} resolves to a recipe`);
+    });
+  });
+  // Blank really is blank — it stays the default opening option
+  types.forEach(ty => eq(Z.tplRecipe('blank', ty).length, 0, 'blank stays blank'));
+  ok(Object.keys(Z.TEMPLATES).length >= 9, 'a real library, not a token one');
+});
+T('the brand guidelines\' named templates are all present', () => {
+  const names = Object.keys(Z.TEMPLATES).map(k => Z.TEMPLATES[k].name.toLowerCase());
+  ['magazine', 'documentary essay', 'travel journal', 'contact sheet', 'portfolio', 'newspaper',
+   'minimalist editorial'].forEach(n => ok(names.includes(n), `${n} template exists`));
+});
+T('recipes are page-relative: they fit every format without being rewritten', () => {
+  const formats = ['mini-zine', 'mini-16', 'a4-portrait', 'a4-landscape', 'book-3x2', 'book-2x3', 'half-letter'];
+  formats.forEach(fk => {
+    Z.newProject(fk);
+    const f = Z.FORMATS[fk];
+    Object.keys(Z.TEMPLATES).forEach(k => {
+      Z.TPL_TYPES.forEach(([ty]) => {
+        Z.tplRecipe(k, ty).map(sp => Z.tplMaterialize(sp, f, Z.tplStyle(k).margin)).forEach(e => {
+          ok(Number.isFinite(e.x) && Number.isFinite(e.w), `${fk}/${k}/${ty} geometry finite`);
+          ok(e.w > 0 && e.h > 0, `${fk}/${k}/${ty} has real size`);
+          if (!(e.type === 'image' && e.w > f.w)) {   // full-bleed frames intentionally exceed trim
+            ok(e.x >= -0.2 && e.x + e.w <= f.w + 0.2, `${fk}/${k}/${ty} stays on the page horizontally`);
+            ok(e.y >= -0.2 && e.y + e.h <= f.h + 0.2, `${fk}/${k}/${ty} stays on the page vertically`);
+          }
+        });
+      });
+    });
+  });
+});
+T('type scales with the page instead of staying stuck at one size', () => {
+  Z.newProject('mini-zine');
+  const small = Z.tplMaterialize(Z.tplRecipe('magazine', 'quote')[0], Z.fmt(), 0.3).size;
+  Z.newProject('book-3x2');
+  const big = Z.tplMaterialize(Z.tplRecipe('magazine', 'quote')[0], Z.fmt(), 0.3).size;
+  ok(big > small, 'a quote on a 12in book is set larger than on a 2.75in zine');
+  ok(small >= 5, 'never shrinks below legibility');
+});
+T('applying a template to a page lays out frames and text', () => {
+  Z.newProject('half-letter');
+  Z.goPage(2);
+  const els = Z.applyTemplatePage('documentary', 'caption', 2, false);
+  ok(els.length >= 2, 'frames and text placed');
+  ok(els.some(e => e.type === 'image'), 'has a photo frame');
+  ok(els.some(e => e.type === 'text'), 'has text');
+  eq(Z.state.pages[2].tpl.key, 'documentary', 'the page remembers its template');
+  eq(Z.state.settings.margin, Z.tplStyle('documentary').margin, 'template sets the margin');
+  els.filter(e => e.type === 'text').forEach(e => {
+    ok(e.font && e.size >= 5 && e.color, 'text carries font, size and colour');
+  });
+});
+T('replacing a template keeps the photos and the words — the whole point', () => {
+  Z.newProject('half-letter');
+  Z.setAsset('x1', { name: '1.jpg', src: PXDATA, w: 6000, h: 4000 });
+  Z.setAsset('x2', { name: '2.jpg', src: PXDATA, w: 4000, h: 6000 });
+  Z.goPage(2);
+  Z.applyTemplatePage('magazine', 'two', 2, false);
+  const frames = Z.state.pages[2].elements.filter(e => e.type === 'image');
+  frames[0].asset = 'x1'; frames[1].asset = 'x2';
+  Z.applyTemplatePage('travel', 'three', 2, true);          // replace, keeping content
+  const after = Z.state.pages[2].elements.filter(e => e.type === 'image' && e.asset);
+  eq(after.length, 2, 'both photos survived the template change');
+  eq(after.map(e => e.asset).join(','), 'x1,x2', 'and kept their order');
+  after.forEach(e => {
+    ok(e.img && Number.isFinite(e.img.w), 're-flowed photo has a valid transform');
+    approx(Z.imgBox(e).w / Z.imgBox(e).h, Z.assetAR(e) ? 1 / Z.assetAR(e) : 1.5, 1e-6,
+      'and still its true aspect ratio — never squashed into the new frame');
+  });
+});
+T('more photos than the new template has frames: none are thrown away', () => {
+  Z.goPage(2);
+  Z.applyTemplatePage('contact', 'grid', 2, false);
+  const fr = Z.state.pages[2].elements.filter(e => e.type === 'image');
+  ['x1', 'x2', 'x1', 'x2', 'x1'].forEach((a, i) => { if (fr[i]) fr[i].asset = a; });
+  const before = Z.state.pages[2].elements.filter(e => e.asset).length;
+  Z.applyTemplatePage('portfolio', 'single', 2, true);      // single has ONE frame
+  const after = Z.state.pages[2].elements.filter(e => e.asset).length;
+  eq(after, before, 'every photo still on the page, even the ones the layout had no room for');
+});
+T('text carries across by role, not by luck', () => {
+  Z.goPage(2);
+  Z.applyTemplatePage('magazine', 'quote', 2, false);
+  const q = Z.state.pages[2].elements.find(e => e.role === 'quote');
+  q.text = 'The city wakes before we do.';
+  Z.applyTemplatePage('minimal', 'quote', 2, true);
+  const q2 = Z.state.pages[2].elements.find(e => e.role === 'quote');
+  eq(q2.text, 'The city wakes before we do.', 'the writing survived the redesign');
+});
+T('applying to the whole zine assigns covers, intro and closing automatically', () => {
+  Z.newProject('mini-16');
+  Z.applyTemplateScope('documentary', 'all', false);
+  const n = Z.state.pages.length;
+  eq(Z.autoTypeFor(0, n), 'cover');
+  eq(Z.autoTypeFor(1, n), 'intro');
+  eq(Z.autoTypeFor(n - 2, n), 'closing');
+  eq(Z.autoTypeFor(n - 1, n), 'back');
+  eq(Z.state.pages[0].tpl.type, 'cover', 'page 1 really got the cover layout');
+  eq(Z.state.pages[n - 1].tpl.type, 'back', 'page 16 really got the back cover');
+  eq(Z.state.tpl, 'documentary', 'the project remembers its template');
+  ok(Z.state.pages.every(p => p.elements.every(e =>
+    Number.isFinite(e.x) && e.x >= -1 && e.x <= Z.fmt().w + 1)), 'every page laid out on the page');
+});
+T('a template applied to 16 pages leaves a valid, saveable project', () => {
+  eq(Z.validateProject(JSON.parse(JSON.stringify(Z.state))), null, 'passes the verifier');
+});
+T('custom templates: save from a page, duplicate, export, import', () => {
+  Z.newProject('half-letter');
+  Z.goPage(2);
+  Z.applyTemplatePage('travel', 'three', 2, false);
+  const k = Z.saveCustomTemplate('Kibera grid', 'three');
+  ok(Z.TEMPLATES[k], 'saved into the library');
+  eq(Z.TEMPLATES[k].cat, 'Custom');
+  eq(Z.TEMPLATES[k].name, 'Kibera grid');
+  eq(Z.tplRecipe(k, 'three').length, Z.state.pages[2].elements.length, 'captured the page it came from');
+  const d = Z.duplicateTemplate(k, 'Kibera grid v2');
+  ok(Z.TEMPLATES[d] && Z.TEMPLATES[d].name === 'Kibera grid v2', 'duplicated');
+  // export → import round-trip
+  const t = Z.TEMPLATES[k];
+  const payload = { app: 'ZineIt-template', ver: 1, name: t.name, note: t.note, style: Z.tplStyle(k), overData: t.overData };
+  const k2 = Z.importTemplate(JSON.parse(JSON.stringify(payload)));
+  eq(Z.TEMPLATES[k2].name, 'Kibera grid', 'imported cleanly');
+  eq(JSON.stringify(Z.tplRecipe(k2, 'three')), JSON.stringify(Z.tplRecipe(k, 'three')), 'recipe survived the round trip');
+});
+T('a junk file cannot poison the template library', () => {
+  let threw = false;
+  try { Z.importTemplate({ hello: 'world' }); } catch (e) { threw = true; }
+  ok(threw, 'refused, with a reason');
+});
+T('custom templates persist across sessions', () => {
+  const before = Object.keys(Z.TEMPLATES).length;
+  Z.loadCustomTemplates();
+  ok(Object.keys(Z.TEMPLATES).length >= before, 'reloading from storage does not lose or duplicate');
+  const raw = window.localStorage.getItem('zineit_templates');
+  ok(raw && /Kibera grid/.test(raw), 'written to local storage, still local-first');
+});
+T('text colour is part of the model, rendered and exported', () => {
+  Z.newProject('half-letter');
+  Z.goPage(1);
+  const e = Z.addTextEl('Hello', 12, 'title', 1);
+  eq(e.color, '#1A1A1A', 'defaults to ink');
+  e.color = '#FF5C5C';
+  Z.select(1, e.id); Z.renderAll();
+  const n = document.querySelector(`#page .el[data-id="${e.id}"]`);
+  ok(/255, 92, 92|#FF5C5C/i.test(n.style.color), 'colour renders on canvas');
+  ok(/ctx\.fillStyle=e\.color\|\|INK/.test(SRC2), 'and is used by the 300 DPI export');
+});
+
+T('the template browser opens, previews and applies', () => {
+  Z.newProject('half-letter');
+  click($('tplBrowseBtn'));
+  ok($('tplModalBk').classList.contains('show'), 'browser opens');
+  const cards = document.querySelectorAll('#tplGrid .tplCard');
+  ok(cards.length >= 9, 'every template is offered');
+  ok(document.querySelectorAll('#tplTypes button').length === 11, 'all eleven page types selectable');
+  // previews are drawn from the real recipes, not decorative stand-ins
+  const contact = [...cards].find(c => c.dataset.k === 'contact');
+  document.querySelectorAll('#tplTypes button')[5].click();      // 'grid'
+  const cells = document.querySelectorAll('#tplGrid .tplCard[data-k="contact"] .tplPrev i');
+  eq(cells.length, 12, 'the contact-sheet grid preview really shows twelve frames');
+  [...document.querySelectorAll('#tplGrid .tplCard')].find(c => c.dataset.k === 'portfolio').click();
+  ok(document.querySelector('#tplGrid .tplCard[data-k="portfolio"]').classList.contains('on'), 'selection shown');
+  ok(/Portfolio/.test($('tplNote').textContent), 'the note explains what it will do');
+  $('tplScope').value = 'page';
+  $('tplKeep').checked = true;
+  click($('tplApply'));
+  ok(!$('tplModalBk').classList.contains('show'), 'closes on apply');
+  ok(Z.state.pages[Z.curPage].elements.length > 0, 'the page was actually laid out');
+});
+
 /* ============ 20 · v4.0: non-destructive image engine ============ */
 T('the frame is a clipping mask — the photo keeps its own size and may exceed it', () => {
   Z.newProject('book-8x10');

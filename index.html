@@ -371,6 +371,21 @@ body.fs #canvasScroll{padding:14px}
   .teAdd{grid-template-columns:1fr}
   .modal{padding:16px}
 }
+
+/* ---- template browser ---- */
+#tplModal .modal{max-width:760px;width:96vw}
+.tplGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px;max-height:38vh;overflow:auto;padding:2px}
+.tplCard{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);padding:8px;cursor:pointer;display:flex;flex-direction:column;gap:6px}
+.tplCard:hover{border-color:var(--muted)}
+.tplCard.on{border-color:var(--yellow);background:rgba(255,196,61,.10)}
+.tplCard .nm{font-family:var(--display);font-weight:700;font-size:12px;letter-spacing:.2px}
+.tplCard .ct{font-family:var(--caption-font);font-size:10px;color:var(--muted);line-height:1.35}
+.tplPrev{position:relative;background:var(--paper);border:1px solid var(--line-soft);border-radius:3px;overflow:hidden}
+.tplPrev i{position:absolute;background:#c9c6bd;border-radius:1px}
+.tplPrev u{position:absolute;background:#8d8a82;border-radius:1px;text-decoration:none}
+.tplTypes{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
+.tplTypes button{font-size:10.5px;padding:4px 8px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--muted)}
+.tplTypes button.on{border-color:var(--yellow);color:var(--yellow);background:rgba(255,196,61,.12)}
 </style>
 </head>
 <body>
@@ -489,6 +504,7 @@ body.fs #canvasScroll{padding:14px}
         <div class="tpl" data-t="h2" title="Two up, side by side"><i></i><i></i></div>
         <div class="tpl" data-t="g4" title="Grid of four"><i></i><i></i><i></i><i></i></div>
       </div>
+      <button class="btn wide" id="tplBrowseBtn">Browse professional templates…</button>
       <div class="row">
         <label class="small" style="flex:0 0 auto">Margin</label>
         <select id="marginSel">
@@ -629,6 +645,35 @@ body.fs #canvasScroll{padding:14px}
 </div>
 <div id="toast" role="status"></div>
 
+<div class="modalBk" id="tplModalBk">
+  <div class="modal" id="tplModal">
+    <h2>Templates</h2>
+    <p class="mono">A template sets the layout, typography and margins. Your photos stay yours.</p>
+    <div class="tplGrid" id="tplGrid"></div>
+    <div class="tplTypes" id="tplTypes"></div>
+    <div class="impSet">
+      <div class="row full">
+        <label class="small" style="flex:0 0 auto">Apply to</label>
+        <select id="tplScope">
+          <option value="page">This page</option>
+          <option value="sel">Selected pages</option>
+          <option value="all">The whole zine</option>
+        </select>
+      </div>
+      <label class="toggle full"><input type="checkbox" id="tplKeep" checked>Keep my photos and text — re-flow them into the new layout</label>
+    </div>
+    <div class="hint" id="tplNote"></div>
+    <div class="row" style="margin-top:8px">
+      <button class="btn" id="tplSave">Save this page as a template</button>
+      <button class="btn" id="tplDup">Duplicate</button>
+      <button class="btn" id="tplExport">Export</button>
+      <button class="btn" id="tplImport">Import</button>
+      <input type="file" id="tplFile" accept="application/json,.json" hidden>
+    </div>
+    <div class="btns"><button class="btn primary" id="tplApply">Apply template</button><button class="btn" id="tplClose">Close</button></div>
+  </div>
+</div>
+
 <div class="modalBk" id="jpgModalBk">
   <div class="modal">
     <h2>Download all pages as high-res JPGs</h2>
@@ -756,7 +801,7 @@ const FORMATS = {
 };
 const APP_VER='4.0', FEEDBACK_EMAIL='hello@storitellah.com';
 const GRID=0.125, MM=1/25.4;
-const FONTS = ['Inter','Roboto','Open Sans','Lato','Montserrat','Poppins','Raleway','Work Sans','DM Sans','Nunito',
+const FONTS = ['Inter','Manrope','Roboto','Open Sans','Lato','Montserrat','Poppins','Raleway','Work Sans','DM Sans','Nunito',
   'Rubik','Karla','Source Sans 3','Space Grotesk','Archivo','Archivo Black','IBM Plex Sans','Oswald','Bebas Neue','Anton',
   'Merriweather','Playfair Display','Lora','PT Serif','Libre Baskerville','EB Garamond','Cormorant Garamond',
   'Crimson Text','DM Serif Display','Abril Fatface','Source Serif 4','Space Mono','IBM Plex Mono','JetBrains Mono',
@@ -801,7 +846,7 @@ function migrate(p){ // v1 .bak files load cleanly into v2
   p.settings.imp=Object.assign({paper:'letter',fit:true,margins:false,fold:true,cut:true},(p.settings.imp||{}));
   if(p.settings.bleedMm!==5)p.settings.bleedMm=3;
   p.pages.forEach(pg=>{ delete pg.audio;
-    pg.elements.forEach(e=>{ if(e.type==='text'&&!e.role)e.role='custom'; if(e.type==='image'&&e.spread==null)e.spread=false; });});
+    pg.elements.forEach(e=>{ if(e.type==='text'&&!e.role)e.role='custom'; if(e.type==='text'&&!e.color)e.color=INK; if(e.type==='image'&&e.spread==null)e.spread=false; });});
   for(const id in (p.assets||{})){ const a=p.assets[id]; if(a&&a.src&&!a.thumb)a.thumb=a.src; }
   // v3 stored object-position percentages + object-fit; v4 stores a real photo transform
   p.pages.forEach(pg=>pg.elements.forEach(e=>{
@@ -1163,7 +1208,7 @@ function addImageEl(assetId,cx,cy,pgIdx){
 function addTextEl(text,size,role,pgIdx){
   if(pgIdx==null)pgIdx=curPage;
   const f=fmt(), m=state.settings.margin;
-  const e={id:uid(),type:'text',text:text||'Caption',size:size||10,align:'left',weight:'400',font:'Inter',role:role||'caption',
+  const e={id:uid(),type:'text',text:text||'Caption',size:size||10,align:'left',weight:'400',font:'Inter',color:INK,role:role||'caption',
     x:m, y:snapV(f.h-m-0.6), w:f.w-2*m, h:0.5};
   pageAt(pgIdx).elements.push(e); selPg=pgIdx; selId=e.id;
   renderCanvas(); renderInspector(); renderTimeline(); renderTextEditor(); touch(); return e;
@@ -1199,6 +1244,232 @@ function applyTemplate(t){
   pageAt(curPage).elements.push(...fr); selPg=curPage; selId=fr[0]&&fr[0].id||null;
   renderCanvas(); renderInspector(); renderTimeline(); touch();
 }
+
+
+/* ================= TEMPLATE LIBRARY =================
+   A template is a STYLE (typography, accent colour, margin, cover treatment) plus a
+   set of PAGE RECIPES — one for each of the eleven page types. Recipes are written in
+   fractions of the page's content box, never in inches, so the same recipe lays out
+   correctly on a 2.75in mini zine and a 12in photobook without being rewritten.
+   Nothing here is hand-authored per format, and nothing is baked into a photo. */
+
+const INK='#1A1A1A', PAPER='#F7F7F5', YELLOW='#FFC43D', TEAL='#00B4A6', CORAL='#FF5C5C',
+      INDIGO='#3D5AFE', FOREST='#2F8A5F';
+const BRAND_COLORS=[['Ink',INK],['Paper',PAPER],['Yellow',YELLOW],['Teal',TEAL],['Coral',CORAL],['Indigo',INDIGO],['Forest',FOREST]];
+
+const TPL_TYPES=[['cover','Cover'],['intro','Intro'],['single','Single photo'],['two','Two-photo spread'],
+  ['three','Three photos'],['grid','Grid'],['caption','Caption page'],['quote','Quote'],
+  ['fullbleed','Full bleed'],['closing','Closing'],['back','Back cover']];
+
+const IM=(x,y,w,h)=>({t:'img',b:[x,y,w,h]});
+const FBL=()=>({t:'img',bleed:true});
+const TX=(x,y,w,h,o)=>Object.assign({t:'txt',b:[x,y,w,h]},o);
+function gridOf(cols,rows,gap){
+  const out=[], gw=gap*(cols-1), gh=gap*(rows-1);
+  const w=(1-gw)/cols, h=(1-gh)/rows;
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++) out.push(IM(c*(w+gap), r*(h+gap), w, h));
+  return out;
+}
+/* the default editorial recipe set every template inherits and may override */
+function basePages(s){
+  const cap=o=>Object.assign({size:9,font:s.caption,role:'caption',color:INK},o);
+  return {
+    cover: s.cover==='plate'
+      ? [IM(0,0,1,.72), TX(0,.78,1,.12,{key:'title',size:26,font:s.display,weight:'800',align:s.align,color:INK,role:'title'})]
+      : [FBL(), TX(0,.62,1,.18,{key:'title',size:30,font:s.display,weight:'800',align:s.align,color:PAPER,role:'title'})],
+    intro: [TX(0,.10,.85,.10,{key:'title',size:18,font:s.display,weight:'800',color:s.accent,role:'page-title'}),
+            TX(0,.24,.78,.45,{key:'intro',size:11,font:s.body,color:INK,role:'custom'})],
+    single: [IM(0,0,1,.80), TX(0,.83,1,.08,cap({key:'caption'}))],
+    two: [IM(0,0,1,.47), IM(0,.53,1,.47)],
+    three: [IM(0,0,1,.50), IM(0,.54,.485,.46), IM(.515,.54,.485,.46)],
+    grid: gridOf(2,2,.03),
+    caption: [IM(0,0,1,.55), TX(0,.61,.82,.30,{key:'caption',size:11,font:s.body,color:INK,role:'custom'})],
+    quote: [TX(.06,.32,.88,.30,{key:'quote',size:20,font:s.display,weight:'700',align:'center',color:s.accent,role:'quote'})],
+    fullbleed: [FBL()],
+    closing: [TX(0,.42,1,.18,{key:'closing',size:13,font:s.body,align:'center',color:INK,role:'reflection'})],
+    back: [TX(0,.80,1,.10,{key:'back',size:9,font:s.caption,align:'center',color:INK,role:'back-cover'})]
+  };
+}
+const TEMPLATES={
+  blank:{ name:'Blank', cat:'Blank', note:'An empty page. Still the default.',
+    style:{display:'Poppins',body:'Source Serif 4',caption:'Manrope',accent:YELLOW,margin:0.25,align:'left',cover:'overlay',numbers:false},
+    over:()=>{ const o={}; TPL_TYPES.forEach(([k])=>o[k]=[]); return o; } },
+
+  minimal:{ name:'Minimalist editorial', cat:'Minimal', note:'Generous white space. The photograph does the talking.',
+    style:{display:'Poppins',body:'Source Serif 4',caption:'Manrope',accent:INK,margin:0.5,align:'left',cover:'plate',numbers:true},
+    over:s=>({ single:[IM(0,0,1,.72), TX(0,.78,.6,.07,{key:'caption',size:8,font:s.caption,color:INK,role:'caption'})],
+               grid:gridOf(2,2,.06),
+               quote:[TX(.12,.40,.76,.2,{key:'quote',size:14,font:s.body,align:'left',color:INK,role:'quote'})] }) },
+
+  documentary:{ name:'Documentary essay', cat:'Documentary', note:'Long-form reportage: image carries, caption explains.',
+    style:{display:'Poppins',body:'Source Serif 4',caption:'Manrope',accent:CORAL,margin:0.3,align:'left',cover:'overlay',numbers:true},
+    over:s=>({ caption:[IM(0,0,1,.62), TX(0,.67,.55,.28,{key:'caption',size:10,font:s.body,color:INK,role:'custom'}),
+                        TX(.60,.67,.40,.28,{key:'note',size:9,font:s.caption,color:INK,role:'note'})],
+               three:[IM(0,0,.62,.55), IM(.64,0,.36,.55), IM(0,.59,1,.41)] }) },
+
+  photojournalism:{ name:'Photojournalism', cat:'Photojournalism', note:'Hard news rhythm. Full bleed, tight captions, dates.',
+    style:{display:'Poppins',body:'Inter',caption:'Manrope',accent:CORAL,margin:0.2,align:'left',cover:'overlay',numbers:true},
+    over:s=>({ single:[FBL(), TX(0,.88,1,.07,{key:'caption',size:8,font:s.caption,color:PAPER,role:'caption'})],
+               two:[IM(0,0,1,.62), IM(0,.66,.49,.34), IM(.51,.66,.49,.34)] }) },
+
+  magazine:{ name:'Magazine', cat:'Magazine', note:'Feature spread: strong headline, two-column body.',
+    style:{display:'Poppins',body:'Source Serif 4',caption:'Manrope',accent:INDIGO,margin:0.3,align:'left',cover:'overlay',numbers:true},
+    over:s=>({ intro:[IM(0,0,1,.42), TX(0,.47,1,.10,{key:'title',size:20,font:s.display,weight:'800',color:s.accent,role:'page-title'}),
+                      TX(0,.60,.48,.35,{key:'intro',size:10,font:s.body,color:INK,role:'custom'}),
+                      TX(.52,.60,.48,.35,{key:'intro2',size:10,font:s.body,color:INK,role:'custom'})],
+               caption:[IM(0,0,.58,1), TX(.62,.06,.38,.5,{key:'caption',size:10,font:s.body,color:INK,role:'custom'})] }) },
+
+  travel:{ name:'Travel journal', cat:'Travel', note:'Notebook feel: mixed sizes, handwritten-scale captions.',
+    style:{display:'Poppins',body:'Source Serif 4',caption:'Manrope',accent:TEAL,margin:0.3,align:'left',cover:'plate',numbers:true},
+    over:s=>({ three:[IM(0,0,.55,.48), IM(.58,0,.42,.48), IM(0,.52,1,.48)],
+               grid:gridOf(3,3,.025),
+               caption:[IM(0,0,1,.5), TX(0,.55,.9,.12,{key:'title',size:14,font:s.display,weight:'700',color:s.accent,role:'page-title'}),
+                        TX(0,.69,.9,.26,{key:'caption',size:10,font:s.body,color:INK,role:'custom'})] }) },
+
+  contact:{ name:'Contact sheet', cat:'Contact Sheet', note:'The edit, laid bare. Twelve up, numbered.',
+    style:{display:'Poppins',body:'Inter',caption:'Manrope',accent:INK,margin:0.25,align:'left',cover:'plate',numbers:true},
+    over:s=>({ grid:gridOf(4,3,.02), single:gridOf(3,2,.02), two:gridOf(4,3,.02), three:gridOf(3,3,.02),
+               fullbleed:gridOf(4,3,.02) }) },
+
+  portfolio:{ name:'Portfolio', cat:'Portfolio', note:'One picture, centred, room to breathe.',
+    style:{display:'Poppins',body:'Source Serif 4',caption:'Manrope',accent:INK,margin:0.6,align:'center',cover:'plate',numbers:false},
+    over:s=>({ single:[IM(0,0,1,.85), TX(0,.90,1,.06,{key:'caption',size:8,font:s.caption,align:'center',color:INK,role:'caption'})],
+               two:[IM(0,.08,.48,.84), IM(.52,.08,.48,.84)],
+               grid:gridOf(2,2,.08) }) },
+
+  newspaper:{ name:'Newspaper', cat:'Newspaper', note:'Dense, urgent, three columns and a masthead.',
+    style:{display:'Archivo Black',body:'PT Serif',caption:'Manrope',accent:INK,margin:0.2,align:'left',cover:'plate',numbers:true},
+    over:s=>({ cover:[TX(0,0,1,.09,{key:'title',size:30,font:s.display,weight:'800',align:'center',color:INK,role:'title'}),
+                      IM(0,.12,1,.55), TX(0,.70,1,.06,{key:'caption',size:8,font:s.caption,color:INK,role:'caption'})],
+               intro:[TX(0,0,1,.08,{key:'title',size:16,font:s.display,weight:'800',color:INK,role:'page-title'}),
+                      TX(0,.11,.31,.85,{key:'intro',size:9,font:s.body,color:INK,role:'custom'}),
+                      TX(.345,.11,.31,.85,{key:'intro2',size:9,font:s.body,color:INK,role:'custom'}),
+                      TX(.69,.11,.31,.85,{key:'intro3',size:9,font:s.body,color:INK,role:'custom'})],
+               three:[IM(0,0,1,.44), IM(0,.48,.49,.28), IM(.51,.48,.49,.28),
+                      TX(0,.79,1,.16,{key:'caption',size:9,font:s.body,color:INK,role:'custom'})] }) }
+};
+function tplStyle(key){ const t=TEMPLATES[key]||TEMPLATES.blank; return Object.assign({},t.style); }
+function tplRecipe(key,type){
+  const t=TEMPLATES[key]||TEMPLATES.blank, s=tplStyle(key);
+  const pages=Object.assign(basePages(s), (t.over? t.over(s):{}));
+  return pages[type]||[];
+}
+const TPL_TEXT={ title:()=>state.meta.name||'Untitled', intro:()=>'Write your introduction here.',
+  intro2:()=>'Continue the story.', intro3:()=>'And finish it.', caption:()=>'Caption',
+  note:()=>'Notes, place, date.', quote:()=>'\u201CTheir words, not yours.\u201D',
+  closing:()=>'Thank you for reading.', back:()=>'Made with ZineIt' };
+function tplText(key){ return (TPL_TEXT[key]? TPL_TEXT[key]() : 'Text'); }
+function tplTypeScale(){ return Math.max(.6, Math.min(2.2, fmt().w/5.5)); }   // type grows with the page
+function tplMaterialize(sp,f,m){
+  const b=bleedAllow();
+  if(sp.bleed){ const e={id:uid(),type:'image',asset:null,spread:false,x:-b,y:-b,w:f.w+2*b,h:f.h+2*b};
+    e.home={x:e.x,y:e.y,w:e.w,h:e.h}; return e; }
+  const W=f.w-2*m, H=f.h-2*m, [x,y,w,h]=sp.b;
+  const X=m+x*W, Y=m+y*H, Wd=w*W, Hd=h*H;
+  if(sp.t==='img'){ const e={id:uid(),type:'image',asset:null,spread:false,x:X,y:Y,w:Wd,h:Hd};
+    e.home={x:X,y:Y,w:Wd,h:Hd}; return e; }
+  return {id:uid(),type:'text',text:tplText(sp.key),size:Math.max(5,Math.round(sp.size*tplTypeScale()*2)/2),
+    align:sp.align||'left',weight:sp.weight||'400',font:sp.font,color:sp.color||INK,role:sp.role||'custom',
+    x:X,y:Y,w:Wd,h:Hd};
+}
+function autoTypeFor(i,n){
+  if(i===0)return 'cover';
+  if(i===n-1)return 'back';
+  if(i===1)return 'intro';
+  if(i===n-2)return 'closing';
+  const cycle=['single','two','caption','fullbleed','three','quote','grid'];
+  return cycle[(i-2)%cycle.length];
+}
+/* Applying a template REPLACES the layout but need not destroy the work: with keep on,
+   photos re-flow into the new frames in order and text carries across by role. */
+function applyTemplatePage(key,type,pgIdx,keep){
+  const pg=pageAt(pgIdx), f=fmt();
+  state.settings.margin=tplStyle(key).margin;
+  const m=state.settings.margin;
+  const oldPhotos=pg.elements.filter(e=>e.type==='image'&&e.asset).map(e=>({asset:e.asset,img:e.img}));
+  const oldTexts=pg.elements.filter(e=>e.type==='text').map(e=>({text:e.text,role:e.role}));
+  const els=tplRecipe(key,type).map(sp=>tplMaterialize(sp,f,m));
+  if(keep!==false){
+    const frames=els.filter(e=>e.type==='image');
+    oldPhotos.forEach((p,i)=>{ if(frames[i]){ frames[i].asset=p.asset; imgFill(frames[i]); } });
+    oldPhotos.slice(frames.length).forEach(p=>{                 // more photos than frames: keep them
+      const e={id:uid(),type:'image',asset:p.asset,spread:false,x:m,y:m,w:(f.w-2*m)/2,h:(f.h-2*m)/2};
+      e.home={x:e.x,y:e.y,w:e.w,h:e.h}; imgFill(e); els.push(e);
+    });
+    const newTexts=els.filter(e=>e.type==='text'); const used=new Set();
+    oldTexts.forEach((t,i)=>{
+      let tgt=newTexts.find((n,j)=>!used.has(j)&&n.role===t.role&&(used.add(j)||true));
+      if(!tgt&&newTexts[i]&&!used.has(i)){ tgt=newTexts[i]; used.add(i); }
+      if(tgt)tgt.text=t.text;
+    });
+  }
+  els.forEach(clampEl);
+  pg.elements=els; pg.tpl={key,type};
+  return els;
+}
+function applyTemplateScope(key,scope,keep){
+  const n=state.pages.length;
+  let idx=[];
+  if(scope==='page')idx=[curPage];
+  else if(scope==='sel')idx=(tplSel.size? [...tplSel] : [curPage]);
+  else idx=state.pages.map((_,i)=>i);
+  idx.forEach(i=>applyTemplatePage(key,autoTypeFor(i,n),i,keep));
+  if(scope==='all'){ state.settings.pageNumsPrint=!!tplStyle(key).numbers; state.tpl=key; }
+  state.pages.forEach(p=>p.elements.forEach(clampEl));
+  renderAll(); touch();
+  toast(`${TEMPLATES[key].name} applied to ${idx.length} page${idx.length>1?'s':''}${keep!==false?' — photos kept':''}.`,'ok');
+}
+/* ---------- custom templates: save, duplicate, export, import ---------- */
+const TPL_LS='zineit_templates';
+function recipeFromPage(pgIdx){
+  const f=fmt(), m=state.settings.margin, W=f.w-2*m, H=f.h-2*m, b=bleedAllow();
+  return pageAt(pgIdx).elements.map(e=>{
+    if(e.type==='image' && Math.abs(e.x+b)<1e-6 && Math.abs(e.w-(f.w+2*b))<1e-6) return {t:'img',bleed:true};
+    const box=[ (e.x-m)/W, (e.y-m)/H, e.w/W, e.h/H ].map(v=>Math.round(v*1e4)/1e4);
+    if(e.type==='img'||e.type==='image') return {t:'img',b:box};
+    return {t:'txt',b:box,key:'caption',size:e.size,font:e.font,weight:e.weight,align:e.align,color:e.color,role:e.role};
+  });
+}
+function loadCustomTemplates(){
+  try{ const raw=localStorage.getItem(TPL_LS); if(!raw)return;
+    const obj=JSON.parse(raw);
+    for(const k in obj){ const t=obj[k]; if(t&&t.name&&t.style&&t.overData) TEMPLATES[k]=inflateCustom(t); }
+  }catch(e){}
+}
+function inflateCustom(t){ return { name:t.name, cat:'Custom', note:t.note||'Your own layout.', custom:true,
+  style:t.style, overData:t.overData, over:()=>JSON.parse(JSON.stringify(t.overData)) }; }
+function persistCustomTemplates(){
+  const out={};
+  for(const k in TEMPLATES){ const t=TEMPLATES[k];
+    if(t.custom) out[k]={name:t.name,note:t.note,style:t.style,overData:t.overData}; }
+  try{ localStorage.setItem(TPL_LS,JSON.stringify(out)); }catch(e){}
+}
+function saveCustomTemplate(name,type){
+  const key='custom-'+uid(), over={}; over[type||'single']=recipeFromPage(curPage);
+  TEMPLATES[key]=inflateCustom({name:name||'My template',style:tplStyle(state.tpl||'minimal'),overData:over});
+  persistCustomTemplates(); return key;
+}
+function duplicateTemplate(key,name){
+  const t=TEMPLATES[key]; if(!t)return null;
+  const nk='custom-'+uid();
+  const over=t.overData? JSON.parse(JSON.stringify(t.overData)) : (t.over? t.over(tplStyle(key)) : {});
+  TEMPLATES[nk]=inflateCustom({name:name||(t.name+' copy'),style:tplStyle(key),overData:over});
+  persistCustomTemplates(); return nk;
+}
+function exportTemplate(key){
+  const t=TEMPLATES[key]; if(!t)return;
+  const over=t.overData? t.overData : (t.over? t.over(tplStyle(key)) : {});
+  const data={app:'ZineIt-template',ver:1,name:t.name,note:t.note||'',style:tplStyle(key),overData:over};
+  saveBlob(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),
+    sanitizeName(t.name)+'_ZineIt-template.json');
+}
+function importTemplate(data){
+  if(!data||data.app!=='ZineIt-template'||!data.name||!data.style) throw new Error('Not a ZineIt template file');
+  const key='custom-'+uid();
+  TEMPLATES[key]=inflateCustom({name:data.name,note:data.note,style:data.style,overData:data.overData||{}});
+  persistCustomTemplates(); return key;
+}
+let tplSel=new Set();
 
 /* ---------- double-page spread ---------- */
 function spreadHostFor(pi){ const sp=buildSpreads()[spreadIndexOf(pi)]; return fullSpread(sp)? sp : null; }
@@ -1366,6 +1637,7 @@ function renderEl(P,e,pgIdx,dxIn,z,interactive){
   if(state.settings.warnMargins && e.type==='image' && e.asset && !e.spread && marginViolation(e).length && !state.settings.bleed) d.classList.add('warnEdge');
   if(e.type==='text'){ d.textContent=e.text;
     d.style.fontSize=(e.size/72*scale)+'px'; d.style.textAlign=e.align; d.style.fontWeight=e.weight;
+    d.style.color=e.color||INK;
     d.style.fontFamily=fontStack(e.font); d.style.padding=(0.02*scale)+'px'; }
   if(interactive){
     d.addEventListener('pointerdown',ev=>{ if(ev.target.classList.contains('hd'))return; startDrag(ev,pgIdx,e.id,null); });
@@ -1553,6 +1825,84 @@ pageEl.addEventListener('drop',ev=>{
   if(ev.dataTransfer.files&&ev.dataTransfer.files.length) importFiles(ev.dataTransfer.files);
 });
 pageEl.addEventListener('pointerdown',ev=>{ if(ev.target===pageEl||ev.target.classList.contains('guide')){ selId=null; updateSelectionDom(); renderInspector(); renderPageTag(); }});
+
+
+/* ---------- template browser UI ---------- */
+let tplPick=null, tplType='single';
+function tplPreviewHtml(key,type,w,hgt){
+  const sp=tplRecipe(key,type);
+  if(!sp.length) return `<div class="tplPrev" style="height:${hgt}px"></div>`;
+  const pad=.08;   // draw the margin as visual padding
+  const bits=sp.map(s=>{
+    if(s.bleed) return `<i style="left:0;top:0;width:100%;height:100%"></i>`;
+    const [x,y,ww,hh]=s.b;
+    const L=(pad+x*(1-2*pad))*100, T=(pad+y*(1-2*pad))*100, W=ww*(1-2*pad)*100, H=hh*(1-2*pad)*100;
+    const tag=s.t==='img'?'i':'u';
+    const h2=s.t==='txt'? Math.max(1.6,H*0.34) : H;
+    return `<${tag} style="left:${L}%;top:${T}%;width:${W}%;height:${h2}%"></${tag}>`;
+  }).join('');
+  return `<div class="tplPrev" style="height:${hgt}px">${bits}</div>`;
+}
+function renderTplGrid(){
+  const g=$('tplGrid'); if(!g)return;
+  const f=fmt(), ar=f.h/f.w, hgt=Math.round(96*Math.min(1.5,Math.max(.6,ar)));
+  g.innerHTML=Object.keys(TEMPLATES).map(k=>{
+    const t=TEMPLATES[k];
+    return `<div class="tplCard${k===tplPick?' on':''}" data-k="${k}">
+      ${tplPreviewHtml(k,tplType,120,hgt)}
+      <div class="nm">${escapeHtml(t.name)}</div>
+      <div class="ct">${escapeHtml(t.cat)}</div></div>`;
+  }).join('');
+  [...g.querySelectorAll('.tplCard')].forEach(c=>c.addEventListener('click',()=>{
+    tplPick=c.dataset.k; renderTplGrid(); renderTplNote();
+  }));
+}
+function renderTplTypes(){
+  const t=$('tplTypes'); if(!t)return;
+  t.innerHTML=TPL_TYPES.map(([k,n])=>`<button data-t="${k}"${k===tplType?' class="on"':''}>${n}</button>`).join('');
+  [...t.querySelectorAll('button')].forEach(b=>b.addEventListener('click',()=>{
+    tplType=b.dataset.t; renderTplTypes(); renderTplGrid();
+  }));
+}
+function renderTplNote(){
+  const t=TEMPLATES[tplPick];
+  $('tplNote').innerHTML = t
+    ? `<b>${escapeHtml(t.name)}</b> — ${escapeHtml(t.note||'')} Sets margin to ${t.style.margin}in, ${escapeHtml(t.style.display)} headings over ${escapeHtml(t.style.body)} body. Applying to the whole zine assigns cover, intro, closing and back cover automatically.`
+    : 'Pick a template.';
+}
+function openTplModal(){
+  loadCustomTemplates();
+  tplPick=tplPick||state.tpl||'minimal';
+  tplType=(pageAt(curPage).tpl&&pageAt(curPage).tpl.type)||autoTypeFor(curPage,state.pages.length);
+  renderTplTypes(); renderTplGrid(); renderTplNote();
+  $('tplModalBk').classList.add('show');
+}
+$('tplBrowseBtn').addEventListener('click',openTplModal);
+$('tplClose').addEventListener('click',()=>$('tplModalBk').classList.remove('show'));
+$('tplApply').addEventListener('click',()=>{
+  if(!tplPick){ toast('Pick a template first.','err'); return; }
+  applyTemplateScope(tplPick,$('tplScope').value,$('tplKeep').checked);
+  $('tplModalBk').classList.remove('show');
+});
+$('tplSave').addEventListener('click',()=>{
+  const n=prompt('Name this template:','My template'); if(!n)return;
+  tplPick=saveCustomTemplate(n,tplType); renderTplGrid(); renderTplNote();
+  toast('Saved — it will be here next time too.','ok');
+});
+$('tplDup').addEventListener('click',()=>{
+  if(!tplPick)return;
+  tplPick=duplicateTemplate(tplPick); renderTplGrid(); renderTplNote(); toast('Duplicated.','ok');
+});
+$('tplExport').addEventListener('click',()=>{ if(tplPick)exportTemplate(tplPick); });
+$('tplImport').addEventListener('click',()=>$('tplFile').click());
+$('tplFile').addEventListener('change',ev=>{
+  const f=ev.target.files&&ev.target.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{ try{ tplPick=importTemplate(JSON.parse(r.result)); renderTplGrid(); renderTplNote();
+      toast('Template imported.','ok'); }
+    catch(e){ toast('Could not import: '+escapeHtml(String(e.message||e)),'err'); } };
+  r.readAsText(f); ev.target.value='';
+});
 
 /* ---------- photo zoom: wheel (desktop) and pinch (touch) ---------- */
 pageEl.addEventListener('wheel',ev=>{
@@ -1976,7 +2326,7 @@ async function loadFullImage(assetId){
 }
 function drawTextEl(ctx,e,px,dx){
   ctx.save();
-  ctx.fillStyle='#1b1b1b';
+  ctx.fillStyle=e.color||INK;
   ctx.font=`${e.weight||400} ${e.size/72*px}px ${fontStack(e.font).replace(/'/g,'"')}`;
   ctx.textBaseline='top';
   const pad=0.02*px, maxW=e.w*px-2*pad;
@@ -2436,7 +2786,10 @@ window.__zineit={
   buildSequentialPrint, buildImposition, buildImpSheet, renderImpPreview, openImpModal,
   buildSaddlePrint, saddleSheets, readingOrder, printOrder,
   fileName, sanitizeName, exportBase, exportJpgs, renderPageCanvas, zipStore, crc32,
-  bleedMm, bleedIn, bleedAllow, FORMATS, blankPage,
+  bleedMm, bleedIn, bleedAllow, FORMATS, blankPage, fmt,
+  TEMPLATES, TPL_TYPES, tplRecipe, tplStyle, tplMaterialize, applyTemplatePage, applyTemplateScope,
+  autoTypeFor, saveCustomTemplate, duplicateTemplate, exportTemplate, importTemplate, recipeFromPage,
+  loadCustomTemplates, basePages, gridOf, openTplModal,
   applyMobile, isMobile, openDrawer, closeDrawers, toggleRail, toggleFS,
   renderAll, renderTextEditor, persist,
   assetStore, buildBakJson, restoreBak, ingestLegacy, printSrc, usedAssetIds, isHeic, dataURLtoBlob,

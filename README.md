@@ -51,10 +51,14 @@ Every project automatically includes a **front cover** and **back cover**; inter
 - **Download all pages as 300 DPI JPGs**, numbered in reading order, rendered from
   your originals, packaged as a ZIP.
 - **3:2 and 2:3 photobooks.**
+- **A real template library**: nine templates × eleven page types, live previews, apply
+  to a page or the whole zine, and a *replace* that re-flows your photos instead of
+  eating them. Save, duplicate, export and import your own. See
+  [`docs/TEMPLATE-GUIDE.md`](docs/TEMPLATE-GUIDE.md).
 - Brand system applied throughout; page audio notes removed.
 
-v4.0 is Phase 1 of a larger brief — rulers, guides, the template library, colour
-proofing, panorama books, mockups and the printmaker guide are sequenced in
+v4.0 is Phase 1 of a larger brief — rulers, guides, colour proofing, panorama books,
+mockups and the printmaker guide are sequenced in
 [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ### New in v3.3 — Lightroom Classic plug-in
@@ -133,6 +137,7 @@ Nothing is ever sent anywhere. The `.bak` lives wherever your downloads go — m
 ```
 index.html            the entire product — zero-build, works offline
 docs/ROADMAP.md       what shipped in v4.0 and what is sequenced next
+docs/TEMPLATE-GUIDE.md  the template library and how replace keeps your work
 lightroom/            Lightroom Classic plug-in (Lua) + its tests
 run-tests.sh          runs every suite in one command
 PROMPT.md             the full build prompt, requirements, and version record
