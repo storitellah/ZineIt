@@ -863,10 +863,13 @@ T('touch drags stay glued to the finger: pointer capture engaged, mouse path una
 T('mobile view bar scrolls horizontally instead of stacking', () => {
   ok(/#viewBar\{[^}]*flex-wrap:nowrap;overflow-x:auto/.test(SRC), 'single-row scrollable toolbar on phones');
 });
-T('feedback subject carries the new version', () => {
-  eq(Z.APP_VER, '4.0');
-  ok(decodeURIComponent($('fbBtn').href).includes('ZineIt v' + Z.APP_VER), 'mailto subject updated');
-  ok($('fbBtn').href.startsWith('mailto:hello@storitellah.com'), 'feedback goes to the new address');
+T('feedback subject carries the running version', () => {
+  // Pinned to a shape, not a number — a version bump is not a regression, but a badge
+  // that disagrees with the code is.
+  ok(/^\d+\.\d+$/.test(Z.APP_VER), 'version looks like a version');
+  eq($('verBadge').textContent, 'v' + Z.APP_VER, 'the badge in the header matches the code');
+  ok(decodeURIComponent($('fbBtn').href).includes('ZineIt v' + Z.APP_VER), 'mailto subject carries it too');
+  ok($('fbBtn').href.startsWith('mailto:hello@storitellah.com'), 'feedback goes to the right address');
 });
 
 /* ============ 17 · v3.2: type system + production readiness ============ */
@@ -1200,6 +1203,235 @@ T('the template browser opens, previews and applies', () => {
   click($('tplApply'));
   ok(!$('tplModalBk').classList.contains('show'), 'closes on apply');
   ok(Z.state.pages[Z.curPage].elements.length > 0, 'the page was actually laid out');
+});
+
+/* ============ 19c · v4.1: one-window workspace ============ */
+T('the right panel is tabbed — one pane at a time, no endless scroll', () => {
+  const tabs = [...document.querySelectorAll('#rtabs button')].map(b => b.dataset.p);
+  eq(tabs.join(','), 'props,page,layers,guides,export', 'five panes, every control reachable');
+  Z.setPane('page');
+  const shown = [...document.querySelectorAll('#rbody > .sec')].filter(s => s.classList.contains('show'));
+  ok(shown.length > 0, 'the page pane shows something');
+  ok(shown.every(s => s.dataset.p === 'page'), 'and shows only the page pane');
+  Z.setPane('guides');
+  ok([...document.querySelectorAll('#rbody > .sec.show')].every(s => s.dataset.p === 'guides'),
+    'switching panes swaps the content rather than stacking it');
+  ok(document.querySelector('#rtabs button[data-p="guides"]').classList.contains('on'), 'active tab marked');
+});
+T('every control the brief asks for is in the window, not buried', () => {
+  // top toolbar
+  ['tbUndo','tbRedo','tbFormat','tbAddPage','tbAddSpread','tbTpl','tbZoomIn','tbZoomOut','tbZoomFit',
+   'tbFocus','tbPreview','tbReset','tbExport','projName','saveState'].forEach(id => ok($(id), `toolbar: ${id}`));
+  // left = media, centre = preview, right = properties, bottom = timeline
+  ok($('left') && $('library'), 'imported photos live on the left');
+  ok($('canvasWrap') && $('page'), 'the preview is the centre panel');
+  ok($('right') && $('rtabs'), 'properties on the right');
+  ok($('rail'), 'page timeline along the bottom');
+  ok($('leftRsz') && $('rightRsz') && $('railRsz'), 'all three panels have resize handles');
+});
+T('the project title is compact but never truncated in the file', () => {
+  const long = 'A Very Long Documentary Project Title That Would Eat The Whole Toolbar';
+  Z.state.meta.name = long; Z.renderAll();
+  eq($('projName').value, long, 'the field holds the whole title');
+  eq($('projName').title, long, 'and the full title shows on hover');
+  eq(Z.state.meta.name, long, 'nothing is truncated in the saved project');
+  ok(/text-overflow:ellipsis/.test(SRC2), 'truncation is visual only');
+});
+T('panels resize, collapse and remember where you left them', () => {
+  Z.resetWs();
+  eq(Z.ws.leftW, 244); eq(Z.ws.rightW, 300); eq(Z.ws.railH, 150);
+  Z.ws.leftW = 320; Z.ws.rightW = 260; Z.ws.railH = 200; Z.applyWs(); Z.saveWs();
+  eq($('app').style.getPropertyValue('--leftW'), '320px', 'left width applied as a CSS variable');
+  eq($('app').style.getPropertyValue('--rightW'), '260px');
+  eq($('app').style.getPropertyValue('--railH'), '200px');
+  const saved = JSON.parse(window.localStorage.getItem('zineit_ws'));
+  eq(saved.leftW, 320, 'written to local storage — still local-first');
+  Z.ws.noLeft = true; Z.applyWs();
+  ok($('app').classList.contains('noLeft'), 'a panel can be collapsed away entirely');
+  Z.ws.noLeft = false; Z.applyWs();
+  Z.loadWs();
+  eq(Z.ws.leftW, 320, 'the arrangement survives a reload');
+  Z.resetWs();
+  eq(Z.ws.leftW, 244, 'and reset puts it all back');
+});
+T('focus mode and preview-only hide the furniture, Esc brings it back', () => {
+  click($('tbFocus'));
+  ok(Z.ws.noLeft && Z.ws.noRight, 'focus mode hides both side panels');
+  ok($('tbFocus').classList.contains('on'), 'and the button shows it');
+  window.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  ok(!Z.ws.noLeft && !Z.ws.noRight, 'Esc restores them');
+  Z.togglePreviewOnly(true);
+  ok($('app').classList.contains('previewOnly'), 'preview-only leaves just the pages');
+  window.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  ok(!$('app').classList.contains('previewOnly'), 'Esc comes back');
+});
+T('the bleed hint tells the truth about millimetres', () => {
+  ok(!/controlled ⅛/.test(SRC2), 'the stale ⅛″ prose is gone');
+  Z.state.settings.bleedMm = 5; Z.renderAll();
+  ok(/5/.test($('bleedHintMm').textContent), 'the hint follows the actual setting');
+  Z.state.settings.bleedMm = 3; Z.renderAll();
+  ok(/3/.test($('bleedHintMm').textContent));
+});
+
+/* ============ 19d · v4.1: layers ============ */
+T('the layers panel lists the page stack, front to back', () => {
+  Z.newProject('half-letter');
+  Z.setAsset('L1', { name: 'street.jpg', src: PXDATA, w: 6000, h: 4000 });
+  Z.goPage(2);
+  const img = Z.addImageEl('L1', 2, 2, 2);
+  const txt = Z.addTextEl('A caption', 10, 'caption', 2);
+  Z.setPane('layers');
+  const rows = [...document.querySelectorAll('#layers .ly')];
+  eq(rows.length, 2, 'both elements listed');
+  eq(rows[0].dataset.id, txt.id, 'the front-most element is listed first, as in Illustrator');
+  eq(rows[1].dataset.id, img.id);
+  ok(/street\.jpg/.test(rows[1].textContent), 'photos are named after the file');
+  eq(Z.lyKind(img), 'photo'); eq(Z.lyKind(txt), 'caption');
+});
+T('layer reordering changes what sits on top', () => {
+  const els = Z.state.pages[2].elements;
+  const [img, txt] = [els[0], els[1]];
+  Z.select(2, img.id);
+  Z.lyShift('front');
+  eq(Z.state.pages[2].elements.at(-1).id, img.id, 'bring to front');
+  Z.lyShift('back');
+  eq(Z.state.pages[2].elements[0].id, img.id, 'send to back');
+  Z.lyShift('fwd');
+  eq(Z.state.pages[2].elements[1].id, img.id, 'move forward one step');
+  Z.lyMoveTo(img.id, 0);
+  eq(Z.state.pages[2].elements[0].id, img.id, 'drag-to-reorder lands where you drop it');
+});
+T('hiding a layer removes it from the page and the export — but not from the file', () => {
+  const img = Z.state.pages[2].elements.find(e => e.type === 'image');
+  Z.goPage(2); Z.renderAll();
+  ok(document.querySelector(`#page .el[data-id="${img.id}"]`), 'visible to start with');
+  img.hidden = true; Z.renderCanvas();
+  ok(!document.querySelector(`#page .el[data-id="${img.id}"]`), 'hidden on the page');
+  ok(Z.state.pages[2].elements.includes(img), 'still in the project — hiding is not deleting');
+  ok(/if\(e\.hidden\) continue;/.test(SRC2), 'and skipped by the 300 DPI export');
+  ok(/if\(e\.hidden\) return;/.test(SRC2), 'and by the print path');
+  img.hidden = false; Z.renderCanvas();
+});
+T('locking a layer stops it being dragged by accident', () => {
+  const img = Z.state.pages[2].elements.find(e => e.type === 'image');
+  Z.goPage(2); Z.select(2, img.id); Z.renderAll();
+  img.locked = true;
+  const x0 = img.x;
+  const n = document.querySelector(`#page .el[data-id="${img.id}"]`);
+  ptr(n, 'pointerdown', { clientX: 100, clientY: 100 });
+  ptr(window, 'pointermove', { clientX: 180, clientY: 100 });
+  ptr(window, 'pointerup', {});
+  eq(img.x, x0, 'a locked layer does not move');
+  img.locked = false;
+});
+T('layer visibility and lock toggles work from the panel', () => {
+  Z.goPage(2); Z.setPane('layers');
+  const img = Z.state.pages[2].elements.find(e => e.type === 'image');
+  const row = document.querySelector(`#layers .ly[data-id="${img.id}"]`);
+  click(row.querySelector('[data-a=vis]'));
+  eq(img.hidden, true, 'eye hides');
+  click(document.querySelector(`#layers .ly[data-id="${img.id}"] [data-a=vis]`));
+  eq(img.hidden, false, 'and shows again');
+  click(document.querySelector(`#layers .ly[data-id="${img.id}"] [data-a=lock]`));
+  eq(img.locked, true, 'padlock locks');
+  click(document.querySelector(`#layers .ly[data-id="${img.id}"] [data-a=lock]`));
+  eq(img.locked, false);
+});
+T('layers can be renamed without touching the photo', () => {
+  const img = Z.state.pages[2].elements.find(e => e.type === 'image');
+  const before = JSON.stringify(Z.state.assets.L1);
+  img.name = 'Opening frame';
+  Z.setPane('layers');
+  ok(/Opening frame/.test($('layers').textContent), 'the new name shows in the stack');
+  eq(JSON.stringify(Z.state.assets.L1), before, 'the photo record is untouched');
+});
+
+/* ============ 19e · v4.1: undo / redo ============ */
+T('undo and redo walk the project backwards and forwards', () => {
+  Z.newProject('half-letter');
+  Z.undoReset();
+  eq(Z.undoDepth, 0, 'a fresh project has nothing to undo');
+  Z.goPage(1);
+  Z.addTextEl('First', 12, 'title', 1);
+  Z.addTextEl('Second', 12, 'title', 1);
+  eq(Z.state.pages[1].elements.length, 2);
+  ok(Z.undoDepth > 0, 'edits are recorded');
+  Z.undo();
+  eq(Z.state.pages[1].elements.length, 1, 'undo removes the last edit');
+  Z.redo();
+  eq(Z.state.pages[1].elements.length, 2, 'redo puts it back');
+  eq(Z.state.pages[1].elements.at(-1).text, 'Second', 'and puts back the right thing');
+});
+T('undo never rewrites the photographs', () => {
+  Z.setAsset('U1', { name: 'u.jpg', src: PXDATA, w: 6000, h: 4000 });
+  const before = JSON.stringify(Z.state.assets.U1);
+  Z.goPage(1);
+  const e = Z.addImageEl('U1', 2, 2, 1);
+  e.img.ox = 2; e.img.rot = 45; Z.touch();
+  Z.undo();
+  eq(JSON.stringify(Z.state.assets.U1), before, 'the asset record is identical after an undo');
+});
+T('a new edit clears the redo branch, as it should', () => {
+  Z.newProject('half-letter'); Z.undoReset();
+  Z.goPage(1);
+  Z.addTextEl('A', 12, 'title', 1);
+  Z.undo();
+  ok(Z.redoDepth > 0, 'something to redo');
+  Z.addTextEl('B', 12, 'title', 1);
+  eq(Z.redoDepth, 0, 'a fresh edit abandons the redo branch rather than corrupting it');
+});
+T('undo buttons reflect what is actually possible', () => {
+  Z.newProject('half-letter'); Z.undoReset();
+  eq($('tbUndo').disabled, true); eq($('tbRedo').disabled, true);
+  Z.goPage(1); Z.addTextEl('X', 12, 'title', 1);
+  eq($('tbUndo').disabled, false, 'undo lights up once there is something to undo');
+  Z.undo();
+  eq($('tbRedo').disabled, false, 'and redo once it has been used');
+});
+
+/* ============ 19f · v4.1: text colour ============ */
+T('hex parsing accepts what people actually type, rejects what it cannot read', () => {
+  eq(Z.normHex('#FFC43D'), '#FFC43D');
+  eq(Z.normHex('ffc43d'), '#FFC43D', 'no hash, lower case — still fine');
+  eq(Z.normHex('#fc3'), '#FFCC33', 'three-digit shorthand expands');
+  eq(Z.normHex('nonsense'), null); eq(Z.normHex('#12345'), null);
+  eq(JSON.stringify(Z.hexToRgb('#FFC43D')), '[255,196,61]', 'RGB readout');
+});
+T('the brand palette is offered as presets', () => {
+  const hexes = Z.BRAND_COLORS.map(c => c[1]);
+  ['#1A1A1A', '#F7F7F5', '#FFC43D', '#00B4A6', '#FF5C5C', '#3D5AFE', '#2F8A5F']
+    .forEach(c => ok(hexes.includes(c), `${c} is a preset`));
+  Z.newProject('half-letter'); Z.goPage(1);
+  const e = Z.addTextEl('Hello', 12, 'title', 1);
+  Z.select(1, e.id); Z.setPane('props');
+  eq(document.querySelectorAll('#swatches .sw').length, 7, 'all seven swatches shown');
+});
+T('setting a colour updates the text, the picker and the recent list', () => {
+  const e = Z.state.pages[1].elements.at(-1);
+  Z.select(1, e.id);
+  Z.setTextColor('#00B4A6');
+  eq(e.color, '#00B4A6', 'applied to the text');
+  eq($('txtHex').value, '#00B4A6', 'hex field in step');
+  eq($('rgbOut').textContent, 'rgb(0, 180, 166)', 'RGB readout in step');
+  const recent = JSON.parse(window.localStorage.getItem('zineit_colors'));
+  eq(recent[0], '#00B4A6', 'remembered as a recent colour');
+});
+T('colour can be applied by scope, to matching roles only', () => {
+  Z.newProject('half-letter');
+  [0, 1, 2].forEach(p => { Z.addTextEl('T' + p, 12, 'title', p); Z.addTextEl('C' + p, 9, 'caption', p); });
+  Z.goPage(1);
+  const title = Z.state.pages[1].elements.find(e => e.role === 'title');
+  Z.select(1, title.id);
+  title.color = '#FF5C5C';
+  $('colScope').value = 'all';
+  click($('colApply'));
+  const titles = [], caps = [];
+  Z.state.pages.forEach(p => p.elements.forEach(e => {
+    if (e.role === 'title') titles.push(e.color);
+    if (e.role === 'caption') caps.push(e.color);
+  }));
+  ok(titles.length >= 3 && titles.every(c => c === '#FF5C5C'), 'every title recoloured across the publication');
+  ok(caps.every(c => c === '#1A1A1A'), 'captions left alone — scope respects the role');
 });
 
 /* ============ 20 · v4.0: non-destructive image engine ============ */

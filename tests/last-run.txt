@@ -1,4 +1,4 @@
-ZineIt v4.0 test run — 2026-07-16T19:52:30.917Z
+ZineIt v4.1 test run — 2026-07-17T18:23:01.690Z
 PASS  boots into a valid mini-zine project
 PASS  spread model: cover alone · 3 interior pairs · back alone
 PASS  forward/backward page navigation, no skips, covers included
@@ -80,7 +80,7 @@ PASS  layout survives iOS dynamic toolbars and hardware cutouts
 PASS  no accidental zoom or selection during editing on touch devices
 PASS  touch drags stay glued to the finger: pointer capture engaged, mouse path unaffected
 PASS  mobile view bar scrolls horizontally instead of stacking
-PASS  feedback subject carries the new version
+PASS  feedback subject carries the running version
 PASS  UI type system follows the brand guidelines: Poppins display, Inter UI
 PASS  brand palette is applied, not approximated
 PASS  brand faces are offered for zine text too
@@ -111,6 +111,26 @@ PASS  a junk file cannot poison the template library
 PASS  custom templates persist across sessions
 PASS  text colour is part of the model, rendered and exported
 PASS  the template browser opens, previews and applies
+PASS  the right panel is tabbed — one pane at a time, no endless scroll
+PASS  every control the brief asks for is in the window, not buried
+PASS  the project title is compact but never truncated in the file
+PASS  panels resize, collapse and remember where you left them
+PASS  focus mode and preview-only hide the furniture, Esc brings it back
+PASS  the bleed hint tells the truth about millimetres
+PASS  the layers panel lists the page stack, front to back
+PASS  layer reordering changes what sits on top
+PASS  hiding a layer removes it from the page and the export — but not from the file
+PASS  locking a layer stops it being dragged by accident
+PASS  layer visibility and lock toggles work from the panel
+PASS  layers can be renamed without touching the photo
+PASS  undo and redo walk the project backwards and forwards
+PASS  undo never rewrites the photographs
+PASS  a new edit clears the redo branch, as it should
+PASS  undo buttons reflect what is actually possible
+PASS  hex parsing accepts what people actually type, rejects what it cannot read
+PASS  the brand palette is offered as presets
+PASS  setting a colour updates the text, the picker and the recent list
+PASS  colour can be applied by scope, to matching roles only
 PASS  the frame is a clipping mask — the photo keeps its own size and may exceed it
 PASS  Fit shows everything, Fill covers, neither ever distorts
 PASS  the original photo is never touched, so every crop is reversible
@@ -133,4 +153,4 @@ PASS  audio notes are gone from every surface
 PASS  support and feedback route to hello@storitellah.com
 PASS  no page errors or uncaught exceptions across the whole run
 
-133 passed · 0 failed
+153 passed · 0 failed

@@ -5,10 +5,13 @@ brief — and it is six to ten weeks of work, not one build. Shipping all of it 
 once would mean twenty half-features and a tool that impresses in a screenshot and
 fails on a deadline.
 
-So v4.0 is **Phase 1: the foundation**. Everything below it in this document sits
-on top of the engine, formats, and export path that Phase 1 puts in place. Each
-phase is shippable on its own and gated by the same rule as every ZineIt release:
-automated tests pass before anything renders.
+So it is being built in phases. Each is shippable on its own and gated by the same
+rule as every ZineIt release: automated tests pass before anything renders.
+
+**v4.0** shipped the foundation and the template library. **v4.1** shipped the
+one-window workspace, layers, undo/redo, the text colour system, the PWA and the
+Android build project. What is left is listed honestly below — nothing here is
+half-built and quietly claimed.
 
 ---
 
@@ -27,7 +30,20 @@ automated tests pass before anything renders.
 | **Text colour** | Colour is now part of the text model, rendered on canvas and in the 300 DPI export |
 | **Removals** | Page audio notes gone from every surface |
 
-## Phase 2 — the workspace (next)
+## Phase 2 — the workspace ✅ mostly shipped in v4.1
+
+| Area | What landed |
+|---|---|
+| **One window** | Compact 44px toolbar, left media panel, centre preview, tabbed right panel, bottom timeline. The right rail was one endless scroll; it is now five panes — Properties, Page, Layers, Guides, Export — and only one is on screen at a time |
+| **Compact title** | Click-to-edit field in the toolbar, truncates visually with the full title on hover, never truncated in the saved file |
+| **Panels** | Resize left/right/timeline by dragging, collapse any of them, arrangement saved to local storage, reset button, focus mode, preview-only mode, Esc always gets you out |
+| **Layers** | Full stack front-to-back, type icons and brand colours, select, rename, drag-reorder, bring to front / send to back, hide, lock, duplicate, delete. Hidden layers are skipped on canvas, in print and in the 300 DPI export — but stay in the file |
+| **Undo / redo** | 60 steps, Ctrl/⌘Z and ⇧ to redo, buttons reflect what is actually possible. Snapshots the project, never the photographs |
+| **Text colour** | Picker, HEX input with forgiving parsing, RGB readout, the seven brand presets, recent colours, and apply-by-scope (text / page / spread / whole publication) that respects the text's role |
+| **PWA** | Manifest, network-first service worker, installable — and skipped entirely on `file://` so the double-click case stays clean |
+| **Android** | Complete Capacitor 6 Android Studio project, branded icons and splash, one permission (`INTERNET`) |
+
+### Still open from Phase 2
 
 - **Rulers** in inch/mm/cm/px with a settable origin
 - **Draggable guides** from the rulers; lock, hide, clear all
@@ -36,6 +52,12 @@ automated tests pass before anything renders.
 - **Mini-zine setup wizard**: paper → finished size → orientation → pages → binding →
   bleed → colour profile → quality → template
 - **Paper and finished-size options**: A3/A4/Letter/custom sheets, A6/A7/custom trims
+- **Dedicated crop editor modal**: a large preview with flip H/V, straighten and
+  perspective correction. The non-destructive crop engine underneath it already works
+  (v4.0) — this is a bigger window onto it, plus three transforms it does not yet have
+- **Front/back cover template library**: inside covers, title pages, credits, colophon,
+  QR codes, supporter logos. The template engine handles cover and back already; this
+  is the specialised set on top of it
 
 ## Phase 3 — templates ✅ shipped (brought forward)
 
@@ -59,9 +81,16 @@ each, not a subsystem.
 
 ## Phase 5 — panorama, mockups, printmaker guide
 
-- Equirectangular 2:1 panorama books: fit, crop, centre point, horizontal shift, seam
-  position, wraparound preview, split across two or four pages, foldout preview,
-  export as full panorama or page sequence, warnings on unsuitable ratios
+- Equirectangular panorama books (2:1, 3:1, 4:1, custom): fit, fill, visual centre,
+  horizontal shift, seam and fold position, gutter preview with subject protection,
+  split across two or four pages, continuous sequence, wraparound cover, foldout
+  preview, export as full panorama or page sequence, warnings on low resolution,
+  unsuitable ratios, subjects crossing the gutter, and over-aggressive crops
+- A panorama-specific crop editor with a wide viewport and horizontal navigation
+
+  *Note: a double-page spread already spans the fold correctly and never stretches a
+  photo (v4.0). What is missing is the panorama-aware tooling above, not the ability
+  to place a wide image across two pages.*
 - Mockups: flat page, facing spread, folded mini zine, saddle-stitched booklet,
   stapled zine, softcover, hardcover, open/closed book, page-turn, print sheet
 - Printmaker guide + downloadable print specification sheet
@@ -69,7 +98,9 @@ each, not a subsystem.
 
 ## Phase 6 — platform and formats
 
-- PWA: manifest, service worker, installable, offline-first
+- ~~PWA: manifest, service worker, installable, offline-first~~ ✅ **shipped in v4.1**
+- ~~Android APK build project~~ ✅ **shipped in v4.1** — the project, not a compiled
+  binary; see `docs/ANDROID-BUILD.md` for why, and for the ten-minute build
 - Export formats: PNG, print-ready PDF with crop marks, screen PDF, multi-page and
   individual PDFs, HTML flipbook, print package ZIP
 - Demo content and sample exports

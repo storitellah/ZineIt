@@ -1,5 +1,95 @@
 # Changelog — ZineIt by Storitellah
 
+## v4.1 — 2026-07-17
+The one-window workspace. **Phase 2 of the v4 brief**, plus the PWA and the Android
+build project from Phase 6 — see `docs/ROADMAP.md` for what is still open and why.
+
+### Added — one-window workspace
+- **The right panel is no longer one endless scroll.** It is five tabbed panes —
+  Properties, Page, Layers, Guides, Export — and only one is on screen at a time. This
+  was the main objective of the release and the thing the brief actually complained about.
+- **Compact top toolbar** (44px): undo, redo, page size, add page, add spread,
+  templates, zoom out/fit/in, focus mode, preview-only, reset workspace, save status,
+  export. Icons with tooltips, no oversized labels.
+- **Compact project title** — a click-to-edit field in the toolbar. It truncates
+  visually with an ellipsis, shows the full title on hover and on focus, and **never
+  truncates the title that is actually saved**.
+- **Resizable, collapsible panels.** Drag the left panel, the right panel or the
+  timeline. Collapse any of them. The arrangement is saved to local storage and comes
+  back next time. There is a reset button when it all goes wrong.
+- **Focus mode** hides both side panels; **preview-only** leaves just the pages.
+  **Esc always gets you back** — it is now checked *before* the typing guard, so it
+  works even when a field has focus.
+
+### Added — layers
+- **An Illustrator-style layer stack per page**, front to back, with type icons in the
+  brand palette: photo, empty frame, panorama/spread, text, caption, page number.
+- Select, **rename** (double-click), **drag to reorder**, bring to front, move forward,
+  move backward, send to back, duplicate, delete.
+- **Hide** and **lock**. Hidden layers are skipped on the canvas, in the print path and
+  in the 300 DPI export — but **stay in your file**. Hiding is not deleting. Locked
+  layers cannot be dragged by accident.
+- Renaming a layer never touches the photo record.
+
+### Added — undo / redo
+- 60 steps. `Ctrl/⌘ Z`, `⇧` to redo, `Ctrl/⌘ Y` as well. The buttons disable themselves
+  when there is nothing to do.
+- **Snapshots the project, never the photographs.** Photos live in IndexedDB and are
+  never rewritten, so undo is both honest and cheap. A fresh edit clears the redo branch
+  rather than corrupting it.
+
+### Added — text colour system
+- Colour picker, HEX input with forgiving parsing (`#FFC43D`, `ffc43d`, `#fc3` all work;
+  junk is refused with a reason), live RGB readout, recent colours, and the seven brand
+  presets.
+- **Apply by scope**: this text, this page, this spread, or the whole publication —
+  matching **by role**, so recolouring every title leaves the captions alone.
+
+### Added — platform
+- **PWA**: `manifest.webmanifest` and a network-first service worker. Installable,
+  offline-capable. **Skipped entirely on `file://`** — the manifest link is removed and
+  the worker never registers, so double-clicking the file gives no 404 and no console
+  error. The single-file case remains the primary one.
+- **Android build project**: a complete, branded Capacitor 6 Android Studio project
+  (`android/`), package `com.storitellah.zineit`, adaptive icon (yellow Z on Ink Black)
+  at every density, Ink Black splash, minSdk 22 / target 34.
+  **One permission: `INTERNET`.** No contacts, call logs, microphone, location,
+  background services — and deliberately **no photo-library permission**, because photos
+  arrive through the system picker one explicit tap at a time.
+  `npm run android:debug` builds it in about ten minutes.
+
+### Fixed
+- **The Guides & Bleed hint still said "controlled ⅛″ spill"** after v4.0 moved bleed to
+  3 mm / 5 mm — in the hint *and* in the toast. Both now track the real setting live.
+  (Caught from a screenshot, which is a fair reminder that prose goes stale too.)
+- **The timeline's resize handle was being eaten** by `renderTimeline`'s `innerHTML`
+  reset on every render.
+- **Esc was swallowed by the typing guard**, so it would not leave preview or focus mode
+  while a field had focus.
+
+### Not in this release — stated plainly
+- **There is no compiled APK.** The build environment has Java but no Android SDK, and
+  `dl.google.com`, `maven.google.com` and `services.gradle.org` are all blocked (HTTP
+  403) — `./gradlew` cannot even download Gradle. The project is complete and real; the
+  ten-minute compile is yours. See `docs/ANDROID-BUILD.md`.
+- **A signed release APK needs your developer signing key.** It is not mine to make.
+  See `docs/APK-SIGNING.md`.
+- **Rulers, draggable guides, the dedicated crop editor modal, the equirectangular
+  panorama system and the front/back cover template library are not built.** They are
+  sequenced in `docs/ROADMAP.md` rather than half-shipped. A double-page spread already
+  spans the fold without stretching; panorama-*aware* tooling is what is missing.
+
+### Testing
+- **153 app tests + 22 Lua tests, all passing.** New coverage: the tabbed right panel;
+  every toolbar and panel control present; the compact title never truncating the saved
+  value; panels resizing, collapsing, persisting and resetting; focus and preview-only
+  with Esc; the bleed hint tracking millimetres; the layer stack order, reorder,
+  hide-is-not-delete, lock-stops-drag, rename-does-not-touch-the-photo; undo/redo
+  walking the project without ever rewriting a photograph, and clearing the redo branch
+  on a new edit; hex parsing, brand presets, and scope-by-role recolouring.
+- Three real bugs were caught by these tests before release — the wiped resize handle,
+  the swallowed Esc, and a call to a `fitScale()` that never existed.
+
 ## v4.0 — 2026-07-16
 Brand system, a real image engine, the 16-page zine, and high-resolution export.
 **Phase 1 of the v4 brief** — see `docs/ROADMAP.md` for what is sequenced next and why.
