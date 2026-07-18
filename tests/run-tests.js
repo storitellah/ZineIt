@@ -1718,6 +1718,183 @@ T('support and feedback route to hello@storitellah.com', () => {
   ok(!/bryanjaybee/.test(SRC2), 'the old address is gone everywhere');
 });
 
+/* ============ 19j · v4.2.1: export fidelity (regression) ============ */
+T('print/PDF export carries the chosen text colour (regression: was hardcoded #1b1b1b)', () => {
+  Z.newProject('a5');
+  const e = Z.addTextEl('Coloured heading', 20, 'title');
+  Z.select(Z.curPage, e.id);
+  e.color = '#FF5C5C';                          // coral — set on the model the colour UI writes to
+  Z.buildSequentialPrint();
+  const node = [...document.querySelectorAll('#printRoot .ptxt')].find(n => n.textContent === 'Coloured heading');
+  ok(node, 'the text element made it into the print DOM');
+  const c = node.style.color.replace(/\s/g, '').toLowerCase();
+  ok(c === '#ff5c5c' || c === 'rgb(255,92,92)', 'print colour matches the element colour, got ' + c);
+});
+T('no export path hardcodes a text colour; each falls back to INK', () => {
+  ok(!/\.color\s*=\s*['"]#1b1b1b['"]/.test(SRC2), 'the old hardcoded colour is gone');
+  ok((SRC2.match(/e\.color\s*\|\|\s*INK/g) || []).length >= 3, 'screen + print + 300 DPI canvas each resolve from the element');
+});
+T('hidden text layers are omitted from print/PDF, matching screen and JPG export', () => {
+  Z.newProject('a5');
+  Z.addTextEl('I print', 12, 'caption');
+  const hidden = Z.addTextEl('I do not', 12, 'caption');
+  hidden.hidden = true;
+  Z.buildSequentialPrint();
+  const txts = [...document.querySelectorAll('#printRoot .ptxt')].map(n => n.textContent);
+  ok(txts.includes('I print'), 'visible text prints');
+  ok(!txts.includes('I do not'), 'hidden text is skipped in print');
+});
+T('print text gets the same inner padding as screen and canvas', () => {
+  Z.newProject('a5');
+  Z.addTextEl('Padded', 12, 'caption');
+  Z.buildSequentialPrint();
+  const node = [...document.querySelectorAll('#printRoot .ptxt')].find(n => n.textContent === 'Padded');
+  ok(node && /0\.02in/.test(node.style.padding || node.style.cssText), 'text padding present in print');
+});
+
+/* ============ 19k · v4.3: cover template library ============ */
+T('front-cover templates apply to the first page and set a real title', () => {
+  Z.newProject('a5');
+  Z.state.meta.name = 'Kibera Stories';
+  Z.applyCoverTemplate('front', 'cover-bigtype', true);
+  const cover = Z.state.pages[0];
+  eq(cover.cover.kind, 'front'); eq(cover.cover.key, 'cover-bigtype');
+  const title = cover.elements.find(e => e.type === 'text' && e.role === 'cover-title');
+  ok(title, 'a cover-title element exists');
+  eq(title.text, 'Kibera Stories', 'title pulls from the project name');
+});
+T('back-cover templates apply to the LAST page', () => {
+  Z.newProject('a5');
+  const last = Z.state.pages.length - 1;
+  Z.applyCoverTemplate('back', 'back-contact', true);
+  eq(Z.coverPageIndex('back'), last, 'back index is the final page');
+  ok(Z.state.pages[last].cover && Z.state.pages[last].cover.kind === 'back', 'back cover recorded on the last page');
+});
+T('applying a cover keeps existing photos, re-flowing them into the new frames', () => {
+  Z.newProject('a5');
+  Z.setAsset('CVP', { name: 'cover.jpg', src: PXDATA, w: 4000, h: 3000 });
+  const img = Z.addImageEl('CVP');           // a photo already on page 1
+  Z.applyCoverTemplate('front', 'cover-plate', true);
+  const photo = Z.state.pages[0].elements.find(e => e.type === 'image' && e.asset === 'CVP');
+  ok(photo, 'the existing photo survived and re-flowed into the cover frame');
+});
+T('every cover and back recipe is well-formed (fractions in range, valid parts)', () => {
+  const check = (kind, set) => {
+    for (const k of Object.keys(set)) {
+      const r = Z.coverRecipe(kind, k);
+      ok(Array.isArray(r) && r.length > 0, kind + ' ' + k + ' produced a recipe');
+      for (const s of r) {
+        if (s.bleed) continue;
+        ok(Array.isArray(s.b) && s.b.length === 4, kind + ' ' + k + ' box has 4 numbers');
+        ok(s.b.every(n => n >= -0.01 && n <= 1.01), kind + ' ' + k + ' box stays within the page');
+      }
+    }
+  };
+  check('front', Z.COVER_TEMPLATES);
+  check('back', Z.BACK_TEMPLATES);
+});
+T('the cover library covers the designs Brian asked for', () => {
+  const fronts = Object.keys(Z.COVER_TEMPLATES);
+  ['cover-fullbleed','cover-minimal','cover-bigtype','cover-split','cover-grid','cover-panorama','cover-bw']
+    .forEach(k => ok(fronts.includes(k), 'front has ' + k));
+  const backs = Object.keys(Z.BACK_TEMPLATES);
+  ['back-summary','back-logo','back-supporters','back-contact','back-qr','back-copyright' in {} ? '' : 'back-colophon','back-solid']
+    .filter(Boolean).forEach(k => ok(backs.includes(k), 'back has ' + k));
+});
+
+/* ============ 19l · v4.3: transparent graphics (QR / logo / PNG) ============ */
+const ALPHAPNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFUlEQVR4nGP4z8DwHwhB4D8QMDQAAD1VB3peF7pjAAAAAElFTkSuQmCC';
+T('a graphic asset is placed contained (whole graphic visible) and flagged', () => {
+  Z.newProject('a5');
+  Z.setAsset('GFX', { name: 'logo.png', src: ALPHAPNG, w: 400, h: 400, graphic: true });
+  const e = Z.addImageEl('GFX');
+  ok(e.graphic === true, 'element carries the graphic flag');
+  const g = Z.ensureImg(e);
+  const contain = Math.min(e.w, e.h / (400/400));
+  approx(g.w, contain, 1e-6, 'graphic is fit (contained), not cover-filled');
+});
+T('graphic elements render with no white matte on screen', () => {
+  Z.newProject('a5');
+  Z.setAsset('GFX2', { name: 'qr.png', src: ALPHAPNG, w: 200, h: 200, graphic: true });
+  const e = Z.addImageEl('GFX2');
+  Z.setTab('layout'); Z.goPage(Z.curPage); Z.renderAll();
+  const node = document.querySelector('#page .el[data-id="' + e.id + '"]');
+  ok(node && node.classList.contains('graphic'), 'the graphic class is applied (transparent background)');
+});
+T('graphics keep transparency into the print/PDF export (no re-encode to JPEG)', () => {
+  ok(/drawScaledTransparent/.test(SRC2), 'a transparent-preserving scaler exists');
+  ok(/'image\/png'/.test(SRC2), 'graphic previews are encoded as PNG, not JPEG');
+  ok(/e\.graphic\?' graphic':''/.test(SRC2), 'the graphic class is emitted for transparent elements');
+});
+T('alphaCapable recognises the alpha formats and rejects jpeg', () => {
+  ok(Z.alphaCapable({ type: 'image/png', name: 'a.png' }), 'png');
+  ok(Z.alphaCapable({ type: '', name: 'logo.SVG' }), 'svg by extension');
+  ok(Z.alphaCapable({ type: 'image/webp', name: 'x' }), 'webp');
+  ok(!Z.alphaCapable({ type: 'image/jpeg', name: 'photo.jpg' }), 'jpeg is not alpha-capable');
+});
+T('the transparent-graphic toggle flips an existing photo to a graphic and back', () => {
+  Z.newProject('a5');
+  Z.setAsset('GFX3', { name: 'p.png', src: ALPHAPNG, w: 300, h: 200 });
+  const e = Z.addImageEl('GFX3');
+  ok(!e.graphic, 'starts as a normal photo');
+  e.graphic = true; Z.imgFit(e);              // what the toggle does
+  ok(e.graphic, 'now a graphic');
+  const g = Z.ensureImg(e);
+  approx(g.w, Math.min(e.w, e.h / (200/300)), 1e-6, 'fit after toggling to graphic');
+});
+
+/* ============ 19m · v4.3: light backup + relink ============ */
+T('a light backup is tiny and carries no pixel data', () => {
+  Z.newProject('a5');
+  Z.setAsset('P1', { name: 'a.jpg', src: PXDATA, w: 4000, h: 3000 });
+  Z.setAsset('P2', { name: 'b.jpg', src: PXDATA, w: 3000, h: 2000 });
+  Z.addImageEl('P1'); Z.addImageEl('P2');
+  const json = Z.buildRefBakJson();
+  const p = JSON.parse(json);
+  ok(p.reference === true, 'flagged as a reference backup');
+  ok(p.manifest && p.manifest.P1 && p.manifest.P2, 'manifest lists every photo');
+  ok(!p.assetData, 'no embedded full-resolution pixel data');
+  // it keeps tiny thumbnails by design, but must be far smaller than a full backup
+  ok(json.length < 60000, 'the light backup is kilobytes, not megabytes (got ' + json.length + ' bytes)');
+});
+T('the manifest fingerprints name, byte size and dimensions', () => {
+  Z.newProject('a5');
+  Z.setAsset('FP', { name: 'street.jpg', src: PXDATA, w: 6000, h: 4000 });
+  Z.state.assets.FP.bytes = 1234567;
+  Z.addImageEl('FP');
+  const m = Z.assetManifest();
+  eq(m.FP.name, 'street.jpg');
+  eq(m.FP.bytes, 1234567);
+  eq(m.FP.w, 6000); eq(m.FP.h, 4000);
+});
+T('relinkScore rewards a name + byte-size match and tolerates a renamed file by size', () => {
+  const asset = { name: 'DSC_0042.JPG', bytes: 500000, w: 6000, h: 4000 };
+  const exact = Z.relinkScore(asset, { name: 'DSC_0042.JPG', bytes: 500000, w: 6000, h: 4000 });
+  const renamed = Z.relinkScore(asset, { name: 'renamed.jpg', bytes: 500000, w: 6000, h: 4000 });
+  const wrong = Z.relinkScore(asset, { name: 'other.jpg', bytes: 999, w: 100, h: 100 });
+  ok(exact >= 9, 'exact match scores high');
+  ok(renamed >= 4, 'byte-size + dimensions still relink a renamed file');
+  ok(wrong < 4, 'an unrelated file is rejected');
+});
+T('missingAssetIds finds photos with no pixels in the store', async () => {
+  Z.newProject('a5');
+  Z.setAsset('HERE', { name: 'here.jpg', src: PXDATA, w: 100, h: 100 });
+  Z.addImageEl('HERE');
+  // an asset in the manifest but never stored — simulates a freshly-opened light backup
+  Z.state.assets.GONE = { name: 'gone.jpg', w: 4000, h: 3000, bytes: 42 };
+  const miss = await Z.missingAssetIds();
+  ok(miss.includes('GONE'), 'the unstored photo is reported missing');
+  ok(!miss.includes('HERE'), 'the stored photo is not missing');
+});
+T('a light backup still validates and restores as a project', () => {
+  Z.newProject('a5');
+  Z.setAsset('V1', { name: 'v.jpg', src: PXDATA, w: 100, h: 100 });
+  Z.addImageEl('V1');
+  const json = Z.buildRefBakJson();
+  const err = Z.validateProject(JSON.parse(json));
+  eq(err, null, 'the light backup passes project validation');
+});
+
 /* ============ 20 · console health ============ */
 T('no page errors or uncaught exceptions across the whole run', () => {
   eq(pageErrors.length, 0, 'errors: ' + pageErrors.slice(0, 3).join(' | '));

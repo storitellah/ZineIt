@@ -265,6 +265,7 @@ textarea{resize:vertical;min-height:56px}
 #pageTag .warnTxt{color:var(--warn)}
 .el{position:absolute;touch-action:none}
 .el.img{overflow:hidden;background:#e8e5dd}
+.el.img.graphic{background:transparent}           /* transparent PNG / QR / logo — no matte */
 .el.img img{display:block;pointer-events:none}   /* frame = clipping mask; photo may exceed it */
 .el.img.empty{background:rgba(44,93,179,.06);border:1.5px dashed rgba(44,93,179,.6);display:flex;align-items:center;justify-content:center}
 .el.img.empty::after{content:"drop photo";font-family:var(--mono);font-size:10px;color:rgba(44,93,179,.85);letter-spacing:.8px}
@@ -502,6 +503,43 @@ body.fs #canvasScroll{padding:14px}
 .tplTypes{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
 .tplTypes button{font-size:10.5px;padding:4px 8px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--muted)}
 .tplTypes button.on{border-color:var(--yellow);color:var(--yellow);background:rgba(255,196,61,.12)}
+/* ---- cover template library ---- */
+.coverModal{max-width:920px;width:96vw}
+.coverHead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.coverKindTabs{display:flex;gap:6px}
+.coverKindTabs button{font-size:12px;padding:6px 14px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--muted);font-weight:600}
+.coverKindTabs button.on{border-color:var(--yellow);color:var(--ink);background:var(--yellow)}
+.coverBody{display:grid;grid-template-columns:280px 1fr;gap:16px;align-items:start}
+.coverList{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow-y:auto;padding:2px}
+.coverItem{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);padding:8px;cursor:pointer;text-align:left}
+.coverItem:hover{border-color:var(--muted)}
+.coverItem.on{border-color:var(--yellow);background:rgba(255,196,61,.10)}
+.coverItem .mini{width:38px;flex:0 0 auto;border-radius:2px;overflow:hidden;position:relative;background:var(--paper);border:1px solid var(--line-soft)}
+.coverItem .mini i{position:absolute;background:#c9c6bd;border-radius:1px}
+.coverItem .mini u{position:absolute;background:#8d8a82;border-radius:1px;text-decoration:none}
+.coverItem .txt{min-width:0}
+.coverItem .txt b{display:block;font-family:var(--display);font-weight:700;font-size:12.5px;letter-spacing:.2px}
+.coverItem .txt span{display:block;font-family:var(--caption-font);font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* the large, centred preview — locks to page aspect ratio and scales to fit its column */
+.coverPreviewWrap{display:flex;flex-direction:column;gap:10px;min-width:0}
+.coverPreviewStage{background:repeating-conic-gradient(#2a2f37 0% 25%,#242930 0% 50%) 50%/20px 20px;
+  border:1px solid var(--line);border-radius:8px;padding:22px;display:grid;place-items:center;min-height:0}
+.coverPreviewFrame{position:relative;background:var(--paper);box-shadow:0 12px 40px rgba(0,0,0,.5);border-radius:2px;
+  max-width:100%;max-height:52vh;overflow:hidden}
+.coverPreviewFrame i{position:absolute;background:#c9c6bd;border-radius:1px}
+.coverPreviewFrame u{position:absolute;background:#7d7a72;border-radius:1px;text-decoration:none}
+.coverPreviewFrame .plabel{position:absolute;font-family:var(--caption-font);color:#6b6862;font-size:9px;pointer-events:none;overflow:hidden}
+.coverPrevMeta{display:flex;flex-direction:column;gap:3px}
+.coverPrevMeta b{font-family:var(--display);font-weight:700;font-size:13px}
+@media(max-width:720px){
+  .coverBody{grid-template-columns:1fr}
+  .coverPreviewWrap{order:-1}                    /* preview on top on phones */
+  .coverList{max-height:30vh;flex-direction:row;overflow-x:auto;overflow-y:hidden}
+  .coverList .coverItem{flex:0 0 auto;width:180px}
+  .coverPreviewFrame{max-height:38vh}
+  .coverPreviewStage{padding:14px}
+}
+
 
 #swatches,#recentSw{display:flex;flex-wrap:wrap;gap:4px}
 .sw{width:20px;height:20px;border-radius:4px;border:1px solid var(--line);cursor:pointer;padding:0}
@@ -516,7 +554,7 @@ body.fs #canvasScroll{padding:14px}
   <header>
     <div class="brand">
       <span class="mark">Zine<span>It</span></span>
-      <span class="ver" id="verBadge">v4.2</span>
+      <span class="ver" id="verBadge">v4.3</span>
     </div>
     <input id="projName" type="text" value="Untitled project" spellcheck="false" aria-label="Project title" title="Project title — click to edit">
     <div class="tbar">
@@ -560,6 +598,8 @@ body.fs #canvasScroll{padding:14px}
         <b>Drop photos here</b><br>or click to browse<br><span style="font-size:10.5px;color:var(--faint)">JPG · PNG · WebP · HEIC &amp; more — originals kept at full quality</span>
       </div>
       <input type="file" id="fileInput" accept="image/*,.heic,.heif,.HEIC,.HEIF" multiple hidden>
+      <button class="btn wide" id="addGraphicBtn" title="Add a QR code, logo or PNG with a transparent background">+ Graphic / QR (transparent)…</button>
+      <input type="file" id="graphicInput" accept="image/png,image/webp,image/svg+xml,image/gif,.png,.webp,.svg,.gif" multiple hidden>
       <div id="library"></div>
       <label class="toggle"><input type="checkbox" id="aspectChk" checked>Keep original aspect ratio</label>
       <div class="hint" id="libHint">Drag onto the page or a frame · double-click a placed photo for full view · drag a placed photo onto an empty frame to snap it in.</div>
@@ -659,6 +699,10 @@ body.fs #canvasScroll{padding:14px}
       </div>
       <button class="btn wide" id="tplBrowseBtn">Browse professional templates…</button>
       <div class="row">
+        <button class="btn" id="coverFrontBtn" style="flex:1" title="Design the front cover">Front cover…</button>
+        <button class="btn" id="coverBackBtn" style="flex:1" title="Design the back cover">Back cover…</button>
+      </div>
+      <div class="row">
         <label class="small" style="flex:0 0 auto">Margin</label>
         <select id="marginSel">
           <option value="0.125">⅛ in</option>
@@ -737,6 +781,7 @@ body.fs #canvasScroll{padding:14px}
       <h3>Selection</h3>
       <div id="inspImg" style="display:none;flex-direction:column;gap:8px">
         <button class="btn primary wide" id="cropOpenBtn" title="Open this photo in the crop window (double-click the photo too)">✂ Crop photo…</button>
+        <label class="toggle full"><input type="checkbox" id="graphicChk">Transparent graphic (no white background — for logos, QR codes)</label>
         <div class="row">
           <button class="btn" id="fitBtn" title="Whole photo visible, no crop">Fit</button>
           <button class="btn" id="fillBtn" title="Fill frame, crop allowed, never stretched">Fill</button>
@@ -809,12 +854,17 @@ body.fs #canvasScroll{padding:14px}
 
     <div class="sec" data-p="export">
       <h3>Backup — local only</h3>
-      <button class="btn wide" id="bakBtn">Save backup (.bak)</button>
+      <button class="btn wide" id="bakBtn">Save full backup (.bak)</button>
       <button class="btn wide" id="restoreBtn">Restore from .bak</button>
-      <input type="file" id="bakInput" accept=".bak,.json" hidden>
+      <input type="file" id="bakInput" accept=".bak,.zineit,.json" hidden>
+      <div class="statusStrip" style="margin-top:6px;padding-top:8px">
+        <button class="btn wide" id="refBakBtn" title="A tiny backup that references your photos instead of embedding them">Save light backup (references photos)</button>
+        <button class="btn wide" id="relinkBtn" title="Reconnect the photos to a light backup after you reopen it">Relink photos…</button>
+        <input type="file" id="relinkInput" accept="image/*,.heic,.heif,.png,.webp,.svg,.gif" multiple hidden>
+      </div>
       <label class="toggle"><input type="checkbox" id="dailyChk" checked>Daily backup reminder</label>
       <div class="kv"><span>Last backup</span><span id="lastBak">never</span></div>
-      <div class="hint">Every .bak is verified by a test restore before it downloads. Autosave runs continuously. Ctrl/Cmd+S = backup.</div>
+      <div class="hint"><b>Full backup</b> embeds every photo — one self-contained file, larger. <b>Light backup</b> is kilobytes: it remembers your layout and which photos go where, but not the pixels. Keep it beside your photo files and use <b>Relink photos</b> to reconnect them on the same computer. Every full .bak is verified by a test restore before it downloads. Ctrl/Cmd+S = full backup.</div>
     </div>
     </div>
   </aside>
@@ -874,6 +924,31 @@ body.fs #canvasScroll{padding:14px}
       <input type="file" id="tplFile" accept="application/json,.json" hidden>
     </div>
     <div class="btns"><button class="btn primary" id="tplApply">Apply template</button><button class="btn" id="tplClose">Close</button></div>
+  </div>
+</div>
+
+<!-- COVER TEMPLATE LIBRARY — front & back cover designs with a large centred preview -->
+<div class="modalBk" id="coverModalBk">
+  <div class="modal coverModal" id="coverModal">
+    <div class="coverHead">
+      <h2 id="coverH2">Cover templates</h2>
+      <div class="coverKindTabs" id="coverKindTabs">
+        <button data-kind="front" class="on">Front cover</button>
+        <button data-kind="back">Back cover</button>
+      </div>
+    </div>
+    <p class="mono">Pick a design for your cover. Your photos and title stay yours — they re-flow into the new layout.</p>
+    <div class="coverBody">
+      <div class="coverList" id="coverList"></div>
+      <div class="coverPreviewWrap">
+        <div class="coverPreviewStage" id="coverPreviewStage">
+          <div class="coverPreviewFrame" id="coverPreviewFrame"></div>
+        </div>
+        <div class="coverPrevMeta"><b id="coverPrevName">—</b><span id="coverPrevNote" class="hint"></span></div>
+      </div>
+    </div>
+    <label class="toggle full"><input type="checkbox" id="coverKeep" checked>Keep my photos and title — re-flow them into the new cover</label>
+    <div class="btns"><button class="btn primary" id="coverApply">Apply cover</button><button class="btn" id="coverClose">Close</button></div>
   </div>
 </div>
 
@@ -1067,7 +1142,7 @@ const FORMATS = {
   'book-3x2'   :{group:'Photobooks', name:'Photobook — 3:2 landscape (12 × 8 in)', w:12, h:8},
   'book-2x3'   :{group:'Photobooks', name:'Photobook — 2:3 portrait (8 × 12 in)',  w:8, h:12},
 };
-const APP_VER='4.2', FEEDBACK_EMAIL='hello@storitellah.com';
+const APP_VER='4.3', FEEDBACK_EMAIL='hello@storitellah.com';
 const GRID=0.125, MM=1/25.4;
 const FONTS = ['Inter','Manrope','Roboto','Open Sans','Lato','Montserrat','Poppins','Raleway','Work Sans','DM Sans','Nunito',
   'Rubik','Karla','Source Sans 3','Space Grotesk','Archivo','Archivo Black','IBM Plex Sans','Oswald','Bebas Neue','Anton',
@@ -1243,10 +1318,39 @@ function drawScaled(bmp,max){
     ctx.drawImage(bmp,0,0,c.width,c.height); }
   return c;
 }
-function canvasBlob(c,q){ return new Promise(res=>{
-  try{ if(c.toBlob)return c.toBlob(b=>res(b),'image/jpeg',q); }catch(e){}
-  try{ res(dataURLtoBlob(c.toDataURL('image/jpeg',q))); }catch(e){ res(null); } }); }
-async function ingestFile(f){
+function canvasBlob(c,q,mime){ return new Promise(res=>{
+  const m=mime||'image/jpeg';
+  try{ if(c.toBlob)return c.toBlob(b=>res(b),m,q); }catch(e){}
+  try{ res(dataURLtoBlob(c.toDataURL(m,q))); }catch(e){ res(null); } }); }
+
+/* Formats that can carry an alpha channel. A PNG/WebP/SVG may or may not actually use it,
+   but we must NOT re-encode them to JPEG or the transparency is lost (matted to black). */
+function alphaCapable(f){
+  const t=(f&&f.type||'').toLowerCase(), n=(f&&f.name||'').toLowerCase();
+  return /png|webp|svg|gif/.test(t) || /\.(png|webp|svg|gif)$/.test(n);
+}
+/* Sample the decoded bitmap: does any pixel have alpha < 250? (cheap downscaled scan) */
+function bitmapHasAlpha(bmp){
+  try{
+    const c=drawScaledTransparent(bmp,64), ctx=c.getContext('2d');
+    const d=ctx.getImageData(0,0,c.width,c.height).data;
+    for(let i=3;i<d.length;i+=4){ if(d[i]<250) return true; }
+  }catch(e){}
+  return false;
+}
+function drawScaledTransparent(bmp,max){
+  const w=bmp.naturalWidth||bmp.width, h=bmp.naturalHeight||bmp.height;
+  const s=Math.min(1,max/Math.max(w,h));
+  const c=document.createElement('canvas');
+  c.width=Math.max(1,Math.round(w*s)); c.height=Math.max(1,Math.round(h*s));
+  const ctx=c.getContext('2d');
+  if(ctx){ ctx.clearRect(0,0,c.width,c.height);            // keep it transparent — never fill white
+    ctx.imageSmoothingEnabled=true; try{ctx.imageSmoothingQuality='high'}catch(e){}
+    ctx.drawImage(bmp,0,0,c.width,c.height); }
+  return c;
+}
+async function ingestFile(f,opts){
+  opts=opts||{};
   let src=f, bmp=null;
   try{ bmp=await decodeToBitmap(src); }
   catch(e){
@@ -1257,11 +1361,22 @@ async function ingestFile(f){
     bmp=await decodeToBitmap(src);
   }
   const w=bmp.naturalWidth||bmp.width, h=bmp.naturalHeight||bmp.height;
-  const preview=(await canvasBlob(drawScaled(bmp,1600),0.82))||src;   // ~fast to decode on any device
-  let thumb=''; try{ thumb=drawScaled(bmp,192).toDataURL('image/jpeg',0.72); }catch(e){}
+  // A graphic keeps its alpha: PNG all the way through, no white matte, "contain" by default.
+  const graphic = !!opts.graphic || (alphaCapable(f) && bitmapHasAlpha(bmp));
+  let preview,thumb;
+  if(graphic){
+    preview=(await canvasBlob(drawScaledTransparent(bmp,1600),undefined,'image/png'))||src;
+    try{ thumb=drawScaledTransparent(bmp,192).toDataURL('image/png'); }catch(e){ thumb=''; }
+  } else {
+    preview=(await canvasBlob(drawScaled(bmp,1600),0.82))||src;   // ~fast to decode on any device
+    try{ thumb=drawScaled(bmp,192).toDataURL('image/jpeg',0.72); }catch(e){ thumb=''; }
+  }
   if(bmp.close){ try{bmp.close()}catch(e){} }
   const id=uid();
-  state.assets[id]={name:f.name||'photo',w,h,thumb};
+  // fingerprint = the facts we can re-check on disk later, so a reference backup can relink
+  state.assets[id]={name:f.name||(graphic?'graphic':'photo'),w,h,thumb,
+    bytes:(f&&typeof f.size==='number')?f.size:0, mtime:(f&&f.lastModified)||0};
+  if(graphic) state.assets[id].graphic=true;
   await assetStore.put(id,{full:src,preview});
   return id;
 }
@@ -1350,8 +1465,115 @@ function restoreBak(file){
     }
     curPage=0; selPg=0; selId=null; renderAll(); persist();
     if(regen.length) regenLegacy(regen);
-    toast('Backup restored ✓','ok'); };
+    // a light/reference backup carries no pixels — offer to relink from disk
+    const miss=await missingAssetIds();
+    if(miss.length){
+      renderAll();
+      toast(`Restored ✓ — ${miss.length} photo${miss.length>1?'s need':' needs'} relinking. Opening the file picker…`,'ok');
+      setTimeout(()=>{ if(confirm(`This is a light backup. ${miss.length} photo${miss.length>1?'s are':' is'} not embedded.\n\nPick the original photo file${miss.length>1?'s':''} now to reconnect ${miss.length>1?'them':'it'}?`)) $('relinkInput').click(); },300);
+    } else {
+      toast('Backup restored ✓','ok');
+    } };
   r.readAsText(file);
+}
+/* ---------- reference backup (tiny) + relink ----------
+   A reference backup stores the project plus a fingerprint of each photo (name, byte size,
+   pixel dimensions) — but NOT the pixels. It is kilobytes, not hundreds of megabytes. As
+   long as the photo files still exist on this computer, "Relink photos" matches them back
+   by fingerprint and pulls the pixels in again. The originals are never modified. */
+function assetManifest(){
+  const out={};
+  for(const id of Object.keys(state.assets)){
+    const a=state.assets[id];
+    out[id]={ name:a.name||'', bytes:a.bytes||0, w:a.w||0, h:a.h||0, graphic:!!a.graphic };
+  }
+  return out;
+}
+function buildRefBakJson(){
+  // keep the thumbnails (they are tiny and let the project still be viewable/relinkable)
+  const slim=Object.assign({},state,{ver:4, reference:true, manifest:assetManifest()});
+  delete slim.assetData;
+  return JSON.stringify(slim);
+}
+async function downloadRefBak(){
+  const json=buildRefBakJson();
+  let verr=null; try{ verr=validateProject(JSON.parse(json)); }catch(e){ verr='unreadable backup'; }
+  if(verr){ toast('Reference backup failed: '+verr,'err'); return; }
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([json],{type:'application/json'}));
+  a.download=fileName('backup','zineit'); a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  const kb=Math.max(1,Math.round(json.length/1024));
+  toast('Reference backup saved ✓ — '+kb+' KB. Keep it beside your photos; use “Relink photos” to reconnect them.','ok');
+}
+/* what is missing pixels right now? (after loading a reference backup) */
+async function missingAssetIds(){
+  const miss=[];
+  for(const id of Object.keys(state.assets)){
+    let rec=null; try{ rec=await assetStore.get(id); }catch(e){}
+    if(!rec||!rec.full) miss.push(id);
+  }
+  return miss;
+}
+function fingerprintOf(file,dims){
+  return { name:file.name||'', bytes:file.size||0, w:(dims&&dims.w)||0, h:(dims&&dims.h)||0 };
+}
+/* score a candidate file against an asset record: name+bytes is a strong match; dims break ties */
+function relinkScore(asset,fp){
+  let s=0;
+  const an=(asset.name||'').toLowerCase(), fn=(fp.name||'').toLowerCase();
+  if(an&&fn&&an===fn) s+=5; else if(an&&fn&&an.replace(/\.[^.]+$/,'')===fn.replace(/\.[^.]+$/,'')) s+=3;
+  if(asset.bytes&&fp.bytes&&asset.bytes===fp.bytes) s+=4;
+  if(asset.w&&asset.h&&fp.w===asset.w&&fp.h===asset.h) s+=2;
+  return s;
+}
+async function relinkFromFiles(files){
+  const list=[...files].filter(f=>(f.type&&f.type.startsWith('image/'))||ACCEPT_EXT.test(f.name||'')||/\.(png|webp|svg|gif)$/i.test(f.name||''));
+  if(!list.length){ toast('No image files in that selection.','err'); return; }
+  const miss=await missingAssetIds();
+  if(!miss.length){ toast('Nothing to relink — every photo is already loaded.','ok'); return; }
+  toast('Relinking '+miss.length+' photo'+(miss.length>1?'s':'')+'…');
+  // decode each candidate once to learn its dimensions, then match
+  const cands=[];
+  for(const f of list){
+    let dims={w:0,h:0};
+    try{ const bmp=await decodeToBitmap(f); dims={w:bmp.naturalWidth||bmp.width,h:bmp.naturalHeight||bmp.height};
+      if(bmp.close)try{bmp.close()}catch(e){} }catch(e){}
+    cands.push({file:f, fp:fingerprintOf(f,dims), used:false});
+  }
+  let linked=0;
+  for(const id of miss){
+    const a=state.assets[id]; let best=null, bestScore=0;
+    for(const c of cands){ if(c.used)continue; const sc=relinkScore(a,c.fp);
+      if(sc>bestScore){ bestScore=sc; best=c; } }
+    if(best && bestScore>=4){                 // require at least a name OR byte-size match
+      try{ await ingestInto(id, best.file, !!a.graphic); best.used=true; linked++; renderLibrary(); }
+      catch(e){}
+    }
+  }
+  renderCanvas(); renderTimeline(); touch();
+  const left=miss.length-linked;
+  toast(linked+' relinked ✓'+(left? ' · '+left+' still missing — pick the right files and try again':' — all photos reconnected'),
+    left?'err':'ok');
+}
+/* re-import a file INTO an existing asset id (keeps the id so every placement reconnects) */
+async function ingestInto(id, f, graphic){
+  let src=f, bmp=null;
+  try{ bmp=await decodeToBitmap(src); }
+  catch(e){ if(!isHeic(f)) throw e; const heic2any=await loadHeicLib();
+    let out=await heic2any({blob:f,toType:'image/jpeg',quality:0.92}); src=Array.isArray(out)?out[0]:out; bmp=await decodeToBitmap(src); }
+  const w=bmp.naturalWidth||bmp.width, h=bmp.naturalHeight||bmp.height;
+  const g = graphic || (alphaCapable(f) && bitmapHasAlpha(bmp));
+  let preview,thumb;
+  if(g){ preview=(await canvasBlob(drawScaledTransparent(bmp,1600),undefined,'image/png'))||src;
+    try{ thumb=drawScaledTransparent(bmp,192).toDataURL('image/png'); }catch(e){ thumb=''; } }
+  else { preview=(await canvasBlob(drawScaled(bmp,1600),0.82))||src;
+    try{ thumb=drawScaled(bmp,192).toDataURL('image/jpeg',0.72); }catch(e){ thumb=''; } }
+  if(bmp.close){ try{bmp.close()}catch(e){} }
+  const a=state.assets[id]||{};
+  a.name=a.name||f.name||'photo'; a.w=w; a.h=h; a.thumb=thumb;
+  a.bytes=(f&&f.size)||a.bytes||0; if(g)a.graphic=true;
+  state.assets[id]=a;
+  await assetStore.put(id,{full:src,preview});
 }
 function renderBakInfo(){ const t=store.get(LS_BAK); $('lastBak').textContent=t?new Date(t).toLocaleString():'never'; }
 function hideBanner(){ $('banner').classList.remove('show'); }
@@ -1387,6 +1609,19 @@ async function importFiles(files){
   if(done) toast(done+' photo'+(done>1?'s':'')+' imported ✓ — originals stored at full quality, light previews on screen'
     +(fail?` · ${fail} failed${heicFail?' (HEIC conversion needs internet once)':''}`:''), fail?'err':'ok');
   else toast('Import failed'+(heicFail?' — HEIC conversion needs an internet connection the first time':''),'err');
+}
+async function importGraphics(files){
+  const list=[...files].filter(f=>(f.type&&f.type.startsWith('image/'))||/\.(png|webp|svg|gif)$/i.test(f.name||''));
+  if(!list.length){ toast('Pick a PNG, SVG, WebP or GIF.','err'); return; }
+  toast('Adding '+list.length+' graphic'+(list.length>1?'s':'')+'…');
+  let done=0,fail=0;
+  for(const f of list){
+    try{ await ingestFile(f,{graphic:true}); done++; renderLibrary(); }  // force transparency preservation
+    catch(e){ fail++; }
+  }
+  renderCanvas(); renderTimeline(); touch();
+  toast(done? done+' graphic'+(done>1?'s':'')+' added ✓ — transparency preserved, no white box'+(fail?` · ${fail} failed`:'')
+    : 'Could not add that graphic.', done?'ok':'err');
 }
 
 /* ---------- geometry ---------- */
@@ -1474,9 +1709,11 @@ function addImageEl(assetId,cx,cy,pgIdx){
   const f=fmt(), m=state.settings.margin, a=assetId?state.assets[assetId]:null;
   let w=Math.min(f.w-2*m, f.w*0.62), h=w*0.75;
   if(a){ const ar=a.h/a.w; h=w*ar; const maxH=f.h-2*m; if(h>maxH){h=maxH;w=h/ar;} }
-  const e={id:uid(),type:'image',asset:assetId||null,spread:false,
+  const graphic = !!(a && a.graphic);
+  const e={id:uid(),type:'image',asset:assetId||null,spread:false,graphic,
     x:snapV((cx!=null?cx:f.w/2)-w/2), y:snapV((cy!=null?cy:f.h/2)-h/2), w:snapV(w), h:snapV(h)};
-  clampEl(e); e.home={x:e.x,y:e.y,w:e.w,h:e.h}; ensureImg(e); imgFill(e);
+  clampEl(e); e.home={x:e.x,y:e.y,w:e.w,h:e.h}; ensureImg(e);
+  if(graphic) imgFit(e); else imgFill(e);        // a graphic shows whole, a photo fills the frame
   pageAt(pgIdx).elements.push(e); selPg=pgIdx; selId=e.id;
   renderCanvas(); renderInspector(); renderTimeline(); touch(); return e;
 }
@@ -1624,6 +1861,136 @@ const TEMPLATES={
                       TX(0,.79,1,.16,{key:'caption',size:9,font:s.body,color:INK,role:'custom'})] }) }
 };
 function tplStyle(key){ const t=TEMPLATES[key]||TEMPLATES.blank; return Object.assign({},t.style); }
+
+/* ================= COVER & BACK-COVER TEMPLATE LIBRARY =================
+   Dedicated front- and back-cover designs, written in the same page-box fractions as
+   every other recipe so they lay out correctly at any trim size. A cover template is
+   {name, cat, note, front:s=>[...], back:s=>[...], style?}. `front`/`back` return recipe
+   arrays (IM/FBL/TX). Style defaults to the project's current template style, so a cover
+   inherits your fonts and accent unless it overrides them. Nothing is baked into a photo. */
+
+const COVER_TEXT={
+  covertitle:()=>state.meta.name||'Untitled',
+  coversub:()=>'A photo essay',
+  coverbyline:()=>'Photographs by '+(state.meta.author||'you'),
+  coverdate:()=>String(new Date().getFullYear()),
+  coverissue:()=>'Issue 01',
+  coverkicker:()=>'STORITELLAH',
+  backblurb:()=>'A short description of the work — what it is, where it was made, and why it matters.',
+  backbyline:()=>'Photographs by '+(state.meta.author||'you'),
+  backcontact:()=>'hello@storitellah.com',
+  backweb:()=>'storitellah.com',
+  backcopyright:()=>'\u00A9 '+new Date().getFullYear()+' '+(state.meta.author||'You')+'. All rights reserved.',
+  backcolophon:()=>'Made with ZineIt \u00B7 printed with care',
+  backqr:()=>'Scan for more'
+};
+function coverText(key){ return COVER_TEXT[key]? COVER_TEXT[key]() : (TPL_TEXT[key]? TPL_TEXT[key]() : 'Text'); }
+
+/* helpers scoped to covers — TX/IM/FBL already exist */
+const COVER_TEMPLATES={
+  'cover-fullbleed':{ name:'Full-bleed photo', cat:'Photo-led', note:'One photograph, edge to edge, title reversed out of the image.',
+    front:s=>[ FBL(),
+      TX(.08,.70,.84,.14,{key:'covertitle',size:34,font:s.display,weight:'800',align:'left',color:PAPER,role:'cover-title'}),
+      TX(.08,.85,.84,.06,{key:'coverbyline',size:11,font:s.caption,align:'left',color:PAPER,role:'cover-byline'}) ] },
+
+  'cover-plate':{ name:'Photo plate + title band', cat:'Photo-led', note:'A framed plate above a clean title band. Gallery-quiet.',
+    front:s=>[ IM(0,0,1,.70),
+      TX(0,.76,1,.11,{key:'covertitle',size:28,font:s.display,weight:'800',align:'center',color:INK,role:'cover-title'}),
+      TX(0,.88,1,.06,{key:'coversub',size:11,font:s.body,align:'center',color:INK,role:'cover-subtitle'}) ] },
+
+  'cover-minimal':{ name:'Minimal title', cat:'Typographic', note:'No photo. Title, a rule, a byline. Lets the paper speak.',
+    front:s=>[ TX(0,.34,1,.14,{key:'covertitle',size:32,font:s.display,weight:'800',align:'center',color:INK,role:'cover-title'}),
+      TX(.30,.50,.40,.004,{key:'',size:6,font:s.caption,align:'center',color:INK,role:'rule'}),
+      TX(0,.54,1,.06,{key:'coversub',size:12,font:s.body,align:'center',color:INK,role:'cover-subtitle'}),
+      TX(0,.86,1,.05,{key:'coverbyline',size:10,font:s.caption,align:'center',color:INK,role:'cover-byline'}) ] },
+
+  'cover-bigtype':{ name:'Big typography', cat:'Typographic', note:'The title is the design. Oversized, confident, ink on paper.',
+    front:s=>[ TX(.06,.10,.88,.60,{key:'covertitle',size:56,font:s.display,weight:'800',align:'left',color:INK,role:'cover-title'}),
+      TX(.06,.84,.88,.06,{key:'coverbyline',size:12,font:s.caption,align:'left',color:INK,role:'cover-byline'}) ] },
+
+  'cover-split':{ name:'Split image / title', cat:'Editorial', note:'Photo on top, title block below on a colour field.',
+    front:s=>[ IM(0,0,1,.58),
+      TX(.06,.66,.88,.14,{key:'covertitle',size:30,font:s.display,weight:'800',align:'left',color:INK,role:'cover-title'}),
+      TX(.06,.82,.88,.06,{key:'coversub',size:12,font:s.body,align:'left',color:INK,role:'cover-subtitle'}) ] },
+
+  'cover-magazine':{ name:'Magazine cover', cat:'Editorial', note:'Kicker, masthead, cover line and issue — newsstand energy.',
+    front:s=>[ FBL(),
+      TX(.06,.05,.88,.05,{key:'coverkicker',size:12,font:s.caption,weight:'700',align:'left',color:PAPER,role:'cover-kicker'}),
+      TX(.06,.10,.88,.13,{key:'covertitle',size:40,font:s.display,weight:'800',align:'left',color:PAPER,role:'cover-title'}),
+      TX(.06,.82,.6,.06,{key:'coversub',size:13,font:s.body,align:'left',color:PAPER,role:'cover-subtitle'}),
+      TX(.70,.05,.24,.05,{key:'coverissue',size:11,font:s.caption,align:'right',color:PAPER,role:'cover-issue'}) ] },
+
+  'cover-grid':{ name:'Photo grid', cat:'Photo-led', note:'A 2\u00D72 contact-style grid with a title strip. Shows range.',
+    front:s=>[ IM(0,0,.495,.42), IM(.505,0,.495,.42), IM(0,.43,.495,.42), IM(.505,.43,.495,.42),
+      TX(0,.88,1,.09,{key:'covertitle',size:22,font:s.display,weight:'800',align:'center',color:INK,role:'cover-title'}) ] },
+
+  'cover-documentary':{ name:'Documentary', cat:'Documentary', note:'Full frame, lower-third caption bar, dateline. Reportage.',
+    front:s=>[ FBL(),
+      TX(.06,.74,.88,.10,{key:'covertitle',size:30,font:s.display,weight:'800',align:'left',color:PAPER,role:'cover-title'}),
+      TX(.06,.86,.6,.05,{key:'coversub',size:11,font:s.body,align:'left',color:PAPER,role:'cover-subtitle'}),
+      TX(.70,.86,.24,.05,{key:'coverdate',size:11,font:s.caption,align:'right',color:PAPER,role:'cover-date'}) ] },
+
+  'cover-fineart':{ name:'Fine-art', cat:'Fine-art', note:'Small centred plate, generous space, understated title beneath.',
+    front:s=>[ IM(.22,.16,.56,.44),
+      TX(0,.66,1,.10,{key:'covertitle',size:22,font:s.display,weight:'700',align:'center',color:INK,role:'cover-title'}),
+      TX(0,.78,1,.05,{key:'coverbyline',size:10,font:s.caption,align:'center',color:INK,role:'cover-byline'}) ] },
+
+  'cover-youth':{ name:'Youth / community', cat:'Community', note:'Bold, bright, friendly — big title, a colour bar, room for names.',
+    front:s=>[ IM(0,.14,1,.56),
+      TX(.06,0,.88,.12,{key:'covertitle',size:34,font:s.display,weight:'800',align:'left',color:s.accent||CORAL,role:'cover-title'}),
+      TX(.06,.74,.88,.06,{key:'coversub',size:13,font:s.body,align:'left',color:INK,role:'cover-subtitle'}),
+      TX(.06,.84,.88,.06,{key:'coverbyline',size:11,font:s.caption,align:'left',color:INK,role:'cover-byline'}) ] },
+
+  'cover-bw':{ name:'Black & white', cat:'Fine-art', note:'High-contrast frame, title reversed, nothing else. Timeless.',
+    style:{accent:INK},
+    front:s=>[ FBL(),
+      TX(.08,.08,.84,.12,{key:'covertitle',size:32,font:s.display,weight:'800',align:'left',color:PAPER,role:'cover-title'}) ] },
+
+  'cover-panorama':{ name:'Panorama band', cat:'Photo-led', note:'A wide letterboxed band across the middle, title above, byline below.',
+    front:s=>[ TX(.06,.10,.88,.10,{key:'covertitle',size:28,font:s.display,weight:'800',align:'left',color:INK,role:'cover-title'}),
+      IM(0,.30,1,.40),
+      TX(.06,.78,.88,.06,{key:'coverbyline',size:11,font:s.caption,align:'left',color:INK,role:'cover-byline'}) ] }
+};
+
+const BACK_TEMPLATES={
+  'back-summary':{ name:'Summary + byline', cat:'Text', note:'A short blurb about the work and who made it.',
+    back:s=>[ TX(.10,.24,.80,.34,{key:'backblurb',size:12,font:s.body,align:'left',color:INK,role:'back-blurb'}),
+      TX(.10,.66,.80,.06,{key:'backbyline',size:11,font:s.caption,align:'left',color:INK,role:'back-byline'}) ] },
+
+  'back-photo':{ name:'Closing photo', cat:'Photo-led', note:'One last frame, full bleed, with a quiet credit.',
+    back:s=>[ FBL(),
+      TX(.06,.88,.88,.05,{key:'backcopyright',size:9,font:s.caption,align:'left',color:PAPER,role:'back-copyright'}) ] },
+
+  'back-logo':{ name:'Logo + contact', cat:'Brand', note:'Centred logo block, contact line, web address.',
+    back:s=>[ IM(.36,.30,.28,.20),
+      TX(0,.56,1,.05,{key:'backweb',size:12,font:s.display,weight:'700',align:'center',color:INK,role:'back-web'}),
+      TX(0,.63,1,.05,{key:'backcontact',size:10,font:s.caption,align:'center',color:INK,role:'back-contact'}) ] },
+
+  'back-supporters':{ name:'Supporter logos', cat:'Brand', note:'A row of supporter/partner logo slots with a thank-you.',
+    back:s=>[ TX(0,.20,1,.06,{key:'',size:11,font:s.caption,align:'center',color:INK,role:'label'}),
+      IM(.10,.34,.22,.16), IM(.39,.34,.22,.16), IM(.68,.34,.22,.16),
+      TX(0,.60,1,.05,{key:'backweb',size:11,font:s.caption,align:'center',color:INK,role:'back-web'}) ] },
+
+  'back-contact':{ name:'Contact card', cat:'Text', note:'Name, email, web and a copyright line — clean and legible.',
+    back:s=>[ TX(.12,.34,.76,.07,{key:'backbyline',size:14,font:s.display,weight:'700',align:'left',color:INK,role:'back-byline'}),
+      TX(.12,.44,.76,.05,{key:'backcontact',size:11,font:s.body,align:'left',color:INK,role:'back-contact'}),
+      TX(.12,.51,.76,.05,{key:'backweb',size:11,font:s.body,align:'left',color:INK,role:'back-web'}),
+      TX(.12,.80,.76,.05,{key:'backcopyright',size:9,font:s.caption,align:'left',color:INK,role:'back-copyright'}) ] },
+
+  'back-qr':{ name:'QR + link', cat:'Brand', note:'A QR slot beside a call-to-action and web link.',
+    back:s=>[ IM(.14,.36,.24,.24),
+      TX(.44,.38,.44,.08,{key:'backqr',size:13,font:s.display,weight:'700',align:'left',color:INK,role:'back-cta'}),
+      TX(.44,.50,.44,.06,{key:'backweb',size:11,font:s.body,align:'left',color:INK,role:'back-web'}) ] },
+
+  'back-colophon':{ name:'Colophon', cat:'Text', note:'The making-of note: tools, paper, thanks — printer\u2019s tradition.',
+    back:s=>[ TX(.14,.30,.72,.30,{key:'backcolophon',size:10,font:s.body,align:'left',color:INK,role:'back-colophon'}),
+      TX(.14,.82,.72,.05,{key:'backcopyright',size:9,font:s.caption,align:'left',color:INK,role:'back-copyright'}) ] },
+
+  'back-solid':{ name:'Solid colour', cat:'Minimal', note:'A single colour field with a centred mark. As quiet as it gets.',
+    back:s=>[ TX(0,.46,1,.06,{key:'backweb',size:13,font:s.display,weight:'700',align:'center',color:INK,role:'back-web'}),
+      TX(0,.86,1,.04,{key:'backcopyright',size:9,font:s.caption,align:'center',color:INK,role:'back-copyright'}) ] }
+};
+
 function tplRecipe(key,type){
   const t=TEMPLATES[key]||TEMPLATES.blank, s=tplStyle(key);
   const pages=Object.assign(basePages(s), (t.over? t.over(s):{}));
@@ -1633,7 +2000,7 @@ const TPL_TEXT={ title:()=>state.meta.name||'Untitled', intro:()=>'Write your in
   intro2:()=>'Continue the story.', intro3:()=>'And finish it.', caption:()=>'Caption',
   note:()=>'Notes, place, date.', quote:()=>'\u201CTheir words, not yours.\u201D',
   closing:()=>'Thank you for reading.', back:()=>'Made with ZineIt' };
-function tplText(key){ return (TPL_TEXT[key]? TPL_TEXT[key]() : 'Text'); }
+function tplText(key){ if(TPL_TEXT[key])return TPL_TEXT[key](); if(typeof COVER_TEXT!=='undefined'&&COVER_TEXT[key])return COVER_TEXT[key](); return 'Text'; }
 function tplTypeScale(){ return Math.max(.6, Math.min(2.2, fmt().w/5.5)); }   // type grows with the page
 function tplMaterialize(sp,f,m){
   const b=bleedAllow();
@@ -1694,6 +2061,50 @@ function applyTemplateScope(key,scope,keep){
   renderAll(); touch();
   toast(`${TEMPLATES[key].name} applied to ${idx.length} page${idx.length>1?'s':''}${keep!==false?' — photos kept':''}.`,'ok');
 }
+
+/* ---------- cover / back-cover template application ---------- */
+function coverStyle(kind,key){
+  // start from the project's active template style, then let the cover override
+  const base=tplStyle(state.tpl||'minimal');
+  const lib=(kind==='back'?BACK_TEMPLATES:COVER_TEMPLATES)[key];
+  return Object.assign(base, (lib&&lib.style)||{});
+}
+function coverRecipe(kind,key){
+  const lib=(kind==='back'?BACK_TEMPLATES:COVER_TEMPLATES)[key];
+  if(!lib)return [];
+  const s=coverStyle(kind,key);
+  const fn=kind==='back'?lib.back:lib.front;
+  return (fn? fn(s):[]).filter(sp=>sp && (sp.bleed || (sp.b && (sp.role!=='rule'||true))));
+}
+/* which page a cover/back applies to: cover→first page, back→last page */
+function coverPageIndex(kind){ return kind==='back'? state.pages.length-1 : 0; }
+function applyCoverTemplate(kind,key,keep){
+  const pgIdx=coverPageIndex(kind), pg=pageAt(pgIdx), f=fmt();
+  const s=coverStyle(kind,key);
+  if(Number.isFinite(s.margin))state.settings.margin=s.margin;
+  const m=state.settings.margin;
+  const oldPhotos=pg.elements.filter(e=>e.type==='image'&&e.asset).map(e=>({asset:e.asset,img:e.img}));
+  const oldTexts=pg.elements.filter(e=>e.type==='text').map(e=>({text:e.text,role:e.role}));
+  const recipe=coverRecipe(kind,key);
+  const els=recipe.map(sp=>tplMaterialize(sp,f,m));
+  if(keep!==false){
+    const frames=els.filter(e=>e.type==='image');
+    oldPhotos.forEach((p,i)=>{ if(frames[i]){ frames[i].asset=p.asset; imgFill(frames[i]); } });
+    const newTexts=els.filter(e=>e.type==='text'); const used=new Set();
+    oldTexts.forEach((t,i)=>{
+      let tgt=newTexts.find((n,j)=>!used.has(j)&&n.role===t.role&&(used.add(j)||true));
+      if(!tgt&&newTexts[i]&&!used.has(i)){ tgt=newTexts[i]; used.add(i); }
+      if(tgt&&t.text)tgt.text=t.text;
+    });
+  }
+  els.forEach(clampEl);
+  pg.elements=els; pg.cover={kind,key};
+  selPg=pgIdx; selId=els[0]?els[0].id:null;
+  renderAll(); touch();
+  const nm=((kind==='back'?BACK_TEMPLATES:COVER_TEMPLATES)[key]||{}).name||'Cover';
+  toast(`${nm} applied to the ${kind==='back'?'back':'front'} cover${keep!==false?' — photos kept':''}.`,'ok');
+}
+
 /* ---------- custom templates: save, duplicate, export, import ---------- */
 const TPL_LS='zineit_templates';
 function recipeFromPage(pgIdx){
@@ -2120,7 +2531,7 @@ function initCropEditor(){
 function renderEl(P,e,pgIdx,dxIn,z,interactive){
   if(e.hidden) return null;                 // hidden is a view state, not a deletion
   const d=document.createElement('div');
-  d.className='el '+(e.type==='image'?('img'+(e.asset?'':' empty')):'txt');
+  d.className='el '+(e.type==='image'?('img'+(e.asset?'':' empty')+(e.graphic?' graphic':'')):'txt');
   d.style.left=((e.x+dxIn)*scale)+'px'; d.style.top=(e.y*scale)+'px';
   d.style.width=(e.w*scale)+'px'; d.style.height=(e.h*scale)+'px';
   d.style.zIndex=10+z; d.dataset.id=e.id; d.dataset.pg=pgIdx;
@@ -2705,6 +3116,79 @@ function openTplModal(){
   renderTplTypes(); renderTplGrid(); renderTplNote();
   $('tplModalBk').classList.add('show');
 }
+
+/* ================= COVER TEMPLATE BROWSER =================
+   A dedicated library of front/back cover designs with a large, centred preview that
+   holds the true page aspect ratio and scales to the viewport (works on phones too). */
+let coverKind='front', coverPick=null;
+function coverSet(){ return coverKind==='back'?BACK_TEMPLATES:COVER_TEMPLATES; }
+/* draw a recipe as a little wireframe; showLabels adds faint text labels for the big preview */
+function recipeWire(recipe,showLabels){
+  const pad=.06;
+  return recipe.map(s=>{
+    if(s.bleed) return `<i style="left:0;top:0;width:100%;height:100%"></i>`;
+    if(!s.b) return '';
+    const [x,y,ww,hh]=s.b;
+    const L=(pad+x*(1-2*pad))*100, T=(pad+y*(1-2*pad))*100, W=ww*(1-2*pad)*100, H=hh*(1-2*pad)*100;
+    if(s.t==='img') return `<i style="left:${L}%;top:${T}%;width:${W}%;height:${H}%"></i>`;
+    const h2=Math.max(1.4,H*0.4);
+    let out=`<u style="left:${L}%;top:${T}%;width:${W}%;height:${h2}%"></u>`;
+    if(showLabels && s.key){ const t=escapeHtml(coverText(s.key)).slice(0,40);
+      out+=`<div class="plabel" style="left:${L}%;top:${T}%;width:${W}%;height:${Math.max(H,h2)}%;text-align:${s.align||'left'};font-size:${Math.max(6,W*0.14)}px;line-height:1.1">${t}</div>`; }
+    return out;
+  }).join('');
+}
+function renderCoverList(){
+  const box=$('coverList'); if(!box)return;
+  const set=coverSet();
+  box.innerHTML=Object.keys(set).map(k=>{
+    const t=set[k], recipe=coverRecipe(coverKind,k);
+    return `<button class="coverItem${k===coverPick?' on':''}" data-k="${k}">
+      <div class="mini" style="aspect-ratio:${fmt().w}/${fmt().h}">${recipeWire(recipe,false)}</div>
+      <div class="txt"><b>${escapeHtml(t.name)}</b><span>${escapeHtml(t.cat)}</span></div></button>`;
+  }).join('');
+  [...box.querySelectorAll('.coverItem')].forEach(c=>c.addEventListener('click',()=>{
+    coverPick=c.dataset.k; renderCoverList(); renderCoverPreview();
+  }));
+}
+function renderCoverPreview(){
+  const fr=$('coverPreviewFrame'); if(!fr)return;
+  const f=fmt(), ar=f.w/f.h;
+  // lock the frame to the true page ratio; CSS max-width/height keeps it inside the stage
+  fr.style.aspectRatio=`${f.w} / ${f.h}`;
+  // size it: fill the wider dimension of the stage while respecting the ratio
+  fr.style.width = ar>=1 ? 'min(100%, calc(52vh * '+ar+'))' : 'auto';
+  fr.style.height= ar>=1 ? 'auto' : 'min(52vh, 100%)';
+  const t=coverSet()[coverPick];
+  if(!t){ fr.innerHTML=''; $('coverPrevName').textContent='—'; $('coverPrevNote').textContent='Pick a cover design.'; return; }
+  fr.innerHTML=recipeWire(coverRecipe(coverKind,coverPick),true);
+  $('coverPrevName').textContent=t.name;
+  $('coverPrevNote').textContent=t.note||'';
+}
+function openCoverModal(kind){
+  coverKind=kind||'front';
+  const cur=pageAt(coverPageIndex(coverKind)).cover;
+  coverPick=(cur&&cur.kind===coverKind&&cur.key)|| Object.keys(coverSet())[0];
+  $('coverH2').textContent = coverKind==='back'?'Back-cover templates':'Front-cover templates';
+  [...$('coverKindTabs').querySelectorAll('button')].forEach(b=>b.classList.toggle('on',b.dataset.kind===coverKind));
+  renderCoverList(); renderCoverPreview();
+  $('coverModalBk').classList.add('show');
+}
+[...document.querySelectorAll('#coverKindTabs button')].forEach(b=>b.addEventListener('click',()=>{
+  coverKind=b.dataset.kind;
+  coverPick=Object.keys(coverSet())[0];
+  [...$('coverKindTabs').querySelectorAll('button')].forEach(x=>x.classList.toggle('on',x===b));
+  $('coverH2').textContent = coverKind==='back'?'Back-cover templates':'Front-cover templates';
+  renderCoverList(); renderCoverPreview();
+}));
+$('coverFrontBtn').addEventListener('click',()=>openCoverModal('front'));
+$('coverBackBtn').addEventListener('click',()=>openCoverModal('back'));
+$('coverClose').addEventListener('click',()=>$('coverModalBk').classList.remove('show'));
+$('coverApply').addEventListener('click',()=>{
+  if(!coverPick){ toast('Pick a cover first.','err'); return; }
+  applyCoverTemplate(coverKind,coverPick,$('coverKeep').checked);
+  $('coverModalBk').classList.remove('show');
+});
 $('tplBrowseBtn').addEventListener('click',openTplModal);
 $('tplClose').addEventListener('click',()=>$('tplModalBk').classList.remove('show'));
 $('tplApply').addEventListener('click',()=>{
@@ -2900,6 +3384,7 @@ function renderInspector(){
     if(e.spread){ sb.style.display='inline-flex'; sb.textContent='Return to single page'; }
     else if(sp&&e.asset){ sb.style.display='inline-flex'; sb.textContent='Make double-page spread'; }
     else sb.style.display='none';
+    if($('graphicChk')) $('graphicChk').checked=!!e.graphic;   // reflect transparent-graphic state
   }
   if(e.type==='text'){ $('txtContent').value=e.text;
     $('txtSize').value=e.size; $('txtAlign').value=e.align;
@@ -2981,11 +3466,11 @@ function renderPrintPage(pi,W,H){
   const d=document.createElement('div'); d.className='pp';
   d.style.width=W+'in'; d.style.height=H+'in';
   pagePrintElements(pi).forEach(({e,dx})=>{
+    if(e.hidden) return;                       // hidden layers never print — matches screen & JPG export
     const x=document.createElement('div');
     x.className='pel '+(e.type==='image'?'pimg':'ptxt');
     x.style.left=(e.x+dx)+'in'; x.style.top=e.y+'in'; x.style.width=e.w+'in'; x.style.height=e.h+'in';
     if(e.type==='image'){
-      if(e.hidden) return;
       if(e.asset){ const im=document.createElement('img'); im.src=printSrc(e.asset);
         const g=ensureImg(e), iw=g.w, ih=g.w*assetAR(e);
         im.style.cssText='position:absolute;left:50%;top:50%;width:'+iw+'in;height:'+ih+'in;max-width:none;'
@@ -2994,7 +3479,9 @@ function renderPrintPage(pi,W,H){
       else return; // empty frames don't print
     } else {
       x.textContent=e.text; x.style.fontSize=e.size+'pt'; x.style.textAlign=e.align;
-      x.style.fontWeight=e.weight; x.style.fontFamily=fontStack(e.font); x.style.color='#1b1b1b'; }
+      x.style.fontWeight=e.weight; x.style.fontFamily=fontStack(e.font);
+      x.style.color=e.color||INK;                // honour the chosen text colour (was hardcoded)
+      x.style.padding='0.02in'; }
     d.appendChild(x);
   });
   if(state.settings.pageNumsPrint && pi!==0 && pi!==state.pages.length-1){
@@ -3408,6 +3895,9 @@ const dz=$('dropzone'), fi=$('fileInput');
 dz.addEventListener('click',()=>fi.click());
 dz.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' ')fi.click(); });
 fi.addEventListener('change',()=>{ importFiles(fi.files); fi.value=''; });
+const gfi=$('graphicInput');
+$('addGraphicBtn').addEventListener('click',()=>gfi.click());
+gfi.addEventListener('change',()=>{ importGraphics(gfi.files); gfi.value=''; });
 ['dragover','dragenter'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('over')}));
 ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('over')}));
 dz.addEventListener('drop',e=>importFiles(e.dataTransfer.files));
@@ -3454,6 +3944,13 @@ $('centreBtn').addEventListener('click',()=>imgAction(imgCentre));
 $('resetCropBtn').addEventListener('click',()=>imgAction(imgResetCrop));
 $('resetFrameBtn').addEventListener('click',()=>imgAction(imgResetFrame));
 $('cropOpenBtn').addEventListener('click',()=>{ const e=el(); if(e)openCropEditor(e); });
+$('graphicChk').addEventListener('change',ev=>{ const e=el(); if(!e||e.type!=='image')return;
+  e.graphic=ev.target.checked;
+  if(e.asset&&state.assets[e.asset]) state.assets[e.asset].graphic=e.graphic;
+  if(e.graphic) imgFit(e);                    // show the whole graphic; no matte
+  renderCanvas(); renderInspector(); touch();
+  toast(e.graphic?'Transparent graphic — the white background is gone and stays gone in export.'
+    :'Back to a normal photo frame.','ok'); });
 function imgZoom(mult){ imgAction(e=>{ const g=ensureImg(e); g.w=Math.max(0.15, Math.min(g.w*mult, surfW(e)*12)); }); }
 $('zoomInImg').addEventListener('click',()=>imgZoom(1.1));
 $('zoomOutImg').addEventListener('click',()=>imgZoom(1/1.1));
@@ -3541,6 +4038,9 @@ $('foldClose').addEventListener('click',()=>$('foldModalBk').classList.remove('s
 $('bakBtn').addEventListener('click',downloadBak);
 $('restoreBtn').addEventListener('click',()=>$('bakInput').click());
 $('bakInput').addEventListener('change',e=>{ if(e.target.files[0])restoreBak(e.target.files[0]); e.target.value=''; });
+$('refBakBtn').addEventListener('click',downloadRefBak);
+$('relinkBtn').addEventListener('click',()=>$('relinkInput').click());
+$('relinkInput').addEventListener('change',e=>{ if(e.target.files&&e.target.files.length)relinkFromFiles(e.target.files); e.target.value=''; });
 $('dailyChk').addEventListener('change',e=>{ state.settings.daily=e.target.checked; touch(); if(!e.target.checked)hideBanner(); });
 $('bannerBak').addEventListener('click',downloadBak);
 $('bannerDismiss').addEventListener('click',hideBanner);
@@ -3637,6 +4137,8 @@ window.__zineit={
   undo, redo, undoReset, get undoDepth(){return undoPast.length}, get redoDepth(){return undoFuture.length},
   renderLayers, lyShift, lyMoveTo, lyKind, lyName, elById, renderCanvas, touch, initPWA,
   openCropEditor, closeCropEditor, applyCrop, get crop(){return crop}, initCropEditor,
+  COVER_TEMPLATES, BACK_TEMPLATES, coverRecipe, applyCoverTemplate, coverPageIndex, openCoverModal,
+  get coverKind(){return coverKind}, get coverPick(){return coverPick},
   renderRulers, renderUserGuides, addGuideFromRuler, setPanMode, get panMode(){return panMode},
   normHex, hexToRgb, setTextColor, applyColorScope, BRAND_COLORS, syncColorUI,
   fileName, sanitizeName, exportBase, exportJpgs, renderPageCanvas, zipStore, crc32,
@@ -3650,7 +4152,10 @@ window.__zineit={
   hydrate, openLightbox, APP_VER, FEEDBACK_EMAIL,
   setAsset:(id,a)=>{ const src=a.src||a.thumb||'';
     state.assets[id]={name:a.name||'test',w:a.w||100,h:a.h||100,thumb:src};
+    if(a.graphic)state.assets[id].graphic=true;
     try{ const b=dataURLtoBlob(src); assetStore.put(id,{full:b,preview:b}); }catch(e){} },
+  alphaCapable, bitmapHasAlpha, importGraphics,
+  buildRefBakJson, assetManifest, missingAssetIds, relinkScore, relinkFromFiles, ingestInto, fingerprintOf,
 };
 
 try{ boot(); console.info('ZineIt v'+APP_VER+' — by Storitellah · feedback: '+FEEDBACK_EMAIL); }

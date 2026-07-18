@@ -1,4 +1,4 @@
-ZineIt v4.2 test run — 2026-07-18T07:46:00.141Z
+ZineIt v4.3 test run — 2026-07-18T21:38:18.200Z
 PASS  boots into a valid mini-zine project
 PASS  spread model: cover alone · 3 interior pairs · back alone
 PASS  forward/backward page navigation, no skips, covers included
@@ -161,6 +161,25 @@ PASS  pan mode toggles from both the toolbar and the properties panel
 PASS  clock and autosave moved into the right panel status strip
 PASS  audio notes are gone from every surface
 PASS  support and feedback route to hello@storitellah.com
+PASS  print/PDF export carries the chosen text colour (regression: was hardcoded #1b1b1b)
+PASS  no export path hardcodes a text colour; each falls back to INK
+PASS  hidden text layers are omitted from print/PDF, matching screen and JPG export
+PASS  print text gets the same inner padding as screen and canvas
+PASS  front-cover templates apply to the first page and set a real title
+PASS  back-cover templates apply to the LAST page
+PASS  applying a cover keeps existing photos, re-flowing them into the new frames
+PASS  every cover and back recipe is well-formed (fractions in range, valid parts)
+PASS  the cover library covers the designs Brian asked for
+PASS  a graphic asset is placed contained (whole graphic visible) and flagged
+PASS  graphic elements render with no white matte on screen
+PASS  graphics keep transparency into the print/PDF export (no re-encode to JPEG)
+PASS  alphaCapable recognises the alpha formats and rejects jpeg
+PASS  the transparent-graphic toggle flips an existing photo to a graphic and back
+PASS  a light backup is tiny and carries no pixel data
+PASS  the manifest fingerprints name, byte size and dimensions
+PASS  relinkScore rewards a name + byte-size match and tolerates a renamed file by size
+PASS  missingAssetIds finds photos with no pixels in the store
+PASS  a light backup still validates and restores as a project
 PASS  no page errors or uncaught exceptions across the whole run
 
-163 passed · 0 failed
+182 passed · 0 failed

@@ -86,9 +86,22 @@ Every project automatically includes a **front cover** and **back cover**; inter
   what “+” means), **Export stands alone**, the clock and autosave moved into the Page
   pane, and **pan mode is a proper toggle**.
 
-**Not in v4.2 (flagged, not buried):** the front/back **cover-template library** and the
-**equirectangular panorama photobook** system are still ahead — both are substantial and
-sequenced in [`docs/ROADMAP.md`](docs/ROADMAP.md).
+**v4.3 — covers, transparent graphics, a fixed export, and light backups**
+
+- **Cover-template library.** Front cover… and Back cover… open a browser with a large,
+  centred preview (mobile-optimised): 12 front designs and 8 back designs. Covers keep your
+  photos and title and re-flow them into the new layout.
+- **Transparent graphics.** + Graphic / QR imports PNG/SVG/WebP/GIF with transparency
+  preserved through export — no white box. Drop a transparent PNG and it's detected
+  automatically; a toggle converts any image to a graphic.
+- **Export fidelity fix.** Text colour now exports (it was printing black), and hidden
+  layers no longer appear in the print/PDF output.
+- **Light backup + relink.** Save a kilobyte-sized reference backup that remembers your
+  layout and which photos go where, then Relink photos… reconnects them from disk. The
+  full one-file .bak is unchanged.
+
+**Not in v4.3 (flagged, not buried):** the **equirectangular panorama photobook** system
+is still ahead — a substantial build sequenced in [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 v4.0 is Phase 1 of a larger brief — colour proofing, panorama books, mockups and the
 printmaker guide are sequenced in [`docs/ROADMAP.md`](docs/ROADMAP.md).

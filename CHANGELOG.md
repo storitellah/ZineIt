@@ -1,5 +1,53 @@
 # Changelog — ZineIt by Storitellah
 
+## v4.3 — 2026-07-18
+The cover-template library, transparent graphics, a fixed export, and a light backup that relinks.
+
+### Fixed — export fidelity (important)
+- **Text colour now exports.** The print/PDF path was hardcoding near-black and ignoring
+  your chosen colour — so a coral heading printed black. It now uses the element's real
+  colour everywhere: screen, print/PDF, and the 300 DPI JPG export all agree.
+- **Hidden text layers no longer print.** A layer you hid on screen was still appearing in
+  the print/PDF export. Now hidden means hidden, in every output.
+- Text also gets the same inner padding in print as it has on screen and in the JPG export,
+  so nothing shifts between preview and paper.
+
+### Added — cover-template library
+- A dedicated **Front cover…** and **Back cover…** browser with a **large, centred preview**
+  that holds your true page proportions and scales to the screen — on desktop the preview
+  sits beside the list; on a phone it moves to the top and the list becomes a swipe strip.
+- **12 front-cover designs**: full-bleed photo, photo plate + title band, minimal title,
+  big typography, split image/title, magazine, photo grid, documentary, fine-art,
+  youth/community, black & white, and a panorama band.
+- **8 back-cover designs**: summary + byline, closing photo, logo + contact, supporter
+  logos, contact card, QR + link, colophon, and solid colour.
+- Covers inherit your project's fonts and accent, pull the title from your project name,
+  and **keep your existing photos and text**, re-flowing them into the new layout. Front
+  applies to the first page, back to the last.
+
+### Added — transparent graphics (QR codes, logos, PNGs)
+- **+ Graphic / QR (transparent)…** imports PNG/SVG/WebP/GIF and **keeps the transparency**
+  all the way through — preview, thumbnail and export are PNG, never flattened to a white
+  box. Drop a normal transparent PNG in and ZineIt detects the alpha automatically.
+- Graphics are placed **contained** (the whole mark is visible) with **no matte**, and a
+  **Transparent graphic** toggle in the inspector converts any image to a graphic (or back).
+- Transparency is preserved in the print/PDF output and composites correctly over photos in
+  the 300 DPI JPG export.
+
+### Added — light backup + relink (small files)
+- **Save light backup (references photos)** writes a **kilobyte-sized** file: your full
+  layout plus a fingerprint of each photo (name, byte size, dimensions) — but not the pixels.
+- **Relink photos…** reconnects those photos from disk by matching the fingerprints, so as
+  long as the originals are on the same computer you get everything back. Restoring a light
+  backup offers to relink straight away. Your originals are never modified.
+- The original **full .bak** (everything embedded, verified by a test restore) is unchanged
+  and still the one-file option.
+
+### Tested
+- 182 automated jsdom tests + 22 Lua tests, all green. New coverage: the export-colour and
+  hidden-layer regressions, every cover/back recipe, transparent-graphic detection and
+  rendering, and the light backup + relink matching.
+
 ## v4.2 — 2026-07-18
 A user-experience pass across the whole tool: clearer toolbar, a real crop window,
 rulers and draggable guides, and a pan toggle that stays put.

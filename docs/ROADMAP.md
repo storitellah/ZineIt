@@ -15,15 +15,18 @@ guides, and a UI pass (labelled toolbar, standalone Export, pan toggle, relocate
 clock). What is left is listed honestly below — nothing here is half-built and quietly
 claimed.
 
-> **Two things you asked for that are NOT in v4.2 — flagged loudly, not buried:**
-> 1. **The front/back cover template *library*** (the specialised set of cover and
->    back-cover designs). The engine supports cover/back page types today; the curated
->    set of templates on top is the next release.
-> 2. **The equirectangular panorama photobook system** (2:1/3:1/4:1 ratios, seam/fold/
+> **v4.3 shipped the cover-template library** (12 front + 8 back designs with a large
+> centred, mobile-optimised preview), **transparent graphics** (QR/logo/PNG with alpha
+> preserved through export), a **fixed export** (text colour + hidden layers now honoured),
+> and a **light backup + relink** system (kilobyte reference files that reconnect photos
+> from disk).
+>
+> **The one big thing still NOT built — flagged loudly, not buried:**
+> - **The equirectangular panorama photobook system** (2:1/3:1/4:1 ratios, seam/fold/
 >    gutter controls, subject-protection, 4-page splits, wraparound cover, panorama-aware
 >    cropping, low-res/ratio warnings). A double-page spread already crosses the fold
->    without stretching; the panorama-*aware* tooling is a substantial build of its own
->    and is scheduled as its own phase. See Phase 5.
+>    without stretching, and there is now a panorama-band *cover*, but the panorama-*aware*
+>    tooling is a substantial build of its own and is scheduled as its own phase. See Phase 5.
 
 ---
 
@@ -75,12 +78,22 @@ claimed.
 - **Mini-zine setup wizard**: paper → finished size → orientation → pages → binding →
   bleed → colour profile → quality → template
 - **Paper and finished-size options**: A3/A4/Letter/custom sheets, A6/A7/custom trims
-- **Front/back cover template library**: dedicated cover templates (full-bleed photo,
-  minimal title, large-type, split-image, photo-grid; documentary/fine-art/magazine/
-  youth/B&W/panorama covers) and back-cover templates (summary, logo, supporter logos,
-  contact, QR, copyright, colophon, solid colour). The template engine already handles
-  cover and back *page types*; this is the specialised **set** on top of it — **NOT yet
-  built**. Next release.
+- **Front/back cover template library** ✅ **shipped in v4.3**: 12 front-cover designs
+  (full-bleed photo, photo plate, minimal title, big typography, split image/title,
+  magazine, photo grid, documentary, fine-art, youth/community, black & white, panorama
+  band) and 8 back-cover designs (summary + byline, closing photo, logo + contact,
+  supporter logos, contact card, QR + link, colophon, solid colour), with a large centred
+  preview that is mobile-optimised.
+
+### Also shipped in v4.3
+- **Transparent graphics** ✅: import QR codes, logos and PNG/SVG/WebP/GIF with alpha
+  preserved end to end (no white matte), placed contained, with an inspector toggle. Alpha
+  is auto-detected on import.
+- **Light backup + relink** ✅: kilobyte reference backups store the layout plus a
+  fingerprint of each photo (name, byte size, dimensions) but not the pixels; **Relink
+  photos…** reconnects them from disk by matching the fingerprints. Originals untouched.
+- **Export fidelity fix** ✅: the print/PDF path now honours the chosen text colour and
+  skips hidden layers, matching screen and the 300 DPI JPG export.
 
 ## Phase 3 — templates ✅ shipped (brought forward)
 
