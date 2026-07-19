@@ -1,5 +1,6 @@
-ZineIt v4.4 test run — 2026-07-19T18:25:15.855Z
-PASS  boots into a valid mini-zine project
+ZineIt v4.5 test run — 2026-07-19T19:24:53.016Z
+PASS  boots into a valid A4 mini-zine project — borderless by default
+PASS  the classic US Letter mini zine is still available (the dimension tests below use it)
 PASS  spread model: cover alone · 3 interior pairs · back alone
 PASS  forward/backward page navigation, no skips, covers included
 PASS  spread navigation lands on each spread in order
@@ -53,11 +54,11 @@ PASS  touch drag & resize use the same pointer pipeline (no mouse-only APIs)
 PASS  fullscreen preview: enters, shows page indicator, navigates, exits via Esc
 PASS  view switching survives on mobile: single / spread / fullscreen all reachable
 PASS  Letter imposition: exact 11×8.5 sheet, 8 panels, 4 rotated, scale 1
-PASS  A4 imposition: paper resized, sheet scaled uniformly (aspect ratios preserved), centred
+PASS  A4 imposition (Fit): paper resized, sheet scaled uniformly (aspect ratios preserved), centred
 PASS  fold marks: 4 dashed fold lines + 8 edge ticks at the exact fold positions
 PASS  cut mark: single ✂ line across the two middle panels only
 PASS  guides can be hidden: fold off and cut off remove every mark
-PASS  maintain-margins shrinks the sheet to keep a ¼″ border
+PASS  maintain-margins shrinks the sheet to keep a ¼″ border (Fit mode only)
 PASS  imposition scale modes: 100% warns of clipping, fit reports the white band, fill is borderless
 PASS  page numbers in the imposition follow the print toggle (interiors only)
 PASS  print-preview modal: opens with synced settings, live preview, toggles rebuild it
@@ -187,6 +188,10 @@ PASS  A3 paper exists and the imposition accepts it
 PASS  fill mode is the default for new projects — borderless out of the box
 PASS  old saves with the fit boolean still resolve to a sane mode
 PASS  the illustrated fold guide is in the app, with all six steps drawn
+PASS  the A4 mini zine panel grid tiles A4 exactly — truly nothing to trim
+PASS  each format prints on its native paper: A4 zine → A4, Letter zine → Letter
+PASS  double-clicking a text box opens exactly that text in the Text editor, focused
+PASS  openTextInEditor is exposed and safe on a missing id
 PASS  no page errors or uncaught exceptions across the whole run
 
-189 passed · 0 failed
+194 passed · 0 failed

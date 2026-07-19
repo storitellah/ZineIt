@@ -39,13 +39,27 @@ const ptr = (target, type, opts) => target.dispatchEvent(new window.MouseEvent(t
 const PXDATA = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
 
 /* ============ 1 · boot & model ============ */
-T('boots into a valid mini-zine project', () => {
+T('boots into a valid A4 mini-zine project — borderless by default', () => {
   ok(Z && Z.state, 'test API present');
   eq(Z.state.app, 'ZineIt'); eq(Z.state.ver, 4);
+  eq(Z.state.format, 'mini-zine-a4', 'the default format is the A4 borderless mini zine');
   eq(Z.state.pages.length, 8, '8 fixed pages');
   eq(Z.state.pages[0].label, 'Front cover');
   eq(Z.state.pages[7].label, 'Back cover');
+  eq(Z.state.settings.imp.paper, 'a4', 'imposition defaults to A4 paper');
+  eq(Z.impMode(Z.state.settings.imp), 'fill', 'and to borderless fill');
   eq(Z.validateProject(Z.state), null, 'boot state validates');
+  // the whole point: the 8 panels tile A4 exactly, so nothing white is left to trim
+  const f = Z.fmt(), r = Z.buildImpSheet();
+  approx(r.scale, 1, 1e-4, 'the design sheet IS the paper — scale 1.0');
+  ok(Math.abs(f.w * 4 - r.paper.w) < 1e-3 && Math.abs(f.h * 2 - r.paper.h) < 1e-3,
+    'panel grid equals A4 to a thousandth of an inch');
+});
+T('the classic US Letter mini zine is still available (the dimension tests below use it)', () => {
+  Z.newProject('mini-zine');
+  eq(Z.state.format, 'mini-zine', 'letter variant selected');
+  approx(Z.fmt().w, 2.75, 1e-9, 'letter panel width');
+  eq(Z.state.settings.imp.paper, 'letter', 'its native paper is Letter');
 });
 T('spread model: cover alone · 3 interior pairs · back alone', () => {
   const sp = Z.buildSpreads();
@@ -597,15 +611,16 @@ T('Letter imposition: exact 11×8.5 sheet, 8 panels, 4 rotated, scale 1', () => 
   eq(page.querySelectorAll('.impRot').length, 4);
   approx(scale, 1, 1e-9, 'design sheet is native Letter — no scaling');
 });
-T('A4 imposition: paper resized, sheet scaled uniformly (aspect ratios preserved), centred', () => {
-  Z.state.settings.imp.paper = 'a4';
+T('A4 imposition (Fit): paper resized, sheet scaled uniformly (aspect ratios preserved), centred', () => {
+  Z.state.settings.imp.paper = 'a4'; Z.state.settings.imp.mode = 'fit';
   const { page, scale } = Z.buildImpSheet();
-  eq(page.style.width, '11.69in'); eq(page.style.height, '8.27in');
-  approx(scale, 8.27 / 8.5, 1e-6, 'fit is limited by A4 height');
+  eq(page.style.width, '11.69291in'); eq(page.style.height, '8.26772in');
+  approx(scale, 8.26772 / 8.5, 1e-6, 'fit is limited by A4 height');
   const sheet = page.querySelector('.impSheet');
   ok(/scale\(0\.9/.test(sheet.style.transform), 'single uniform scale() — nothing stretches');
   const ox = parseFloat(sheet.style.left);
-  approx(ox, (11.69 - 11 * scale) / 2, 1e-4, 'sheet centred horizontally');
+  approx(ox, (11.69291 - 11 * scale) / 2, 1e-4, 'sheet centred horizontally');
+  Z.state.settings.imp.mode = 'fill';
 });
 T('fold marks: 4 dashed fold lines + 8 edge ticks at the exact fold positions', () => {
   const { page } = Z.buildImpSheet();
@@ -631,10 +646,14 @@ T('guides can be hidden: fold off and cut off remove every mark', () => {
   eq(page.querySelectorAll('.cutLine').length, 0);
   Z.state.settings.imp.fold = true; Z.state.settings.imp.cut = true;
 });
-T('maintain-margins shrinks the sheet to keep a ¼″ border', () => {
+T('maintain-margins shrinks the sheet to keep a ¼″ border (Fit mode only)', () => {
   Z.state.settings.imp.paper = 'letter'; Z.state.settings.imp.margins = true;
-  const { scale } = Z.buildImpSheet();
+  Z.state.settings.imp.mode = 'fit';                  // margins only make sense when fitting inside
+  let { scale } = Z.buildImpSheet();
   approx(scale, Math.min(10.5 / 11, 8 / 8.5), 1e-6, 'fits inside paper minus ¼″ each side');
+  Z.state.settings.imp.mode = 'fill';                 // margins must NOT shrink a borderless print
+  ({ scale } = Z.buildImpSheet());
+  approx(scale, 1, 1e-9, 'fill ignores the margin — borderless means borderless');
   Z.state.settings.imp.margins = false;
 });
 T('imposition scale modes: 100% warns of clipping, fit reports the white band, fill is borderless', () => {
@@ -689,7 +708,7 @@ T('print-preview modal: opens with synced settings, live preview, toggles rebuil
 T('printing the imposition uses the chosen paper size for @page and PDF export', () => {
   Z.state.settings.imp.paper = 'a4';
   Z.buildImposition();
-  ok(/@page\{size:11\.69in 8\.27in/.test($('pageSizeStyle').textContent), '@page = A4 landscape');
+  ok(/@page\{size:11\.69291in 8\.26772in/.test($('pageSizeStyle').textContent), '@page = A4 landscape');
   eq(document.querySelectorAll('#printRoot .impPanel').length, 8);
   Z.state.settings.imp.paper = 'letter';
   Z.buildImposition();
@@ -1958,6 +1977,49 @@ T('the illustrated fold guide is in the app, with all six steps drawn', () => {
   ok($('howFoldBk').classList.contains('show'), 'opens from the mini-zine print window');
   click($('howFoldClose'));
   ok(!$('howFoldBk').classList.contains('show'), 'and closes');
+});
+
+/* ============ 19o · v4.5: A4-native mini zine + dblclick text → editor ============ */
+T('the A4 mini zine panel grid tiles A4 exactly — truly nothing to trim', () => {
+  Z.newProject('mini-zine-a4');
+  const f = Z.fmt();
+  // 4 panels across, 2 down = the A4 landscape sheet, to a thousandth of an inch
+  approx(f.w * 4, 11.69291, 1e-3, 'grid width = A4 width');
+  approx(f.h * 2, 8.26772, 1e-3, 'grid height = A4 height');
+  const r = Z.buildImpSheet();
+  approx(r.scale, 1, 1e-4, 'printed at 100% — no scaling at all');
+  ok(!/white/.test(r.warn), 'no white band reported');
+  // full bleed by default: designs run to the panel edge
+  eq(Z.state.settings.margin, 0, 'no forced margin');
+  eq(Z.state.settings.bleed, true, 'bleed on');
+});
+T('each format prints on its native paper: A4 zine → A4, Letter zine → Letter', () => {
+  Z.newProject('mini-zine-a4');
+  eq(Z.state.settings.imp.paper, 'a4');
+  eq(Z.impMode(Z.state.settings.imp), 'fill');
+  Z.newProject('mini-zine');
+  eq(Z.state.settings.imp.paper, 'letter');
+});
+T('double-clicking a text box opens exactly that text in the Text editor, focused', () => {
+  Z.newProject('mini-zine-a4');
+  const e1 = Z.addTextEl('First caption', 10, 'caption', 1);
+  const e2 = Z.addTextEl('Second caption', 10, 'caption', 2);
+  Z.setTab('layout'); Z.goPage(1); Z.renderAll();
+  const node = document.querySelector('#page .el[data-id="' + e1.id + '"]');
+  ok(node, 'the text element renders on the page');
+  node.dispatchEvent(new window.MouseEvent('dblclick', { bubbles: true }));
+  eq(Z.view.tab, 'text', 'double-click lands in the Text editor tab');
+  const row = document.querySelector('#teList .teRow[data-eid="' + e1.id + '"]');
+  ok(row, 'the row for that exact element exists');
+  ok(row.classList.contains('teFocus'), 'and is highlighted');
+  eq(document.activeElement, row.querySelector('textarea'), 'its textarea has focus, ready to type');
+  const other = document.querySelector('#teList .teRow[data-eid="' + e2.id + '"]');
+  ok(other && !other.classList.contains('teFocus'), 'the other text row is not highlighted');
+});
+T('openTextInEditor is exposed and safe on a missing id', () => {
+  Z.setTab('layout');
+  Z.openTextInEditor('no-such-id');            // must not throw
+  eq(Z.view.tab, 'text', 'still switches to the editor');
 });
 
 /* ============ 20 · console health ============ */

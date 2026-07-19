@@ -1,5 +1,35 @@
 # Changelog — ZineIt by Storitellah
 
+## v4.5 — 2026-07-19
+The A4 mini zine becomes native and truly borderless, and double-clicking text opens the
+Text editor.
+
+### Fixed properly — the A4 white border, at the root this time
+v4.4 added Fill mode, which scales the US-Letter-proportioned sheet to cover A4 — better,
+but still a compromise: the proportions never matched, so something always cropped or
+banded. v4.5 fixes the geometry itself:
+
+- **New format: Mini zine — 8-page A4, one sheet (borderless).** Its 8 panels are exactly
+  74.25 × 105 mm — four across, two down **is** an A4 landscape sheet. Printed at 100%:
+  scale 1.000000, zero white band, zero cropping, nothing to trim. Verified in the test
+  suite to a thousandth of an inch.
+- **It is the default.** New projects open in the A4 borderless mini zine, full-bleed, with
+  the print already set to A4 paper — design on it and print it, and the sheet leaves the
+  printer finished.
+- Each format now knows its native paper: the A4 zine prints on A4, the US Letter zine
+  (still available, now labelled clearly) on Letter.
+- Fill mode also now explicitly ignores the ¼″ margin option — borderless means borderless.
+
+### Added — double-click a text box to edit it
+- **Double-clicking any text on the page opens the Text editor with exactly that text
+  focused** — highlighted, scrolled into view, caret ready at the end. The matching photo
+  gesture (double-click → crop window) has been there since v4.2; text now behaves the
+  same way.
+
+### Tested
+- 194 automated jsdom tests + 22 Lua tests, all green (4 new v4.5 tests, incl. the
+  panel-grid-equals-A4 proof and the double-click contract).
+
 ## v4.4 — 2026-07-19
 Borderless A4 printing, readable tab names, a font picker that shows the fonts, and an
 illustrated fold guide.

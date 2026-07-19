@@ -15,6 +15,10 @@ guides, and a UI pass (labelled toolbar, standalone Export, pan toggle, relocate
 clock). What is left is listed honestly below — nothing here is half-built and quietly
 claimed.
 
+> **v4.5 made the A4 mini zine native**: a new default format whose 8 panels tile A4
+> exactly, so a 100% print is borderless with zero cropping — the white-border problem is
+> solved in the geometry, not worked around. Double-click text → Text editor also shipped.
+>
 > **v4.4 shipped borderless printing** (Fill-the-paper on A4/Letter/A3 — the white border
 > Brian was trimming is gone), **named panel tabs** with the autosave/clock footer, a
 > **font picker with live previews**, and an **illustrated fold guide**.

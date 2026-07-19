@@ -535,6 +535,8 @@ body.fs #canvasScroll{padding:14px}
 .fCut{stroke:var(--coral);stroke-width:2;fill:none}
 .fArrow{stroke:var(--teal);stroke-width:1.6;fill:none;stroke-linecap:round}
 .fScissor{font-size:9px;fill:var(--coral)}
+.teRow.teFocus{outline:2px solid var(--yellow);outline-offset:2px;border-radius:6px;transition:outline-color .4s}
+
 
 
 /* ---- cover template library ---- */
@@ -588,7 +590,7 @@ body.fs #canvasScroll{padding:14px}
   <header>
     <div class="brand">
       <span class="mark">Zine<span>It</span></span>
-      <span class="ver" id="verBadge">v4.4</span>
+      <span class="ver" id="verBadge">v4.5</span>
     </div>
     <input id="projName" type="text" value="Untitled project" spellcheck="false" aria-label="Project title" title="Project title — click to edit">
     <div class="tbar">
@@ -1185,7 +1187,10 @@ body.fs #canvasScroll{padding:14px}
 
 /* ---------- constants ---------- */
 const FORMATS = {
-  'mini-zine'  :{group:'Zines', name:'Mini zine — 8-page, one sheet', w:2.75, h:4.25, fixed:8, imposition:true},
+  /* A4 mini zine: 8 panels tile an A4 landscape sheet EXACTLY (74.25 × 105 mm each), so the
+     printed sheet is borderless at 100% — no scaling, no cropping, no white edges to trim. */
+  'mini-zine-a4':{group:'Zines', name:'Mini zine — 8-page A4, one sheet (borderless)', w:2.92323, h:4.13386, fixed:8, imposition:true, fullBleed:true, paper:'a4'},
+  'mini-zine'  :{group:'Zines', name:'Mini zine — 8-page, one sheet (US Letter)', w:2.75, h:4.25, fixed:8, imposition:true, paper:'letter'},
   'mini-16'    :{group:'Zines', name:'Mini zine — 16-page, saddle stitch', w:5.83, h:8.27, fixed:16, saddle:true},
   'quarter'    :{group:'Zines', name:'Quarter zine — 4.25 × 5.5 in',  w:4.25, h:5.5},
   'half-letter':{group:'Zines', name:'Half-letter zine — 5.5 × 8.5 in', w:5.5, h:8.5},
@@ -1199,7 +1204,7 @@ const FORMATS = {
   'book-3x2'   :{group:'Photobooks', name:'Photobook — 3:2 landscape (12 × 8 in)', w:12, h:8},
   'book-2x3'   :{group:'Photobooks', name:'Photobook — 2:3 portrait (8 × 12 in)',  w:8, h:12},
 };
-const APP_VER='4.4', FEEDBACK_EMAIL='hello@storitellah.com';
+const APP_VER='4.5', FEEDBACK_EMAIL='hello@storitellah.com';
 const GRID=0.125, MM=1/25.4;
 const FONTS = ['Inter','Manrope','Roboto','Open Sans','Lato','Montserrat','Poppins','Raleway','Work Sans','DM Sans','Nunito',
   'Rubik','Karla','Source Sans 3','Space Grotesk','Archivo','Archivo Black','IBM Plex Sans','Oswald','Bebas Neue','Anton',
@@ -1233,6 +1238,7 @@ function newProject(formatKey){
   const f=FORMATS[formatKey], n=f.fixed||4;
   const s=defaultSettings();
   if(f.fullBleed){ s.margin=0; s.bleed=true; s.warnMargins=false; }   // A4 zines: edge to edge by default
+  if(f.paper){ s.imp.paper=f.paper; s.imp.mode='fill'; }              // mini zines print on their native sheet
   const pages=[blankPage('Front cover')];
   for(let i=2;i<n;i++)pages.push(blankPage('Page '+i));
   pages.push(blankPage('Back cover'));
@@ -2655,6 +2661,7 @@ function renderEl(P,e,pgIdx,dxIn,z,interactive){
   if(e.spread){ const b=document.createElement('span'); b.className='spreadBadge'; b.textContent='SPREAD'; d.appendChild(b); }
   if(state.settings.warnMargins && e.type==='image' && e.asset && !e.spread && marginViolation(e).length && !state.settings.bleed) d.classList.add('warnEdge');
   if(e.type==='text'){ d.textContent=e.text;
+    d.addEventListener('dblclick',ev=>{ ev.stopPropagation(); openTextInEditor(e.id); });
     d.style.fontSize=(e.size/72*scale)+'px'; d.style.textAlign=e.align; d.style.fontWeight=e.weight;
     d.style.color=e.color||INK;
     d.style.fontFamily=fontStack(e.font); d.style.padding=(0.02*scale)+'px'; }
@@ -3512,7 +3519,7 @@ function renderTextEditor(){
   state.pages.forEach((p,pi)=>{
     p.elements.forEach(e=>{
       if(e.type!=='text')return; count++;
-      const row=document.createElement('div'); row.className='teRow';
+      const row=document.createElement('div'); row.className='teRow'; row.dataset.eid=e.id;
       const si=sps.findIndex(s=>s.left===pi||s.right===pi);
       row.innerHTML=`<div class="loc">page ${pi+1}<br>spread ${si+1}<br><span style="color:var(--faint)">${escapeHtml(p.label)}</span></div>`;
       const role=document.createElement('select');
@@ -3538,6 +3545,18 @@ function renderTextEditor(){
 function markEdited(row){ const s=row.querySelector('.teStatus'); s.classList.add('edited'); s.lastChild.textContent='editing…'; }
 
 /* ---------- tabs / view bar ---------- */
+/* double-click a text box on the page → its entry in the Text editor, focused and ready */
+function openTextInEditor(eid){
+  setTab('text');
+  renderTextEditor();
+  const row=document.querySelector(`#teList .teRow[data-eid="${eid}"]`);
+  if(!row)return;
+  row.classList.add('teFocus');
+  if(row.scrollIntoView)row.scrollIntoView({block:'center',behavior:'smooth'});
+  const ta=row.querySelector('textarea');
+  if(ta){ ta.focus({preventScroll:true}); try{ ta.setSelectionRange(ta.value.length,ta.value.length); }catch(e){} }
+  setTimeout(()=>row.classList.remove('teFocus'),1600);
+}
 function setTab(t){ view.tab=t;
   $('tabLayout').classList.toggle('on',t==='layout'); $('tabText').classList.toggle('on',t==='text');
   $('canvasScroll').style.display=t==='layout'?'grid':'none';
@@ -3610,7 +3629,7 @@ function buildSequentialPrint(){
 /* classic 8-page one-sheet imposition:
    top row (rotated 180°) L→R: p5 p4 p3 p2 · bottom row L→R: p6 p7 back front
    Design sheet = 4×2.75 by 2×4.25 = 11 × 8.5 in, scaled uniformly onto Letter or A4. */
-const PAPERS={ letter:{name:'US Letter', w:11, h:8.5}, a4:{name:'A4', w:11.69, h:8.27}, a3:{name:'A3', w:16.54, h:11.69} };
+const PAPERS={ letter:{name:'US Letter', w:11, h:8.5}, a4:{name:'A4', w:11.69291, h:8.26772}, a3:{name:'A3', w:16.53543, h:11.69291} };
 function impMode(imp){ return imp.mode || (imp.fit===false?'actual':'fit'); }  // old saves: fit boolean
 function buildImpSheet(){
   const f=fmt(), imp=state.settings.imp||{paper:'letter',mode:'fill',margins:false,fold:true,cut:true};
@@ -3990,7 +4009,7 @@ function boot(){
   ROLES.forEach(r=>{ [rs,ra].forEach(sel=>{ const o=document.createElement('option'); o.value=r; o.textContent=r; sel.appendChild(o); }); });
   const saved=store.get(LS_KEY);
   if(saved){ try{ const p=JSON.parse(saved); if(!validateProject(p))state=migrate(p); }catch(e){} }
-  if(!state)newProject('mini-zine');
+  if(!state)newProject('mini-zine-a4');   // A4 is the default worldwide paper — borderless out of the box
   const fb='mailto:'+FEEDBACK_EMAIL
     +'?subject='+encodeURIComponent('ZineIt v'+APP_VER+' — bug report / idea')
     +'&body='+encodeURIComponent('Hi Brian,\n\nWhat happened (or what I wish ZineIt did):\n\n\nSteps to reproduce (for a bug):\n1.\n2.\n\n—\nZineIt v'+APP_VER+' · format: '+state.format+' · '+(navigator.userAgent||''));
@@ -4291,7 +4310,7 @@ window.__zineit={
     if(a.graphic)state.assets[id].graphic=true;
     try{ const b=dataURLtoBlob(src); assetStore.put(id,{full:b,preview:b}); }catch(e){} },
   alphaCapable, bitmapHasAlpha, importGraphics,
-  impMode, PAPERS, openFontMenu, closeFontMenu, pickFont, syncFontBtn, renderFontList, buildFontMenu, fontCategory, fontStack, FONTS,
+  impMode, PAPERS, openFontMenu, closeFontMenu, pickFont, syncFontBtn, renderFontList, buildFontMenu, fontCategory, fontStack, FONTS, openTextInEditor,
   buildRefBakJson, assetManifest, missingAssetIds, relinkScore, relinkFromFiles, ingestInto, fingerprintOf,
 };
 

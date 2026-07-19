@@ -111,7 +111,14 @@ Every project automatically includes a **front cover** and **back cover**; inter
   with the button previewing the current face.
 - **✂ How to fold** — six illustrated steps, in the app where you print.
 
-**Not in v4.4 (flagged, not buried):** the **equirectangular panorama photobook** system
+**v4.5 — the A4 mini zine, native and borderless**
+
+- A new default format whose 8 panels tile A4 **exactly** (74.25 × 105 mm each). Printed at
+  100% the sheet is borderless — no scaling, no cropping, no white edges to trim, proven in
+  the test suite. The US Letter mini zine remains, clearly labelled.
+- Double-click any text on the page to open it in the Text editor, focused and ready.
+
+**Not in v4.5 (flagged, not buried):** the **equirectangular panorama photobook** system
 is still ahead — a substantial build sequenced in [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 v4.0 is Phase 1 of a larger brief — colour proofing, panorama books, mockups and the
