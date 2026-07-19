@@ -118,7 +118,15 @@ Every project automatically includes a **front cover** and **back cover**; inter
   the test suite. The US Letter mini zine remains, clearly labelled.
 - Double-click any text on the page to open it in the Text editor, focused and ready.
 
-**Not in v4.5 (flagged, not buried):** the **equirectangular panorama photobook** system
+**v4.6 — backups adapt to your size**
+
+- Restore an A5 backup while working in A4 (or any format pair) and ZineIt offers to
+  re-fit the whole design to the current size — frames, text, guides, type scale; photos
+  never stretch, by construction. The format switcher can likewise adapt a live project
+  in place instead of starting over. Impossible conversions (fixed page counts) are
+  blocked with a plain-language reason.
+
+**Not in v4.6 (flagged, not buried):** the **equirectangular panorama photobook** system
 is still ahead — a substantial build sequenced in [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 v4.0 is Phase 1 of a larger brief — colour proofing, panorama books, mockups and the

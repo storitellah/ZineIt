@@ -2022,6 +2022,71 @@ T('openTextInEditor is exposed and safe on a missing id', () => {
   eq(Z.view.tab, 'text', 'still switches to the editor');
 });
 
+/* ============ 19p · v4.6: format-adapting restore & conversion ============ */
+T('convertProjectFormat re-fits every frame, text and guide from A5 to A4 portrait', () => {
+  Z.newProject('a5');                                   // 5.83 x 8.27
+  Z.setAsset('CV1', { name: 'c.jpg', src: PXDATA, w: 3000, h: 2000 });
+  const img = Z.addImageEl('CV1');
+  img.x = 1; img.y = 2; img.w = 2; img.h = 1.5;
+  const txt = Z.addTextEl('Scale me', 10, 'caption');
+  txt.x = 0.5; txt.y = 7; txt.w = 4; txt.h = 0.5;
+  Z.state.settings.userGuides.push({ axis: 'v', pos: 2.915 }, { axis: 'h', pos: 4.135 });
+  const p = JSON.parse(JSON.stringify(Z.state));
+  const c = Z.convertProjectFormat(p, 'a4-portrait');   // 8.27 x 11.69
+  const sx = 8.27 / 5.83, sy = 11.69 / 8.27;
+  eq(c.format, 'a4-portrait', 'format switched');
+  const ci = c.pages[Z.curPage].elements.find(e => e.type === 'image');
+  approx(ci.x, 1 * sx, 1e-2, 'x scales by width ratio');
+  approx(ci.y, 2 * sy, 1e-2, 'y scales by height ratio');
+  approx(ci.w, 2 * sx, 1e-2, 'frame width scales');
+  approx(ci.h, 1.5 * sy, 1e-2, 'frame height scales');
+  const ct = c.pages[Z.curPage].elements.find(e => e.type === 'text');
+  const st = Math.sqrt(sx * sy);
+  approx(ct.size, Math.round(10 * st * 2) / 2, 0.51, 'type scales by the geometric mean');
+  approx(c.settings.userGuides[0].pos, 2.915 * sx, 1e-2, 'vertical guide follows width');
+  approx(c.settings.userGuides[1].pos, 4.135 * sy, 1e-2, 'horizontal guide follows height');
+});
+T('conversion cannot stretch a photo — only the width transform is stored', () => {
+  Z.newProject('a5');
+  Z.setAsset('CV2', { name: 'p.jpg', src: PXDATA, w: 6000, h: 4000 });
+  const e = Z.addImageEl('CV2');
+  const g0 = JSON.parse(JSON.stringify(Z.ensureImg(e)));
+  const p = Z.convertProjectFormat(JSON.parse(JSON.stringify(Z.state)), 'a4-portrait');
+  const ce = p.pages[Z.curPage].elements.find(x => x.type === 'image');
+  ok(Number.isFinite(ce.img.w) && !('h' in ce.img), 'the transform still stores width only — height always derives from the photo ratio');
+  approx(ce.img.w, g0.w * (8.27 / 5.83), 1e-2, 'photo width scales with the page width');
+});
+T('the fixed-page guard blocks impossible adaptations and explains why', () => {
+  Z.newProject('a5');                                   // variable page count (8 by default? a5 starts with N)
+  while (Z.state.pages.length > 6) Z.state.pages.pop(); // force a count that cannot be a mini zine
+  const err = Z.convertGuard(Z.state, 'mini-zine-a4');
+  ok(err && /fixed at 8/.test(err), 'guard names the fixed count: ' + err);
+  eq(Z.convertGuard(Z.state, 'a4-portrait'), null, 'variable-count targets are fine');
+});
+T('an A5 backup adapts cleanly into the A4 mini zine when page counts match', () => {
+  Z.newProject('a5');
+  while (Z.state.pages.length > 8) Z.state.pages.pop();
+  while (Z.state.pages.length < 8) Z.state.pages.push(Z.blankPage('Page'));
+  Z.setAsset('CV3', { name: 'z.jpg', src: PXDATA, w: 3000, h: 2000 });
+  Z.addImageEl('CV3');
+  eq(Z.convertGuard(Z.state, 'mini-zine-a4'), null, 'guard passes at 8 pages');
+  const c = Z.convertProjectFormat(JSON.parse(JSON.stringify(Z.state)), 'mini-zine-a4');
+  eq(c.format, 'mini-zine-a4');
+  eq(c.settings.margin, 0, 'target full-bleed applied');
+  eq(c.settings.bleed, true, 'bleed on');
+  eq(c.settings.imp.paper, 'a4', 'native paper applied');
+  eq(Z.validateProject(Z.migrate(JSON.parse(JSON.stringify(c)))), null, 'the adapted project validates');
+});
+T('same-format conversion is a no-op and unknown formats are left untouched', () => {
+  Z.newProject('a5');
+  const before = JSON.stringify(Z.state.pages);
+  const same = Z.convertProjectFormat(JSON.parse(JSON.stringify(Z.state)), 'a5');
+  eq(JSON.stringify(same.pages), before, 'same target changes nothing');
+  const weird = JSON.parse(JSON.stringify(Z.state)); weird.format = 'no-such-format';
+  const out = Z.convertProjectFormat(weird, 'a4-portrait');
+  eq(out.format, 'no-such-format', 'unknown source left alone rather than guessed at');
+});
+
 /* ============ 20 · console health ============ */
 T('no page errors or uncaught exceptions across the whole run', () => {
   eq(pageErrors.length, 0, 'errors: ' + pageErrors.slice(0, 3).join(' | '));

@@ -15,6 +15,11 @@ guides, and a UI pass (labelled toolbar, standalone Export, pan toggle, relocate
 clock). What is left is listed honestly below — nothing here is half-built and quietly
 claimed.
 
+> **v4.6 added format conversion**: restoring a backup of a different size offers to adapt
+> it to the format you are working in (all format pairs, light backups included), and the
+> format switcher can re-fit a live project in place. Photos cannot stretch — the model
+> stores only photo width, so height always derives from the photo's own ratio.
+>
 > **v4.5 made the A4 mini zine native**: a new default format whose 8 panels tile A4
 > exactly, so a 100% print is borderless with zero cropping — the white-border problem is
 > solved in the geometry, not worked around. Double-click text → Text editor also shipped.

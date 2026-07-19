@@ -1,4 +1,4 @@
-ZineIt v4.5 test run — 2026-07-19T19:24:53.016Z
+ZineIt v4.6 test run — 2026-07-19T19:49:53.817Z
 PASS  boots into a valid A4 mini-zine project — borderless by default
 PASS  the classic US Letter mini zine is still available (the dimension tests below use it)
 PASS  spread model: cover alone · 3 interior pairs · back alone
@@ -192,6 +192,11 @@ PASS  the A4 mini zine panel grid tiles A4 exactly — truly nothing to trim
 PASS  each format prints on its native paper: A4 zine → A4, Letter zine → Letter
 PASS  double-clicking a text box opens exactly that text in the Text editor, focused
 PASS  openTextInEditor is exposed and safe on a missing id
+PASS  convertProjectFormat re-fits every frame, text and guide from A5 to A4 portrait
+PASS  conversion cannot stretch a photo — only the width transform is stored
+PASS  the fixed-page guard blocks impossible adaptations and explains why
+PASS  an A5 backup adapts cleanly into the A4 mini zine when page counts match
+PASS  same-format conversion is a no-op and unknown formats are left untouched
 PASS  no page errors or uncaught exceptions across the whole run
 
-194 passed · 0 failed
+199 passed · 0 failed

@@ -590,7 +590,7 @@ body.fs #canvasScroll{padding:14px}
   <header>
     <div class="brand">
       <span class="mark">Zine<span>It</span></span>
-      <span class="ver" id="verBadge">v4.5</span>
+      <span class="ver" id="verBadge">v4.6</span>
     </div>
     <input id="projName" type="text" value="Untitled project" spellcheck="false" aria-label="Project title" title="Project title — click to edit">
     <div class="tbar">
@@ -1204,7 +1204,7 @@ const FORMATS = {
   'book-3x2'   :{group:'Photobooks', name:'Photobook — 3:2 landscape (12 × 8 in)', w:12, h:8},
   'book-2x3'   :{group:'Photobooks', name:'Photobook — 2:3 portrait (8 × 12 in)',  w:8, h:12},
 };
-const APP_VER='4.5', FEEDBACK_EMAIL='hello@storitellah.com';
+const APP_VER='4.6', FEEDBACK_EMAIL='hello@storitellah.com';
 const GRID=0.125, MM=1/25.4;
 const FONTS = ['Inter','Manrope','Roboto','Open Sans','Lato','Montserrat','Poppins','Raleway','Work Sans','DM Sans','Nunito',
   'Rubik','Karla','Source Sans 3','Space Grotesk','Archivo','Archivo Black','IBM Plex Sans','Oswald','Bebas Neue','Anton',
@@ -1501,13 +1501,59 @@ async function downloadBak(){
   store.set(LS_BAK,new Date().toISOString()); renderBakInfo(); hideBanner();
   toast('Backup saved ✓ — verified by test restore before download','ok');
 }
+/* ================= FORMAT CONVERSION =================
+   Re-fit a whole project from one page size to another. Frames, text boxes and guides
+   scale to the new page; type scales by the geometric mean so it reads the same; the
+   photo transform scales with the frame — and because only the photo's WIDTH is stored
+   (height always derives from the photo's own ratio), photos cannot stretch, ever. */
+function convertProjectFormat(p, targetKey){
+  const src=FORMATS[p.format], tgt=FORMATS[targetKey];
+  if(!src||!tgt||p.format===targetKey) return p;
+  const sx=tgt.w/src.w, sy=tgt.h/src.h, st=Math.sqrt(sx*sy);
+  const r2=v=>Math.round(v*1000)/1000;
+  (p.pages||[]).forEach(pg=>(pg.elements||[]).forEach(e=>{
+    e.x=r2(e.x*sx); e.y=r2(e.y*sy); e.w=r2(e.w*sx); e.h=r2(e.h*sy);
+    if(e.home){ e.home.x=r2(e.home.x*sx); e.home.y=r2(e.home.y*sy); e.home.w=r2(e.home.w*sx); e.home.h=r2(e.home.h*sy); }
+    if(e.type==='text'&&Number.isFinite(e.size)) e.size=Math.max(4,Math.round(e.size*st*2)/2);
+    if(e.type==='image'&&e.img){
+      if(Number.isFinite(e.img.w)) e.img.w=r2(e.img.w*sx);   // width only — the photo keeps its own ratio
+      if(Number.isFinite(e.img.ox))e.img.ox=r2(e.img.ox*sx);
+      if(Number.isFinite(e.img.oy))e.img.oy=r2(e.img.oy*sy);
+    }
+  }));
+  const s=p.settings||{};
+  if(Number.isFinite(s.margin)) s.margin=Math.min(1,Math.max(0,Math.round(s.margin*st*100)/100));
+  (s.userGuides||[]).forEach(g=>{ g.pos=r2(g.pos*(g.axis==='v'?sx:sy)); });
+  if(tgt.fullBleed){ s.margin=0; s.bleed=true; s.warnMargins=false; }
+  if(tgt.paper&&s.imp){ s.imp.paper=tgt.paper; s.imp.mode='fill'; }
+  p.format=targetKey;
+  return p;
+}
+/* can this backup be adapted to the format the person is looking at right now? */
+function convertGuard(p, targetKey){
+  const tgt=FORMATS[targetKey];
+  if(!tgt) return 'unknown target format';
+  if(!FORMATS[p.format]) return 'the backup uses a format this version does not know';
+  if(tgt.fixed && p.pages.length!==tgt.fixed)
+    return `${tgt.name} is fixed at ${tgt.fixed} pages, but the backup has ${p.pages.length}`;
+  return null;
+}
 function restoreBak(file){
   const r=new FileReader();
   r.onload=async()=>{ let p; try{ p=JSON.parse(r.result); }catch(e){ toast('Not a valid .bak file','err'); return; }
     const err=validateProject(p);
     if(err){ toast('Restore blocked: '+err,'err'); return; }
-    const info=`"${p.meta&&p.meta.name||'Untitled'}" · ${p.pages.length} pages · ${FORMATS[p.format].name}\nLast modified ${p.meta&&p.meta.modified?new Date(p.meta.modified).toLocaleString():'unknown'}`;
+    const info=`"${p.meta&&p.meta.name||'Untitled'}" · ${p.pages.length} pages · ${FORMATS[p.format]?FORMATS[p.format].name:p.format}\nLast modified ${p.meta&&p.meta.modified?new Date(p.meta.modified).toLocaleString():'unknown'}`;
     if(!confirm('Restore this backup? Your current project will be replaced.\n\n'+info)) return;
+    // the backup may be a different size than what you are working in — offer to adapt it
+    if(p.format!==state.format && FORMATS[p.format] && FORMATS[state.format]){
+      const guardErr=convertGuard(p,state.format);
+      if(guardErr){
+        toast('Restored in its original format — could not adapt: '+guardErr+'.','ok');
+      } else if(confirm(`This backup is ${FORMATS[p.format].name}.\nYou are working in ${FORMATS[state.format].name}.\n\nOK — adapt the backup to ${FORMATS[state.format].name} (layout re-fits, photos never stretch)\nCancel — restore it in its original ${FORMATS[p.format].name}`)){
+        p=convertProjectFormat(p,state.format);
+      }
+    }
     toast('Restoring…');
     const data=p.assetData||{}; delete p.assetData;
     state=migrate(p);
@@ -4029,7 +4075,17 @@ $('projName').addEventListener('input',e=>{ state.meta.name=e.target.value; if(v
 $('fmtSel').addEventListener('change',e=>{
   const k=e.target.value; if(k===state.format)return;
   const hasWork=state.pages.some(p=>p.elements.length);
-  if(hasWork&&!confirm('Changing format starts a new project (page sizes differ).\nSave a .bak first if you need this one.\n\nStart a new '+FORMATS[k].name+'?')){ e.target.value=state.format; return; }
+  if(hasWork){
+    const guardErr=convertGuard(state,k);
+    if(!guardErr && confirm(`Adapt this design to ${FORMATS[k].name}?\nEverything re-fits to the new page size — photos never stretch.\n\nOK — adapt the current design\nCancel — choose whether to start blank instead`)){
+      undoPush();
+      state=migrate(convertProjectFormat(state,k));
+      renderAll(); touch(); toast('Adapted to '+FORMATS[k].name+' ✓ — check each page, then print.','ok');
+      return;
+    }
+    if(guardErr) toast('Cannot adapt: '+guardErr+'.','err');
+    if(!confirm('Start a blank '+FORMATS[k].name+' instead?\nSave a .bak first if you need the current design.')){ e.target.value=state.format; if($('tbFormat'))$('tbFormat').value=state.format; return; }
+  }
   const keep=state.assets; newProject(k); state.assets=keep;
   renderAll(); touch(); toast('New project: '+FORMATS[k].name,'ok');
 });
@@ -4311,6 +4367,7 @@ window.__zineit={
     try{ const b=dataURLtoBlob(src); assetStore.put(id,{full:b,preview:b}); }catch(e){} },
   alphaCapable, bitmapHasAlpha, importGraphics,
   impMode, PAPERS, openFontMenu, closeFontMenu, pickFont, syncFontBtn, renderFontList, buildFontMenu, fontCategory, fontStack, FONTS, openTextInEditor,
+  convertProjectFormat, convertGuard,
   buildRefBakJson, assetManifest, missingAssetIds, relinkScore, relinkFromFiles, ingestInto, fingerprintOf,
 };
 

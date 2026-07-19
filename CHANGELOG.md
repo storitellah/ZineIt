@@ -1,5 +1,34 @@
 # Changelog — ZineIt by Storitellah
 
+## v4.6 — 2026-07-19
+Backups now adapt to the size you are working in — and any project can be re-fitted to any
+format.
+
+### Added — format-adapting restore
+- **Restoring a .bak of a different size now offers to adapt it.** Working in the A4 mini
+  zine and restoring an A5 backup? One click re-fits the whole design to A4: every frame,
+  text box and guide scales to the new page, type scales by the geometric mean so it reads
+  the same, and the print is preset to the format's native paper. Or restore it untouched
+  in its original size — your choice, stated plainly in the dialog.
+- Works for **every format pair** (zines, photobooks, minis), and for **light backups** too,
+  since they restore through the same path.
+- **Photos cannot stretch during conversion — by construction.** ZineIt stores only the
+  photo's width; its height always derives from the photo's own ratio. A conversion scales
+  the frame, and the photo re-sits inside it at its true proportions.
+- A **guard** blocks impossible adaptations honestly: a format fixed at 8 pages will not
+  accept a 12-page backup — the dialog says exactly why, and the backup restores in its
+  original format instead. Nothing is silently discarded.
+
+### Changed — the format switcher can adapt in place
+- Changing format used to mean starting over. Now it asks first: **adapt the current
+  design to the new size** (undo-able), or start blank. The toolbar and panel format menus
+  share one path, and both stay in sync when you cancel.
+
+### Tested
+- 199 automated jsdom tests + 22 Lua tests, all green (5 new: geometry scaling A5→A4,
+  the photos-cannot-stretch proof, the fixed-count guard, a full adapt-and-validate round
+  trip into the A4 mini zine, and the no-op/unknown-format edges).
+
 ## v4.5 — 2026-07-19
 The A4 mini zine becomes native and truly borderless, and double-clicking text opens the
 Text editor.
