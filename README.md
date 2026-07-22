@@ -126,7 +126,23 @@ Every project automatically includes a **front cover** and **back cover**; inter
   in place instead of starting over. Impossible conversions (fixed page counts) are
   blocked with a plain-language reason.
 
-**Not in v4.6 (flagged, not buried):** the **equirectangular panorama photobook** system
+**v5.0 — mobile, panoramas, and a proper icon**
+
+- **Mobile is first-class.** iOS gets a viewport that survives the collapsing address bar;
+  Android's back button closes what's open instead of leaving the app; modals become
+  bottom sheets, the crop window goes full-screen, tap targets hit 44px, and two-finger
+  pinch zooms the page.
+- **Panorama photobook system.** Place a panorama across a spread (widened by the gutter so
+  the fold eats spare pixels), **split it across 2–8 pages** as one continuous photo, or
+  **wrap it around the cover**. Honest DPI, ratio and fold warnings. Never stretched.
+- **New icon** — a zine cutout: paper, the yellow fold, the coral single cut.
+- **[Hosting `zineit.app`](docs/ZINEIT-APP-DOMAIN.md)** — full Cloudflare walkthrough.
+
+**Android APK:** the complete Capacitor project ships in `android/`; it must be compiled
+and signed on your own machine (see [`docs/ANDROID-BUILD.md`](docs/ANDROID-BUILD.md)) —
+it cannot be built in the sandbox ZineIt is developed in.
+
+**Not in v5.0 (flagged, not buried):** the **equirectangular panorama photobook** system
 is still ahead — a substantial build sequenced in [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 v4.0 is Phase 1 of a larger brief — colour proofing, panorama books, mockups and the

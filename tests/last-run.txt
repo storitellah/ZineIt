@@ -1,4 +1,4 @@
-ZineIt v4.6 test run — 2026-07-19T19:49:53.817Z
+ZineIt v5.0 test run — 2026-07-22T22:02:54.263Z
 PASS  boots into a valid A4 mini-zine project — borderless by default
 PASS  the classic US Letter mini zine is still available (the dimension tests below use it)
 PASS  spread model: cover alone · 3 interior pairs · back alone
@@ -197,6 +197,17 @@ PASS  conversion cannot stretch a photo — only the width transform is stored
 PASS  the fixed-page guard blocks impossible adaptations and explains why
 PASS  an A5 backup adapts cleanly into the A4 mini zine when page counts match
 PASS  same-format conversion is a no-op and unknown formats are left untouched
+PASS  panorama detection classifies by aspect ratio and spots equirectangular 360s
+PASS  across-the-spread widens the photo by the gutter so the fold eats spare pixels
+PASS  splitting a panorama lays one continuous photo across N pages
+PASS  a split group nudges together, staying continuous
+PASS  wraparound cover runs one photo across back, spine and front
+PASS  panorama warnings are honest about resolution, ratio and the fold
+PASS  the gutter is configurable and every placement respects it
+PASS  platform detection and phone breakpoint are exposed
+PASS  the back button closes the top open layer instead of leaving the app
+PASS  layers close newest-first, so back unwinds the way it was opened
+PASS  mobile CSS covers the real viewport, sheet modals and 44px touch targets
 PASS  no page errors or uncaught exceptions across the whole run
 
-199 passed · 0 failed
+210 passed · 0 failed

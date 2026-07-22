@@ -4,13 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#1A1A1A">
+<!-- Icon: the zine cutout — one sheet, one fold, one cut. Inlined only: a saved
+     single file has no sibling files to link to; hosted copies get /favicon.ico and
+     /apple-touch-icon.png by convention. -->
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJaaW5lSXQg4oCUIGEgZm9sZGVkIHppbmUgd2l0aCBpdHMgc2luZ2xlIGN1dCI+CiAgPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9IiMxQTFBMUEiLz4KICA8ZyB0cmFuc2Zvcm09InJvdGF0ZSgtNSAzMiAzMikiPgogICAgPCEtLSB0aGUgc2hlZXQgLS0+CiAgICA8cmVjdCB4PSI5IiB5PSIxNCIgd2lkdGg9IjQ2IiBoZWlnaHQ9IjM2IiByeD0iMi41IiBmaWxsPSIjRjdGN0Y1Ii8+CiAgICA8IS0tIHRoZSBob3Jpem9udGFsIGZvbGQsIGVkZ2UgdG8gZWRnZSAtLT4KICAgIDxyZWN0IHg9IjkiIHk9IjMwLjQiIHdpZHRoPSI0NiIgaGVpZ2h0PSIzLjIiIGZpbGw9IiNGRkM0M0QiLz4KICAgIDwhLS0gVEhFIGN1dDogdGhlIG9uZSBzbGl0IHRoYXQgdHVybnMgYSBzaGVldCBpbnRvIGEgYm9va2xldCAtLT4KICAgIDxyZWN0IHg9IjIxIiB5PSIyOS42IiB3aWR0aD0iMjIiIGhlaWdodD0iNC44IiByeD0iMi40IiBmaWxsPSIjRkY1QzVDIi8+CiAgICA8IS0tIHR1cm5lZC11cCBjb3JuZXIsIGNhdWdodCBtaWQtZm9sZCAtLT4KICAgIDxwYXRoIGQ9Ik01NSAxNCBMNTUgMjYgTDQzIDE0IFoiIGZpbGw9IiMwMEI0QTYiLz4KICA8L2c+Cjwvc3ZnPgo=">
 <link rel="manifest" href="manifest.webmanifest" id="pwaManifest">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>ZineIt — by Storitellah</title>
 <meta name="description" content="ZineIt by Storitellah — a local, print-quality zine and photobook layout tool for photojournalists and photographers.">
-<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="%23F6407A"/><stop offset=".5" stop-color="%237C5CFF"/><stop offset="1" stop-color="%233E8DFF"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(%23g)"/><text x="32" y="46" font-family="Arial,Helvetica,sans-serif" font-size="40" font-weight="bold" text-anchor="middle" fill="white">Z</text></svg>'>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter&family=Roboto&family=Open+Sans&family=Lato&family=Montserrat&family=Poppins&family=Raleway&family=Work+Sans&family=DM+Sans&family=Nunito&family=Rubik&family=Karla&family=Space+Grotesk&family=Archivo&family=Archivo+Black&family=IBM+Plex+Sans&family=Oswald&family=Bebas+Neue&family=Anton&family=Merriweather&family=Playfair+Display&family=Lora&family=PT+Serif&family=Libre+Baskerville&family=EB+Garamond&family=Cormorant+Garamond&family=Crimson+Text&family=DM+Serif+Display&family=Abril+Fatface&family=Source+Serif+4&family=Space+Mono&family=IBM+Plex+Mono&family=JetBrains+Mono&family=Inconsolata&family=Courier+Prime&family=Special+Elite&family=Amatic+SC&family=Caveat&family=Shadows+Into+Light&family=Permanent+Marker&family=Source+Sans+3:wght@400;600;700&family=Poppins:wght@700;800&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;600&display=swap">
@@ -461,7 +464,53 @@ body.fs #canvasScroll{padding:14px}
   .teRow{grid-template-columns:1fr;gap:7px}
   .teRow .ops{flex-direction:row}
   .teAdd{grid-template-columns:1fr}
-  .modal{padding:16px}
+
+  /* ---- real viewport height: survives iOS chrome collapsing ---- */
+  #app{height:calc(var(--vh,1vh) * 100)}
+  @supports (height:100dvh){ #app{height:100dvh} }
+
+  /* ---- modals become bottom sheets: reachable with a thumb, swipe-down feel ---- */
+  .modalBk{align-items:flex-end}
+  .modal{width:100%;max-width:none;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    border-radius:16px 16px 0 0;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));
+    animation:sheetUp .22s ease}
+  @keyframes sheetUp{from{transform:translateY(14px);opacity:.6}to{transform:none;opacity:1}}
+  .modal::before{content:"";display:block;width:38px;height:4px;border-radius:999px;background:var(--line);
+    margin:-4px auto 12px}                        /* grab handle affordance */
+  .modal .btns{position:sticky;bottom:0;background:var(--panel);padding-top:10px;margin-top:4px}
+  .modal .btns .btn{flex:1;min-height:44px}       /* thumb-sized primary actions */
+
+  /* the crop window is a full-screen tool on a phone, not a floating dialog */
+  .cropWin{width:100vw;height:calc(var(--vh,1vh) * 100);max-height:none;border-radius:0}
+  @supports (height:100dvh){ .cropWin{height:100dvh} }
+  .cropSide{max-height:44vh}
+  .cropFoot .btn{min-height:44px}
+
+  /* panel tabs: five names must fit a narrow drawer */
+  #rtabs button{font-size:9.5px;letter-spacing:0;padding:0}
+
+  /* every tap target reaches the 44px accessibility floor */
+  .btn,.vbtn,#mtb button{min-height:44px}
+  .toggle{min-height:38px;align-items:center}
+  #library .thumb{min-height:56px}
+}
+
+/* ---- iOS-specific ---- */
+body.ios{-webkit-tap-highlight-color:transparent}
+body.ios input,body.ios textarea,body.ios select{-webkit-appearance:none;border-radius:6px}
+body.ios #canvasScroll{-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+/* iOS home-indicator clearance when installed to the home screen */
+body.ios.installed #mtb{padding-bottom:max(8px,env(safe-area-inset-bottom,0px))}
+
+/* ---- Android-specific ---- */
+body.android #canvasScroll{overscroll-behavior:none}   /* kill pull-to-refresh mid-drag */
+body.android .modal{border-radius:14px 14px 0 0}
+body.android select{background-image:none}
+
+/* ---- any touch device: no hover-only affordances ---- */
+@media (hover:none){
+  .el:hover{outline:none}
+  .tplCard:hover,.coverItem:hover,.fmItem:hover{border-color:var(--line)}
 }
 
 /* ---- crop editor window ---- */
@@ -536,6 +585,18 @@ body.fs #canvasScroll{padding:14px}
 .fArrow{stroke:var(--teal);stroke-width:1.6;fill:none;stroke-linecap:round}
 .fScissor{font-size:9px;fill:var(--coral)}
 .teRow.teFocus{outline:2px solid var(--yellow);outline-offset:2px;border-radius:6px;transition:outline-color .4s}
+/* ---- panorama panel ---- */
+#panoBox{border:1px solid var(--line);border-radius:8px;padding:10px;background:var(--panel-2)}
+.panoHead{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.panoHead b{font-family:var(--display);font-size:12px;font-weight:700;letter-spacing:.3px}
+.panoHead .mono{font-family:var(--mono);font-size:10px;color:var(--faint)}
+#panoWarn{display:flex;flex-direction:column;gap:4px}
+.pw{font-family:var(--caption-font);font-size:10.5px;line-height:1.4;padding:6px 8px;border-radius:5px;border-left:3px solid}
+.pw.ok{border-color:var(--forest);background:rgba(47,138,95,.10);color:var(--muted)}
+.pw.info{border-color:var(--teal);background:rgba(0,180,166,.10);color:var(--muted)}
+.pw.warn{border-color:var(--yellow);background:rgba(255,196,61,.10);color:var(--text)}
+.pw.err{border-color:var(--coral);background:rgba(255,92,92,.12);color:var(--text)}
+
 
 
 
@@ -590,7 +651,7 @@ body.fs #canvasScroll{padding:14px}
   <header>
     <div class="brand">
       <span class="mark">Zine<span>It</span></span>
-      <span class="ver" id="verBadge">v4.6</span>
+      <span class="ver" id="verBadge">v5.0</span>
     </div>
     <input id="projName" type="text" value="Untitled project" spellcheck="false" aria-label="Project title" title="Project title — click to edit">
     <div class="tbar">
@@ -835,6 +896,27 @@ body.fs #canvasScroll{padding:14px}
           <button class="btn" id="rotReset" title="Straighten">0°</button>
         </div>
         <button class="btn wide" id="spreadBtn" style="display:none"></button>
+        <div id="panoBox" style="display:none;flex-direction:column;gap:8px">
+          <div class="panoHead"><b>Panorama</b><span class="mono"><span id="panoAr">—</span> · <span id="panoKind">—</span></span></div>
+          <div class="kv"><span>Currently</span><span id="panoState">—</span></div>
+          <div id="panoWarn"></div>
+          <button class="btn wide" id="panoSpreadBtn" title="One photo across two facing pages, widened so the fold eats spare pixels">Across this spread (gutter-aware)</button>
+          <div class="row">
+            <label class="small" style="flex:0 0 auto">Split across</label>
+            <select id="panoSplitN"><option>2</option><option>3</option><option selected>4</option><option>6</option><option>8</option></select>
+            <button class="btn" id="panoSplitBtn">Pages</button>
+          </div>
+          <button class="btn wide" id="panoWrapBtn" title="One photo across the back cover, spine and front cover">Wraparound cover</button>
+          <div class="row">
+            <label class="small" style="flex:0 0 auto" title="How much of the image the fold and binding swallow">Gutter</label>
+            <input type="number" id="panoGutter" step="0.5" min="0" max="25" style="width:74px"> <span class="small">mm</span>
+          </div>
+          <div class="row">
+            <button class="btn" id="panoUp" title="Nudge every slice up together">▲ Nudge</button>
+            <button class="btn" id="panoDown" title="Nudge every slice down together">▼ Nudge</button>
+          </div>
+          <div class="hint">A panorama is never stretched: these tools move the crop window, not the pixels. The fold physically removes a strip — keep faces and horizons out of it.</div>
+        </div>
         <div class="hint">The frame is a mask: ⇧ drag (or Pan mode) moves the photo <b>anywhere</b>, even outside the frame · scroll or pinch to zoom · the round handle rotates · resize crops, never stretches · nothing is ever written to your original file.<br><b>F</b> fit · <b>⇧F</b> fill · <b>C</b> centre · <b>R</b> reset crop · <b>⇧R</b> reset frame</div>
         <button class="btn" id="panModeBtn">Pan mode: off</button>
       </div>
@@ -1204,7 +1286,7 @@ const FORMATS = {
   'book-3x2'   :{group:'Photobooks', name:'Photobook — 3:2 landscape (12 × 8 in)', w:12, h:8},
   'book-2x3'   :{group:'Photobooks', name:'Photobook — 2:3 portrait (8 × 12 in)',  w:8, h:12},
 };
-const APP_VER='4.6', FEEDBACK_EMAIL='hello@storitellah.com';
+const APP_VER='5.0', FEEDBACK_EMAIL='hello@storitellah.com';
 const GRID=0.125, MM=1/25.4;
 const FONTS = ['Inter','Manrope','Roboto','Open Sans','Lato','Montserrat','Poppins','Raleway','Work Sans','DM Sans','Nunito',
   'Rubik','Karla','Source Sans 3','Space Grotesk','Archivo','Archivo Black','IBM Plex Sans','Oswald','Bebas Neue','Anton',
@@ -1233,6 +1315,7 @@ function defaultSettings(){ return { snap:true, grid:true, margin:0.25, daily:tr
   bleed:false, bleedMm:3, warnMargins:true, pageNumsPreview:false, pageNumsPrint:false,
   guides:{margins:true, safe:false, bleedG:false, fold:true}, nameSuffix:'',
   rulers:false, userGuides:[], snapObjects:true,
+  gutter:0.125,
   imp:{paper:'letter', mode:'fill', fit:true, margins:false, fold:true, cut:true} }; }
 function newProject(formatKey){
   const f=FORMATS[formatKey], n=f.fixed||4;
@@ -2282,6 +2365,178 @@ function makeSpread(){
   renderCanvas(); renderInspector(); renderTimeline(); touch();
   toast('Double-page spread — the photo now spans both facing pages, aligned across the fold.','ok');
 }
+/* ================= PANORAMA PHOTOBOOK SYSTEM =================
+   A panorama is any photo appreciably wider than the page spread it will live on. Printing
+   one properly is not the same as printing a wide photo: the fold (or the saddle-stitch
+   gutter) physically swallows a strip of the image, the binding hides more, and a subject
+   that lands in the gutter is destroyed. This system makes those facts visible and gives
+   you the three real options — span one spread, split across several, or wrap the cover —
+   without ever stretching the photo. */
+
+const PANO_MIN_AR = 1.8;                         // wider than 1.8:1 is treated as a panorama
+const PANO_CLASSES = [
+  {key:'2:1',  ar:2,  name:'2:1 — wide'},
+  {key:'3:1',  ar:3,  name:'3:1 — panoramic'},
+  {key:'4:1',  ar:4,  name:'4:1 — very wide'},
+  {key:'360',  ar:2,  name:'Equirectangular 360° (2:1)', equirect:true}
+];
+function assetAspect(id){ const a=state.assets[id]; return (a&&a.w&&a.h)? a.w/a.h : 0; }
+function isPanorama(id){ return assetAspect(id) >= PANO_MIN_AR; }
+/* an equirectangular 360 is 2:1 within a whisker, and usually very large */
+function isEquirect(id){ const ar=assetAspect(id); return Math.abs(ar-2)<0.04 && (state.assets[id]||{}).w>=4000; }
+function panoClass(id){
+  const ar=assetAspect(id); if(!ar)return null;
+  let best=PANO_CLASSES[0], bd=Infinity;
+  PANO_CLASSES.forEach(c=>{ const d=Math.abs(ar-c.ar); if(d<bd){bd=d;best=c;} });
+  return {ar, near:best, equirect:isEquirect(id)};
+}
+
+/* ---- the gutter: what the fold and binding actually take ---- */
+function gutterIn(){                              // inches lost INTO the fold, total
+  const g=state.settings.gutter;
+  return Number.isFinite(g)? g : (FORMATS[state.format].saddle? 0.25 : 0.125);
+}
+/* the strip of a spread-spanning photo that the fold will eat, as page-inches either side */
+function gutterBand(){ const g=gutterIn(); return {half:g/2, total:g}; }
+
+/* ---- placement 1: one photo across one spread, gutter-aware ---- */
+function panoAcrossSpread(){
+  const e=el(); if(!e||e.type!=='image'||!e.asset){ toast('Select a photo first.','err'); return; }
+  const sp=spreadHostFor(selPg);
+  if(!sp){ toast('This page has no facing page — a panorama spread needs two facing pages.','err'); return; }
+  undoPush();
+  if(selPg===sp.right){
+    const p=pageAt(selPg); p.elements=p.elements.filter(x=>x.id!==e.id);
+    e.x+=fmt().w; pageAt(sp.left).elements.push(e); selPg=sp.left;
+  }
+  e.spread=true; e.pano={mode:'spread', gutter:true};
+  const b=bleedAllow(), f=fmt();
+  e.x=-b; e.y=-b; e.w=f.w*2+2*b; e.h=f.h+2*b;
+  imgFill(e);
+  /* Gutter compensation: widen the photo by the gutter so the pixels the fold swallows are
+     extra, not part of the composition. The photo keeps its ratio — only the frame's crop
+     window shifts, so nothing stretches. */
+  if(e.pano.gutter){ const g=ensureImg(e); g.w += gutterIn(); }
+  if(view.mode!=='spread'){ view.mode='spread'; syncViewBar(); }
+  curPage=sp.left;
+  renderAll(); touch();
+  const warn=panoWarnings(e);
+  toast('Panorama across the spread ✓ — widened by the gutter so the fold eats spare pixels, not your picture.'
+    +(warn.length?' See the warnings in Properties.':''), warn.length?'err':'ok');
+}
+
+/* ---- placement 2: split one panorama across N sequential pages ---- */
+function panoSplit(n){
+  const e=el(); if(!e||e.type!=='image'||!e.asset){ toast('Select a photo first.','err'); return; }
+  n=Math.max(2,Math.min(8,n|0));
+  const start=selPg;
+  if(start+n>state.pages.length){
+    toast(`Not enough pages — a ${n}-page split needs ${n} pages from here (there are ${state.pages.length-start}).`,'err'); return; }
+  undoPush();
+  const f=fmt(), b=bleedAllow(), asset=e.asset, srcImg=Object.assign({},ensureImg(e));
+  // remove the original, then lay one slice per page, each showing its own window of the photo
+  pageAt(start).elements=pageAt(start).elements.filter(x=>x.id!==e.id);
+  const totalW=f.w*n;                                  // the panorama spans this much page-width
+  const gid='pano'+uid();
+  for(let i=0;i<n;i++){
+    const pg=pageAt(start+i);
+    const el2={id:uid(),type:'image',asset,spread:false,graphic:false,
+      x:-b,y:-b,w:f.w+2*b,h:f.h+2*b,
+      pano:{mode:'split',group:gid,index:i,count:n}};
+    ensureImg(el2);
+    // one continuous photo: each slice is the same photo, scaled to the whole run, offset by its share
+    const g=el2.img;
+    g.w = totalW + 2*b;                                // photo width spans every page
+    g.ox = (n-1-2*i)*f.w/2;                            // centre of this page's window
+    g.oy = srcImg.oy||0; g.rot=srcImg.rot||0; g.fx=!!srcImg.fx; g.fy=!!srcImg.fy;
+    pg.elements.push(el2);
+  }
+  curPage=start; selPg=start; selId=pageAt(start).elements.slice(-1)[0].id;
+  renderAll(); touch();
+  toast(`Panorama split across ${n} pages ✓ — one continuous photo, each page showing its own slice.`,'ok');
+}
+/* keep a split group consistent when one slice is nudged */
+function panoGroupOf(e){
+  if(!e||!e.pano||e.pano.mode!=='split')return [];
+  const out=[];
+  state.pages.forEach((pg,pi)=>pg.elements.forEach(x=>{
+    if(x.pano&&x.pano.mode==='split'&&x.pano.group===e.pano.group) out.push({e:x,pi});
+  }));
+  return out.sort((a,b)=>a.e.pano.index-b.e.pano.index);
+}
+function panoNudgeGroup(e,dy,dzoom){
+  const grp=panoGroupOf(e); if(!grp.length)return;
+  undoPush();
+  const f=fmt();
+  grp.forEach(({e:x})=>{
+    const g=ensureImg(x);
+    if(dy) g.oy=(g.oy||0)+dy;
+    if(dzoom){ g.w=Math.max(0.2,g.w*dzoom); g.ox=(x.pano.count-1-2*x.pano.index)*f.w/2*(g.w/(f.w*x.pano.count)); }
+  });
+  renderAll(); touch();
+}
+
+/* ---- placement 3: wraparound cover (back + spine + front from one photo) ---- */
+function panoWrapCover(){
+  const e=el(); if(!e||e.type!=='image'||!e.asset){ toast('Select a photo first.','err'); return; }
+  const last=state.pages.length-1;
+  undoPush();
+  const f=fmt(), b=bleedAllow(), asset=e.asset, gid='wrap'+uid();
+  // front cover = page 0, back cover = last page; the photo runs back → spine → front
+  [[last,0],[0,1]].forEach(([pi,idx])=>{
+    const pg=pageAt(pi);
+    pg.elements=pg.elements.filter(x=>!(x.pano&&x.pano.mode==='wrap'));
+    const el2={id:uid(),type:'image',asset,spread:false,
+      x:-b,y:-b,w:f.w+2*b,h:f.h+2*b,
+      pano:{mode:'wrap',group:gid,index:idx,count:2}};
+    ensureImg(el2);
+    const g=el2.img;
+    g.w=f.w*2+gutterIn()+2*b;                        // back + front + the spine between them
+    g.ox=(idx===0? 1:-1)*(f.w+gutterIn())/2;         // back half, then front half
+    pg.elements.unshift(el2);                        // sit behind the title
+  });
+  curPage=0; selPg=0;
+  renderAll(); touch();
+  toast('Wraparound cover ✓ — one photo runs across the back, the spine and the front.','ok');
+}
+
+/* ---- honest warnings: resolution, ratio, and what lands in the gutter ---- */
+function panoWarnings(e){
+  const out=[];
+  if(!e||e.type!=='image'||!e.asset)return out;
+  const a=state.assets[e.asset]; if(!a)return out;
+  const g=ensureImg(e);
+  const shownW=(e.pano&&e.pano.mode==='split')? g.w : g.w;    // photo width in page inches
+  const dpi = shownW>0 ? a.w/shownW : 0;
+  if(dpi&&dpi<150) out.push({level:'err',  msg:`Only ${Math.round(dpi)} DPI at this size — visibly soft in print. 300 DPI is the target; 150 is the floor.`});
+  else if(dpi&&dpi<300) out.push({level:'warn', msg:`${Math.round(dpi)} DPI — acceptable but not crisp. 300 DPI needs a ${Math.round(shownW*300)}px-wide original.`});
+  const ar=assetAspect(e.asset);
+  if(ar&&ar<PANO_MIN_AR) out.push({level:'warn', msg:`This photo is ${ar.toFixed(2)}:1 — not really a panorama. It will be cropped hard to fill a panoramic frame.`});
+  if(e.pano&&(e.pano.mode==='spread'||e.pano.mode==='wrap')){
+    const gb=gutterBand();
+    out.push({level:'info', msg:`The fold takes about ${(gb.total*25.4).toFixed(0)} mm through the middle. Keep faces and horizons clear of it.`});
+  }
+  if(isEquirect(e.asset)) out.push({level:'info', msg:'Equirectangular 360° source: the far left and right edges are the same seam — place it so the seam falls at the outer edge, not the fold.'});
+  return out;
+}
+function renderPanoPanel(){
+  const box=$('panoBox'); if(!box)return;
+  const e=el();
+  const on = e && e.type==='image' && e.asset;
+  box.style.display = on ? 'flex' : 'none';
+  if(!on)return;
+  const pc=panoClass(e.asset);
+  $('panoAr').textContent = pc? pc.ar.toFixed(2)+':1'+(pc.equirect?' · 360°':'') : '—';
+  $('panoKind').textContent = isPanorama(e.asset)? (pc.near.name) : 'not a panorama';
+  const w=panoWarnings(e);
+  $('panoWarn').innerHTML = w.length
+    ? w.map(x=>`<div class="pw ${x.level}">${escapeHtml(x.msg)}</div>`).join('')
+    : '<div class="pw ok">Resolution and proportions look right for print.</div>';
+  const m=(e.pano&&e.pano.mode)||'';
+  $('panoState').textContent = m==='spread'?'across this spread' : m==='split'?`split across ${e.pano.count} pages`
+    : m==='wrap'?'wraparound cover' : 'placed on one page';
+}
+
 function unSpread(){
   const e=el(); if(!e||!e.spread)return;
   e.spread=false; const f=fmt();
@@ -3549,6 +3804,8 @@ function renderInspector(){
     else if(sp&&e.asset){ sb.style.display='inline-flex'; sb.textContent='Make double-page spread'; }
     else sb.style.display='none';
     if($('graphicChk')) $('graphicChk').checked=!!e.graphic;   // reflect transparent-graphic state
+    if($('panoGutter')) $('panoGutter').value=(gutterIn()*25.4).toFixed(1);
+    renderPanoPanel();
   }
   if(e.type==='text'){ $('txtContent').value=e.text;
     $('txtSize').value=e.size; $('txtAlign').value=e.align;
@@ -4047,6 +4304,120 @@ async function sweepOrphans(){
     for(const k of await assetStore.keys()) if(!valid.has(k)) assetStore.del(k);
   }catch(e){}
 }
+/* ================= MOBILE PLATFORM LAYER =================
+   One codebase, two behaviours. Phones get: a real viewport unit that survives the
+   browser chrome collapsing (iOS), a hardware/gesture back button that closes what is
+   open instead of leaving the app (Android), sheet-style modals, and platform classes
+   so CSS can adapt without guessing. Nothing here changes desktop. */
+const UA=navigator.userAgent||'';
+const IS_IOS = /iPad|iPhone|iPod/.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints>1);
+const IS_ANDROID = /Android/.test(UA);
+const IS_TOUCH = (navigator.maxTouchPoints||0)>0 || 'ontouchstart' in window;
+function isPhone(){ try{ return window.matchMedia('(max-width:820px)').matches; }catch(e){ return (window.innerWidth||1024)<=820; } }
+function isStandalone(){
+  try{ if(window.matchMedia('(display-mode:standalone)').matches)return true; }catch(e){}
+  return navigator.standalone===true;
+}
+/* iOS reports 100vh as the TALLEST the viewport can be, so a full-height layout hides
+   behind the address bar. Publish the real height as --vh and use it in the grid. */
+function setVH(){
+  document.documentElement.style.setProperty('--vh', (window.innerHeight*0.01)+'px');
+}
+/* Everything currently "open" on a phone, newest last — the back button pops this. */
+function openLayers(){
+  /* bottom of the stack first, top last — back closes the top, matching what the eye sees */
+  const out=[];
+  if(document.body.classList.contains('railOpen'))out.push({kind:'rail'});
+  if(document.body.classList.contains('dLeft'))out.push({kind:'left'});
+  if(document.body.classList.contains('dRight'))out.push({kind:'right'});
+  document.querySelectorAll('.modalBk.show').forEach(m=>{
+    if(m.id==='cropBk')return;                 // handled below, it owns a bigger z-index
+    out.push({kind:'modal',el:m});
+  });
+  if($('cropBk')&&$('cropBk').classList.contains('show'))out.push({kind:'crop'});
+  if($('fontMenuBk')&&$('fontMenuBk').classList.contains('show'))out.push({kind:'fontmenu'});
+  return out;
+}
+function closeTopLayer(){
+  const L=openLayers(); if(!L.length)return false;
+  const top=L[L.length-1];
+  if(top.kind==='modal') top.el.classList.remove('show');
+  else if(top.kind==='crop') closeCropEditor();
+  else if(top.kind==='fontmenu') closeFontMenu();
+  else if(top.kind==='rail') document.body.classList.remove('railOpen');
+  else document.body.classList.remove('dLeft','dRight');
+  if(typeof closeDrawers==='function'&&!document.body.classList.contains('dLeft')&&!document.body.classList.contains('dRight'))
+    $('drawerBk').classList.remove('show');
+  return true;
+}
+/* two-finger pinch zooms the whole page view — the gesture everyone expects on a phone.
+   It only engages on empty canvas (not on an element), so element pinch-zoom still works. */
+function initCanvasPinch(){
+  const wrap=$('canvasScroll'); if(!wrap)return;
+  const pts=new Map(); let base=0, baseZf=1, active=false;
+  wrap.addEventListener('pointerdown',ev=>{
+    if(ev.pointerType!=='touch')return;
+    if(ev.target.closest('.el'))return;              // let element gestures win
+    pts.set(ev.pointerId,{x:ev.clientX,y:ev.clientY});
+    if(pts.size===2){
+      const [a,b]=[...pts.values()];
+      base=Math.hypot(a.x-b.x,a.y-b.y); baseZf=scale/96; active=true;
+    }
+  });
+  wrap.addEventListener('pointermove',ev=>{
+    if(!pts.has(ev.pointerId))return;
+    pts.set(ev.pointerId,{x:ev.clientX,y:ev.clientY});
+    if(!active||pts.size<2)return;
+    ev.preventDefault();
+    const [a,b]=[...pts.values()];
+    const d=Math.hypot(a.x-b.x,a.y-b.y);
+    if(base>0){
+      view.zoom='custom';
+      view.zf=Math.max(0.3,Math.min(2.4, baseZf*(d/base)));
+      syncViewBar(); renderCanvas();
+    }
+  },{passive:false});
+  const end=ev=>{ pts.delete(ev.pointerId); if(pts.size<2){ active=false; base=0; } };
+  wrap.addEventListener('pointerup',end);
+  wrap.addEventListener('pointercancel',end);
+}
+function initMobile(){
+  const b=document.body;
+  b.classList.toggle('ios',IS_IOS);
+  b.classList.toggle('android',IS_ANDROID);
+  b.classList.toggle('touch',IS_TOUCH);
+  b.classList.toggle('installed',isStandalone());
+  setVH();
+  window.addEventListener('resize',setVH);
+  window.addEventListener('orientationchange',()=>setTimeout(setVH,220));
+  if(window.visualViewport) window.visualViewport.addEventListener('resize',setVH);
+
+  /* Android back / browser back closes the top layer instead of leaving ZineIt.
+     We keep one sentinel history entry and re-push it whenever something opens. */
+  try{ history.replaceState({zineit:'base'},''); }catch(e){}
+  let guard=false;
+  const pushGuard=()=>{ if(guard)return; try{ history.pushState({zineit:'layer'},''); guard=true; }catch(e){} };
+  const dropGuard=()=>{ guard=false; };
+  window.addEventListener('popstate',()=>{
+    dropGuard();
+    if(closeTopLayer()){ if(openLayers().length)pushGuard(); }
+    else { try{ history.replaceState({zineit:'base'},''); }catch(e){} }
+  });
+  // watch for anything opening, so the guard entry exists before the user swipes back
+  const mo=new MutationObserver(()=>{ if(isPhone()&&openLayers().length)pushGuard(); });
+  mo.observe(document.body,{attributes:true,attributeFilter:['class'],subtree:true});
+
+  /* iOS Safari zooms the whole page on a double-tap; that fights our own gestures. */
+  if(IS_IOS){
+    document.addEventListener('gesturestart',ev=>{ if(ev.target.closest('#canvasScroll,#cropStage'))ev.preventDefault(); },{passive:false});
+    let lastTap=0;
+    document.addEventListener('touchend',ev=>{
+      const t=Date.now();
+      if(t-lastTap<320 && ev.target.closest('#canvasScroll')) ev.preventDefault();
+      lastTap=t;
+    },{passive:false});
+  }
+}
 function boot(){
   initFormatSelect();
   const fs=$('txtFont');
@@ -4060,7 +4431,7 @@ function boot(){
     +'?subject='+encodeURIComponent('ZineIt v'+APP_VER+' — bug report / idea')
     +'&body='+encodeURIComponent('Hi Brian,\n\nWhat happened (or what I wish ZineIt did):\n\n\nSteps to reproduce (for a bug):\n1.\n2.\n\n—\nZineIt v'+APP_VER+' · format: '+state.format+' · '+(navigator.userAgent||''));
   $('feedbackLink').href=fb; $('fbBtn').href=fb;
-  initToolbar(); initLayerBtns(); initWorkspace(); initPWA(); initRulers(); initCropEditor();
+  initToolbar(); initLayerBtns(); initWorkspace(); initPWA(); initRulers(); initCropEditor(); initMobile(); initCanvasPinch();
   renderAll(); applyMobile(); dailyCheck(); setSaveState('saved','autosave on');
   undoReset();
   window.__zineitReady=(async()=>{      // storage warm-up continues in the background
@@ -4150,6 +4521,15 @@ $('centreBtn').addEventListener('click',()=>imgAction(imgCentre));
 $('resetCropBtn').addEventListener('click',()=>imgAction(imgResetCrop));
 $('resetFrameBtn').addEventListener('click',()=>imgAction(imgResetFrame));
 $('cropOpenBtn').addEventListener('click',()=>{ const e=el(); if(e)openCropEditor(e); });
+$('panoSpreadBtn').addEventListener('click',panoAcrossSpread);
+$('panoSplitBtn').addEventListener('click',()=>panoSplit(+$('panoSplitN').value||4));
+$('panoWrapBtn').addEventListener('click',panoWrapCover);
+$('panoGutter').addEventListener('change',ev=>{
+  const mm=Math.max(0,Math.min(25,+ev.target.value||0));
+  state.settings.gutter=mm/25.4; ev.target.value=mm.toFixed(1);
+  renderAll(); touch(); toast('Gutter set to '+mm.toFixed(1)+' mm — panorama placements account for it.','ok'); });
+$('panoUp').addEventListener('click',()=>{ const e=el(); if(e)panoNudgeGroup(e,-0.05,0); });
+$('panoDown').addEventListener('click',()=>{ const e=el(); if(e)panoNudgeGroup(e,0.05,0); });
 $('graphicChk').addEventListener('change',ev=>{ const e=el(); if(!e||e.type!=='image')return;
   e.graphic=ev.target.checked;
   if(e.asset&&state.assets[e.asset]) state.assets[e.asset].graphic=e.graphic;
@@ -4368,6 +4748,9 @@ window.__zineit={
   alphaCapable, bitmapHasAlpha, importGraphics,
   impMode, PAPERS, openFontMenu, closeFontMenu, pickFont, syncFontBtn, renderFontList, buildFontMenu, fontCategory, fontStack, FONTS, openTextInEditor,
   convertProjectFormat, convertGuard,
+  isPanorama, isEquirect, panoClass, assetAspect, gutterIn, gutterBand, panoAcrossSpread, panoSplit,
+  panoWrapCover, panoWarnings, panoGroupOf, panoNudgeGroup, renderPanoPanel, PANO_MIN_AR, PANO_CLASSES,
+  IS_IOS, IS_ANDROID, isPhone, openLayers, closeTopLayer, initMobile, setVH,
   buildRefBakJson, assetManifest, missingAssetIds, relinkScore, relinkFromFiles, ingestInto, fingerprintOf,
 };
 

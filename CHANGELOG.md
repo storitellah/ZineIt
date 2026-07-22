@@ -1,5 +1,71 @@
 # Changelog — ZineIt by Storitellah
 
+## v5.0 — 2026-07-22
+Mobile becomes a first-class platform, panoramas get a real system, and the mark on the
+tab is finally a zine instead of a letter.
+
+### Added — mobile platform layer (iOS, Android, Chrome/Safari/Brave)
+Not a set of breakpoints bolted on — a layer that knows which device it is on.
+
+- **iOS:** the layout now uses the *real* viewport height (`--vh`, and `100dvh` where
+  supported), so it stops hiding behind Safari's collapsing address bar. Double-tap
+  page-zoom is suppressed over the canvas so it no longer fights ZineIt's own gestures.
+  Tap highlight, input styling and momentum scrolling are normalised.
+- **Android:** the **back button (gesture or hardware) now closes whatever is open** —
+  the topmost modal first, then a drawer, then the timeline rail — instead of throwing
+  you out of the app mid-layout. Pull-to-refresh no longer fires mid-drag.
+- **Both:** modals become **bottom sheets** with a grab handle and sticky, thumb-sized
+  buttons; the crop window goes genuinely full-screen; **every tap target meets the 44px
+  floor**; two-finger **pinch zooms the whole page view**; hover-only affordances are
+  dropped on touch devices.
+
+### Added — panorama photobook system
+The last big item from the v4 roadmap. A panorama is not just a wide photo: the fold
+physically swallows a strip of it, and a face landing in the gutter is destroyed. This
+makes those facts visible and gives you the three placements that actually exist.
+
+- **Detection and classification** — 2:1, 3:1, 4:1, and **equirectangular 360°** (spotted
+  by ratio plus resolution).
+- **Across one spread, gutter-aware** — the photo is widened by exactly the gutter, so the
+  fold consumes *spare* pixels rather than your composition.
+- **Split across 2–8 pages** — one continuous photograph, each page showing its own window,
+  stepping by exactly one page width: no repeats, no gaps. Slices stay bound as a group and
+  nudge together.
+- **Wraparound cover** — one photo running across the back cover, the spine and the front.
+- **Configurable gutter** in millimetres; every placement respects it.
+- **Honest warnings** — real DPI at the printed size (not the file's pixel count), a plain
+  "this isn't really a panorama" for near-square photos, how many mm the fold takes, and a
+  note that a 360's seam belongs at the outer edge, never at the fold.
+- As everywhere in ZineIt, **a panorama cannot be stretched**: the model stores photo width
+  only, so height always derives from the photo's own ratio.
+
+### Changed — new icon: the zine cutout
+The favicon was a generic letter **Z** in colours that were not even the brand palette. It
+is now the thing the tool actually makes: a sheet of paper with the **Warm Yellow fold**,
+the **Coral single cut** that turns one sheet into eight pages, and a Teal corner caught
+mid-fold. Rebuilt at every size (`.ico`, 180/192/512 PNG) and checked for legibility at
+16px. A stale second icon link that would have silently won by being later was removed, and
+a test now guards against a duplicate returning.
+
+### Added — hosting guide for `zineit.app`
+`docs/ZINEIT-APP-DOMAIN.md` walks through registering and attaching the domain, including
+the trap specific to `.app`: it is **HSTS-preloaded at the TLD level**, so there is no
+`http://` fallback at all and a still-issuing certificate looks like a hard failure rather
+than a warning. Cost: the domain (~US$14–20/yr); hosting and TLS are free.
+
+### Android APK — still cannot be compiled here, and I checked again
+`java` is present, but there is **no Android SDK, no Gradle, and `dl.google.com` returns
+HTTP 403**. What ships is the complete, branded Capacitor 6 Android Studio project plus
+`docs/ANDROID-BUILD.md` and `docs/APK-SIGNING.md`. On your machine it is
+`npm run android:debug` — about ten minutes. You have to run and sign it yourself in any
+case, since the signing key is yours and must never leave your hands.
+
+### Tested
+- 210 automated jsdom tests + 22 Lua tests, all green (11 new: panorama detection,
+  gutter-aware spread, split continuity, group nudge, wraparound geometry, warning
+  honesty, configurable gutter, platform detection, back-button layer unwinding, and the
+  mobile CSS contract).
+
 ## v4.6 — 2026-07-19
 Backups now adapt to the size you are working in — and any project can be re-fitted to any
 format.

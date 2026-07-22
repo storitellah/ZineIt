@@ -1,7 +1,7 @@
-# TESTING.md — ZineIt v4.6 test report
+# TESTING.md — ZineIt v5.0 test report
 
-**Result: 199 passed · 0 failed · 0 console errors in the app suite, plus 22 Lua unit
-tests for the Lightroom plug-in — 221 total, all green.** The whole tool — through the
+**Result: 210 passed · 0 failed · 0 console errors in the app suite, plus 22 Lua unit
+tests for the Lightroom plug-in — 232 total, all green.** The whole tool — through the
 v4.3 cover-template library, transparent graphics, export-fidelity fix and light-backup +
 relink system — was tested before this render, as required. v4.3 added regression tests
 that lock the text-colour export bug shut, plus coverage for every cover/back recipe,

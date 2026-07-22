@@ -1,1 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F6407A"/><stop offset=".5" stop-color="#7C5CFF"/><stop offset="1" stop-color="#3E8DFF"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#g)"/><text x="32" y="46" font-family="Arial,Helvetica,sans-serif" font-size="40" font-weight="bold" text-anchor="middle" fill="white">Z</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="ZineIt — a folded zine with its single cut">
+  <rect width="64" height="64" rx="14" fill="#1A1A1A"/>
+  <g transform="rotate(-5 32 32)">
+    <!-- the sheet -->
+    <rect x="9" y="14" width="46" height="36" rx="2.5" fill="#F7F7F5"/>
+    <!-- the horizontal fold, edge to edge -->
+    <rect x="9" y="30.4" width="46" height="3.2" fill="#FFC43D"/>
+    <!-- THE cut: the one slit that turns a sheet into a booklet -->
+    <rect x="21" y="29.6" width="22" height="4.8" rx="2.4" fill="#FF5C5C"/>
+    <!-- turned-up corner, caught mid-fold -->
+    <path d="M55 14 L55 26 L43 14 Z" fill="#00B4A6"/>
+  </g>
+</svg>

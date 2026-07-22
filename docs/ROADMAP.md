@@ -15,6 +15,11 @@ guides, and a UI pass (labelled toolbar, standalone Export, pan toggle, relocate
 clock). What is left is listed honestly below — nothing here is half-built and quietly
 claimed.
 
+> **v5.0 shipped the panorama photobook system** (spread / split / wraparound placements,
+> gutter compensation, equirectangular 360 handling, honest DPI + fold warnings) — the last
+> major open item from the v4 brief — plus a **mobile platform layer** for iOS and Android
+> and a new **zine-cutout icon**.
+>
 > **v4.6 added format conversion**: restoring a backup of a different size offers to adapt
 > it to the format you are working in (all format pairs, light backups included), and the
 > format switcher can re-fit a live project in place. Photos cannot stretch — the model

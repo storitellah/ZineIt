@@ -960,7 +960,10 @@ T('physical favicon files ship in the repo with valid signatures', () => {
   const ico = fs.readFileSync(path.join(root, 'favicon.ico'));
   ok(ico.length > 1000 && ico[0] === 0 && ico[1] === 0 && ico[2] === 1 && ico[3] === 0, 'favicon.ico is a real multi-image ICO');
   const svg = fs.readFileSync(path.join(root, 'favicon.svg'), 'utf8');
-  ok(/^<svg /.test(svg) && /linearGradient/.test(svg), 'favicon.svg is the gradient Z mark');
+  ok(/^<svg /.test(svg), 'favicon.svg is an SVG');
+  ok(!/>Z</.test(svg), 'the old letter-Z mark is gone');
+  ok(/#FFC43D/.test(svg) && /#FF5C5C/.test(svg) && /#1A1A1A/.test(svg) && /#F7F7F5/.test(svg),
+    'the zine cutout uses the brand palette (ink, paper, fold yellow, cut coral)');
   for (const f of ['apple-touch-icon.png', 'icon-192.png', 'icon-512.png']) {
     const b = fs.readFileSync(path.join(root, f));
     ok(b.length > 1000 && b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4E && b[3] === 0x47, f + ' is a real PNG');
@@ -974,7 +977,8 @@ T('icons are cache-controlled on Cloudflare; the app itself stays always-fresh',
 });
 T('single-file use keeps working: inline data-URI icon retained, no file-based icon links', () => {
   const src = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
-  ok(/rel="icon" href='data:image\/svg\+xml/.test(src), 'data-URI icon still in the HTML (works when ZineIt.html is opened locally)');
+  ok(/rel="icon" href=["']data:image\/svg\+xml/.test(src), 'data-URI icon still in the HTML (works when ZineIt.html is opened locally)');
+  eq((src.match(/rel="icon"/g) || []).length, 1, 'exactly one icon link — no stale mark left behind to win by being later');
   ok(!/rel="icon" href="favicon/.test(src) && !/rel="apple-touch-icon"/.test(src),
     'no relative icon links that would 404 for a saved single file — iOS and crawlers find the root files by convention');
 });
@@ -2085,6 +2089,148 @@ T('same-format conversion is a no-op and unknown formats are left untouched', ()
   const weird = JSON.parse(JSON.stringify(Z.state)); weird.format = 'no-such-format';
   const out = Z.convertProjectFormat(weird, 'a4-portrait');
   eq(out.format, 'no-such-format', 'unknown source left alone rather than guessed at');
+});
+
+/* ============ 19q · v5.0: panorama photobook system ============ */
+T('panorama detection classifies by aspect ratio and spots equirectangular 360s', () => {
+  Z.newProject('book-8x10');
+  Z.setAsset('P21', { name: 'p2.jpg', src: PXDATA, w: 8000, h: 4000 });   // 2:1
+  Z.setAsset('P31', { name: 'p3.jpg', src: PXDATA, w: 9000, h: 3000 });   // 3:1
+  Z.setAsset('NRM', { name: 'n.jpg',  src: PXDATA, w: 3000, h: 2000 });   // 1.5:1
+  ok(Z.isPanorama('P21'), '2:1 is a panorama');
+  ok(Z.isPanorama('P31'), '3:1 is a panorama');
+  ok(!Z.isPanorama('NRM'), '3:2 is not');
+  ok(Z.isEquirect('P21'), 'a large 2:1 reads as equirectangular 360');
+  ok(!Z.isEquirect('P31'), '3:1 is not equirectangular');
+  approx(Z.panoClass('P31').ar, 3, 1e-6, 'ratio reported');
+});
+T('across-the-spread widens the photo by the gutter so the fold eats spare pixels', () => {
+  Z.newProject('book-8x10');
+  Z.setAsset('PS', { name: 'wide.jpg', src: PXDATA, w: 9000, h: 3000 });
+  Z.goPage(1);
+  const e = Z.addImageEl('PS', null, null, 1);
+  Z.select(1, e.id);
+  const plainFill = Z.coverW(e);
+  Z.panoAcrossSpread();
+  eq(e.spread, true, 'it spans the spread');
+  eq(e.pano.mode, 'spread', 'tagged as a spread panorama');
+  const g = Z.ensureImg(e);
+  ok(g.w > plainFill, 'photo is wider than a plain fill — that extra IS the gutter allowance');
+  approx(g.w - Z.coverW(e), Z.gutterIn(), 1e-6, 'widened by exactly the gutter');
+  ok(!('h' in g), 'still width-only — a panorama can never be stretched');
+});
+T('splitting a panorama lays one continuous photo across N pages', () => {
+  Z.newProject('book-8x10');
+  Z.setAsset('PSP', { name: 'long.jpg', src: PXDATA, w: 12000, h: 3000 });
+  Z.goPage(1);
+  let e = Z.addImageEl('PSP', null, null, 1);
+  Z.select(1, e.id);
+  // refuses honestly when there aren't enough pages, rather than half-doing it
+  Z.panoSplit(4);
+  eq(Z.state.pages.filter(p => p.elements.some(x => x.pano)).length, 0,
+    'a 4-page split from page 1 of a 4-page book is refused, not fudged');
+  while (Z.state.pages.length < 6) Z.state.pages.push(Z.blankPage('Page'));
+  Z.select(1, e.id);
+  Z.panoSplit(4);
+  const grp = [];
+  Z.state.pages.forEach(pg => pg.elements.forEach(x => { if (x.pano && x.pano.mode === 'split') grp.push(x); }));
+  eq(grp.length, 4, 'four slices created');
+  ok(grp.every(x => x.asset === 'PSP'), 'every slice is the same photo');
+  ok(grp.every(x => x.pano.group === grp[0].pano.group), 'one group id binds them');
+  const f = Z.fmt();
+  // each slice shows its own window: offsets step by exactly one page width
+  const sorted = grp.sort((a, b) => a.pano.index - b.pano.index);
+  const step = sorted[0].img.ox - sorted[1].img.ox;
+  approx(step, f.w, 1e-6, 'windows step by one page width — continuous, no repeat, no gap');
+  ok(sorted.every(x => Math.abs(x.img.w - sorted[0].img.w) < 1e-9), 'all slices share one photo width');
+});
+T('a split group nudges together, staying continuous', () => {
+  Z.newProject('book-8x10');
+  while (Z.state.pages.length < 6) Z.state.pages.push(Z.blankPage('Page'));
+  Z.setAsset('PN', { name: 'n.jpg', src: PXDATA, w: 12000, h: 3000 });
+  Z.goPage(1);
+  const e = Z.addImageEl('PN', null, null, 1);
+  Z.select(1, e.id); Z.panoSplit(3);
+  const grp = Z.panoGroupOf(Z.state.pages[1].elements.find(x => x.pano));
+  eq(grp.length, 3, 'group found from any member');
+  const before = grp.map(x => Z.ensureImg(x.e).oy);
+  Z.panoNudgeGroup(grp[0].e, 0.05, 0);
+  const after = Z.panoGroupOf(grp[0].e).map(x => Z.ensureImg(x.e).oy);
+  after.forEach((v, i) => approx(v, before[i] + 0.05, 1e-6, 'every slice moved by the same amount'));
+});
+T('wraparound cover runs one photo across back, spine and front', () => {
+  Z.newProject('book-8x10');
+  Z.setAsset('PW', { name: 'w.jpg', src: PXDATA, w: 9000, h: 3000 });
+  const e = Z.addImageEl('PW', null, null, 0);
+  Z.select(0, e.id);
+  Z.panoWrapCover();
+  const last = Z.state.pages.length - 1;
+  const front = Z.state.pages[0].elements.find(x => x.pano && x.pano.mode === 'wrap');
+  const back = Z.state.pages[last].elements.find(x => x.pano && x.pano.mode === 'wrap');
+  ok(front && back, 'a wrap slice sits on both the front and back cover');
+  eq(front.asset, back.asset, 'same photo across the wrap');
+  const f = Z.fmt();
+  approx(Z.ensureImg(front).w, f.w * 2 + Z.gutterIn() + 2 * Z.bleedAllow(), 1e-6,
+    'photo spans both covers plus the spine');
+  ok(Math.sign(Z.ensureImg(front).ox) !== Math.sign(Z.ensureImg(back).ox), 'the halves face opposite ways');
+});
+T('panorama warnings are honest about resolution, ratio and the fold', () => {
+  Z.newProject('book-8x10');
+  Z.setAsset('LOW', { name: 'small.jpg', src: PXDATA, w: 900, h: 300 });
+  Z.goPage(1);
+  const e = Z.addImageEl('LOW', null, null, 1);
+  Z.select(1, e.id); Z.panoAcrossSpread();
+  const w = Z.panoWarnings(e);
+  ok(w.some(x => x.level === 'err' && /DPI/.test(x.msg)), 'a 900px original across a spread is flagged as too soft');
+  ok(w.some(x => x.level === 'info' && /fold/.test(x.msg)), 'the fold loss is stated in mm');
+  Z.setAsset('SQR', { name: 'sq.jpg', src: PXDATA, w: 3000, h: 2400 });
+  const e2 = Z.addImageEl('SQR', null, null, 2);
+  Z.select(2, e2.id);
+  ok(Z.panoWarnings(e2).some(x => /not really a panorama/.test(x.msg)), 'a near-square photo is called out');
+});
+T('the gutter is configurable and every placement respects it', () => {
+  Z.newProject('book-8x10');
+  Z.state.settings.gutter = 10 / 25.4;                 // 10 mm
+  approx(Z.gutterIn(), 10 / 25.4, 1e-9, 'gutter read back in inches');
+  approx(Z.gutterBand().total, 10 / 25.4, 1e-9, 'band total matches');
+  Z.setAsset('PG', { name: 'g.jpg', src: PXDATA, w: 9000, h: 3000 });
+  Z.goPage(1);
+  const e = Z.addImageEl('PG', null, null, 1);
+  Z.select(1, e.id); Z.panoAcrossSpread();
+  approx(Z.ensureImg(e).w - Z.coverW(e), 10 / 25.4, 1e-6, 'the 10 mm gutter is added to the photo width');
+});
+
+/* ============ 19r · v5.0: mobile platform layer ============ */
+T('platform detection and phone breakpoint are exposed', () => {
+  eq(typeof Z.IS_IOS, 'boolean'); eq(typeof Z.IS_ANDROID, 'boolean');
+  eq(typeof Z.isPhone(), 'boolean', 'phone breakpoint resolves');
+});
+T('the back button closes the top open layer instead of leaving the app', () => {
+  Z.newProject('a5');
+  eq(Z.openLayers().length, 0, 'nothing open to start');
+  document.body.classList.add('dRight');
+  eq(Z.openLayers().length, 1, 'the drawer counts as an open layer');
+  ok(Z.closeTopLayer(), 'back closes it');
+  ok(!document.body.classList.contains('dRight'), 'drawer shut');
+  eq(Z.closeTopLayer(), false, 'with nothing open, back is allowed to leave');
+});
+T('layers close newest-first, so back unwinds the way it was opened', () => {
+  Z.newProject('a5');
+  document.body.classList.add('dRight');
+  $('howFoldBk').classList.add('show');
+  eq(Z.openLayers().length, 2, 'drawer + modal open');
+  Z.closeTopLayer();
+  ok(!$('howFoldBk').classList.contains('show'), 'the modal closed first');
+  ok(document.body.classList.contains('dRight'), 'the drawer is still open underneath');
+  Z.closeTopLayer();
+  ok(!document.body.classList.contains('dRight'), 'then the drawer');
+});
+T('mobile CSS covers the real viewport, sheet modals and 44px touch targets', () => {
+  ok(/--vh/.test(SRC2) && /calc\(var\(--vh,1vh\) \* 100\)/.test(SRC2), 'dynamic viewport height for iOS');
+  ok(/@supports \(height:100dvh\)/.test(SRC2), 'dvh used where supported');
+  ok(/\.modal\{width:100%[\s\S]*border-radius:16px 16px 0 0/.test(SRC2), 'modals become bottom sheets on phones');
+  ok(/\.btn,\.vbtn,#mtb button\{min-height:44px\}/.test(SRC2), 'tap targets meet the 44px floor');
+  ok(/body\.ios/.test(SRC2) && /body\.android/.test(SRC2), 'per-platform styling hooks exist');
 });
 
 /* ============ 20 · console health ============ */
