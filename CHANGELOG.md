@@ -1,5 +1,38 @@
 # Changelog — ZineIt by Storitellah
 
+## v5.1 — 2026-07-23
+The official logo becomes the icon, and the layout is tightened on both phone and desktop.
+
+### Changed — new logo and favicon
+- ZineIt now wears its **real logo** — the folded-Z booklet with the orange page edges and
+  the dotted "i" — in the browser tab, the home-screen icon and the app header. Generated
+  at every size (`.ico`, 180/192/512 PNG, plus an SVG that wraps the artwork) and checked
+  for legibility down to 16px. The header shows the logo beside the wordmark.
+
+### Fixed — mobile preview centring
+- On phones and tablets the page preview **now sits centred by default**, both across and
+  down. The old layout pinned an over-sized page to the top-left corner (a CSS grid +
+  overflow quirk); it now uses safe centring with auto margins so a small page centres and
+  a large one still scrolls without being clipped.
+
+### Fixed — the timeline aligns to the screen
+- Tapping **Timeline** on a phone or tablet now re-fits the canvas into the space that is
+  actually left, keeps the current page **clear of the timeline instead of behind it**, and
+  centres the timeline's pages when they fit the screen (scrolling only when they don't).
+  The current spread scrolls itself into view when the rail opens.
+
+### Fixed — right-panel tabs no longer truncate (desktop)
+- **Selected · Page · Layers · Guides · Export** now show their full names. A stray
+  duplicate font-size was forcing the labels to 14px and clipping them with an ellipsis;
+  the text now scales to fit the tab. The two side panels were rebalanced (left 268px,
+  right 312px) so both read cleanly by default.
+
+### Tested
+- 216 automated jsdom tests + 22 Lua tests, all green (6 new: the header logo, the favicon
+  swap, canvas safe-centring, the rail re-fit + space reservation, full tab labels, and
+  panel balance). Layout changes were also verified by rendering the app on desktop and
+  mobile viewports.
+
 ## v5.0 — 2026-07-22
 Mobile becomes a first-class platform, panoramas get a real system, and the mark on the
 tab is finally a zine instead of a letter.

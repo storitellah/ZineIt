@@ -142,7 +142,15 @@ Every project automatically includes a **front cover** and **back cover**; inter
 and signed on your own machine (see [`docs/ANDROID-BUILD.md`](docs/ANDROID-BUILD.md)) —
 it cannot be built in the sandbox ZineIt is developed in.
 
-**Not in v5.0 (flagged, not buried):** the **equirectangular panorama photobook** system
+**v5.1 — logo, and layout polish**
+
+- The official ZineIt logo is now the favicon, home-screen icon and header mark.
+- Mobile preview is centred by default; the timeline re-fits the canvas and aligns to the
+  screen when opened.
+- Desktop right-panel tabs (Selected · Page · Layers · Guides · Export) show full labels;
+  the two side panels are balanced.
+
+**Not in v5.1 (flagged, not buried):** the **equirectangular panorama photobook** system
 is still ahead — a substantial build sequenced in [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 v4.0 is Phase 1 of a larger brief — colour proofing, panorama books, mockups and the

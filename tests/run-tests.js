@@ -961,9 +961,8 @@ T('physical favicon files ship in the repo with valid signatures', () => {
   ok(ico.length > 1000 && ico[0] === 0 && ico[1] === 0 && ico[2] === 1 && ico[3] === 0, 'favicon.ico is a real multi-image ICO');
   const svg = fs.readFileSync(path.join(root, 'favicon.svg'), 'utf8');
   ok(/^<svg /.test(svg), 'favicon.svg is an SVG');
-  ok(!/>Z</.test(svg), 'the old letter-Z mark is gone');
-  ok(/#FFC43D/.test(svg) && /#FF5C5C/.test(svg) && /#1A1A1A/.test(svg) && /#F7F7F5/.test(svg),
-    'the zine cutout uses the brand palette (ink, paper, fold yellow, cut coral)');
+  ok(/<image[^>]+href="data:image\/png;base64,/.test(svg), 'favicon.svg wraps the official ZineIt logo bitmap');
+  ok(fs.existsSync(path.join(root, 'logo.png')), 'the full-resolution logo ships in the repo');
   for (const f of ['apple-touch-icon.png', 'icon-192.png', 'icon-512.png']) {
     const b = fs.readFileSync(path.join(root, f));
     ok(b.length > 1000 && b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4E && b[3] === 0x47, f + ' is a real PNG');
@@ -1270,7 +1269,7 @@ T('the project title is compact but never truncated in the file', () => {
 });
 T('panels resize, collapse and remember where you left them', () => {
   Z.resetWs();
-  eq(Z.ws.leftW, 244); eq(Z.ws.rightW, 300); eq(Z.ws.railH, 150);
+  eq(Z.ws.leftW, 268); eq(Z.ws.rightW, 312); eq(Z.ws.railH, 150);
   Z.ws.leftW = 320; Z.ws.rightW = 260; Z.ws.railH = 200; Z.applyWs(); Z.saveWs();
   eq($('app').style.getPropertyValue('--leftW'), '320px', 'left width applied as a CSS variable');
   eq($('app').style.getPropertyValue('--rightW'), '260px');
@@ -1283,7 +1282,7 @@ T('panels resize, collapse and remember where you left them', () => {
   Z.loadWs();
   eq(Z.ws.leftW, 320, 'the arrangement survives a reload');
   Z.resetWs();
-  eq(Z.ws.leftW, 244, 'and reset puts it all back');
+  eq(Z.ws.leftW, 268, 'and reset puts it all back');
 });
 T('focus mode and preview-only hide the furniture, Esc brings it back', () => {
   click($('tbFocus'));
@@ -2231,6 +2230,36 @@ T('mobile CSS covers the real viewport, sheet modals and 44px touch targets', ()
   ok(/\.modal\{width:100%[\s\S]*border-radius:16px 16px 0 0/.test(SRC2), 'modals become bottom sheets on phones');
   ok(/\.btn,\.vbtn,#mtb button\{min-height:44px\}/.test(SRC2), 'tap targets meet the 44px floor');
   ok(/body\.ios/.test(SRC2) && /body\.android/.test(SRC2), 'per-platform styling hooks exist');
+});
+
+/* ============ 19s · v5.1: logo, centring, tab legibility ============ */
+T('the header carries the ZineIt logo image', () => {
+  const logo = document.querySelector('.brand img.logo');
+  ok(logo, 'a logo image sits in the header brand');
+  ok(/^data:image\/png;base64,/.test(logo.getAttribute('src')), 'inlined so it works from file:// too');
+});
+T('the favicon and app icons are the supplied logo, not the old cutout', () => {
+  const link = document.querySelector('link[rel="icon"]');
+  ok(link && /^data:image\/svg\+xml/.test(link.getAttribute('href')), 'an inline SVG favicon is present');
+});
+T('the canvas centres its page even when it overflows (mobile fix)', () => {
+  ok(/#canvasScroll\{[^}]*place-content:safe center/.test(SRC2), 'safe centring prevents start-pinning on overflow');
+  ok(/#pageHost\{[^}]*margin:auto/.test(SRC2), 'the page host re-centres via auto margins');
+});
+T('opening the timeline re-fits the canvas and reserves its space on mobile', () => {
+  ok(/body\.railOpen #canvasScroll\{padding-bottom:186px\}/.test(SRC2), 'the page stays clear of the timeline');
+  ok(/function toggleRail\(\)\{[\s\S]*renderCanvas\(\)/.test(SRC2), 'toggling the rail recomputes the fit');
+  ok(/#rail\{[^}]*justify-content:safe center/.test(SRC2), 'timeline pages centre when they fit the screen');
+});
+T('the right-panel tabs render full labels, not truncated icons', () => {
+  const labels = [...document.querySelectorAll('#rtabs button')].map(b => b.textContent.trim());
+  eq(JSON.stringify(labels), JSON.stringify(['Selected','Page','Layers','Guides','Export']), 'all five names present');
+  ok(/#rtabs button\{[^}]*font-size:clamp\(/.test(SRC2), 'tab text scales to fit rather than truncating');
+  ok(!/#rtabs button\{[^}]*text-overflow:ellipsis/.test(SRC2), 'no ellipsis truncation on the tabs');
+});
+T('the two side panels are balanced by default', () => {
+  eq(Z.WS_DEF ? Z.WS_DEF.leftW : 268, 268, 'left default');
+  ok(/var\(--leftW,268px\) 1fr var\(--rightW,312px\)/.test(SRC2), 'left and right defaults are close, right a touch wider for its five tabs');
 });
 
 /* ============ 20 · console health ============ */
