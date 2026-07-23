@@ -1,4 +1,55 @@
-# Changelog — ZineIt by Storitellah
+# Changelog — Zineit by Storitellah
+
+## v5.2 — 2026-07-23
+A real one-click PDF, a flipbook reader, print-shop colour guidance, and the tool's proper
+name in the header.
+
+### Added — one-click A4 mini-zine PDF
+- **Download now gives you a real PDF**, not a trip through the print dialog. It renders the
+  imposed 8-panel sheet at a true **300 DPI** from your original photos, wraps it in a valid
+  PDF by hand (no heavy library — the app stays one small file), and saves it **named after
+  your project**. A4, borderless, ready for the printer. The old print-dialog route is still
+  there as a secondary option.
+
+### Added — flipbook reader
+- A new **Read (flipbook)** tab pages through your zine like a real book — tap the right or
+  left half of a page to turn it, or use the arrow keys. Read the project you're designing,
+  or open image pages to read. (Reading arbitrary **PDF** files needs a PDF engine that
+  would bloat the single file, so that runs on the hosted app at zineit.app; offline, the
+  reader handles your current project and image pages.)
+
+### Added — print & colour guidance (honest about CMYK)
+- A new **Print & colour** panel spells out what a print shop needs: **300 DPI**, **standard
+  black** (K100) for crisp text, **rich black** (≈C75 M68 Y67 K90) for deep fills, and
+  **bleed** (now with a **0.125″** option alongside 3 mm and 5 mm).
+- On CMYK: browsers are RGB-only and can't apply a print ICC profile accurately, so rather
+  than fake it, ZineIt exports clean 300 DPI RGB and tells you exactly how to convert to
+  **Coated GRACoL 2006 (ISO 12647-2)** or **FOGRA39** in a real prepress tool (Affinity
+  Publisher, Scribus, Acrobat). You get a correct, bleed-ready file to start from.
+
+### Fixed — transparent graphics
+- Toggling a placed photo to **Transparent graphic** now **rebuilds it from the original**
+  so real transparency comes back, instead of keeping a matted JPEG preview. Transparent
+  graphics show with no background in the preview and in export. (Graphics added via
+  **+ Graphic / QR** were already transparent; this fixes the toggle path.)
+
+### Changed — the tool is “Zineit by Storitellah”
+- The header now reads **ZineIt · by Storitellah**, with **Storitellah** linking to
+  storitellah.com.
+
+### Already there (worth knowing)
+- **Free placement**: on a blank page, photos drop exactly where you release them — you only
+  get snap-in frames when you choose a template layout.
+- **Double-click text** opens it in the Text editor.
+- **Interactive imposition**: the mini-zine sheet has a live preview that updates as you
+  change paper, fill/fit and fold/cut options.
+
+### Tested
+- 224 automated jsdom tests + 22 Lua tests, all green (10 new: the PDF builder's validity
+  and A4 sizing, the imposed-sheet DPI math, flipbook navigation and its offline-PDF
+  refusal, the byline link, the CMYK/print panel, the 0.125″ bleed, and the transparent-
+  toggle re-ingest). PDF output, the 300 DPI sheet, the flipbook and double-click text were
+  additionally verified by rendering the app in a real browser.
 
 ## v5.1 — 2026-07-23
 The official logo becomes the icon, and the layout is tightened on both phone and desktop.

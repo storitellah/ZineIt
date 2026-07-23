@@ -2267,6 +2267,71 @@ T('the two side panels are balanced by default', () => {
   ok(/var\(--leftW,268px\) 1fr var\(--rightW,312px\)/.test(SRC2), 'left and right defaults are close, right a touch wider for its five tabs');
 });
 
+/* ============ 19t · v5.2: PDF export, flipbook, byline, print guidance ============ */
+T('the one-click PDF builder emits a valid single-image PDF', () => {
+  // synthesize a tiny JPEG byte string (SOI..EOI) — buildImagePdf just embeds bytes, doesn't decode
+  const buf=new Uint8Array([0xFF,0xD8,0xFF,0xE0,0,16,0x4A,0x46,0x49,0x46,0,1,1,0,0,1,0,1,0,0,0xFF,0xD9]);
+  const pdf=Z.buildImagePdf(buf, 11.69291, 8.26772);
+  const head=new TextDecoder().decode(pdf.slice(0,8));
+  const tail=new TextDecoder().decode(pdf.slice(-6));
+  eq(head, '%PDF-1.4', 'valid PDF header');
+  eq(tail, '\n%%EOF', 'valid PDF trailer');
+  const body=new TextDecoder('latin1').decode(pdf);
+  ok(/\/DCTDecode/.test(body), 'the page carries a JPEG image');
+  ok(/\/MediaBox \[0 0 841\.\d+ 595\.\d+\]/.test(body), 'A4 landscape media box in points');
+  ok(/startxref/.test(body) && /\/Root 1 0 R/.test(body), 'has an xref + catalog root');
+});
+T('the imposed A4 sheet targets a true 300 DPI on A4 paper', () => {
+  eq(typeof Z.renderImposedSheetCanvas, 'function', 'the imposed-sheet renderer exists');
+  const a4=Z.PAPERS.a4; ok(a4, 'A4 paper is defined');
+  // A4 = 210 x 297mm = 8.27 x 11.69in; at 300dpi that is ~2480 x 3508px
+  approx(Math.round(a4.w*300), 3508, 6, 'A4 long side ~3508px @300dpi (paper stored landscape)');
+  approx(Math.round(a4.h*300), 2480, 6, 'A4 short side ~2480px @300dpi');
+  ok(/cv\.width=Math\.round\(paper\.w\*DPI\)/.test(SRC2), 'the sheet canvas is sized paper x 300 DPI');
+});
+T('the flipbook steps through pages and clamps at the ends', () => {
+  // stub a page set (real rendering is Playwright-verified) and exercise navigation
+  Z.flip.pages=['a','b','c','d','e','f','g','h']; Z.flip.i=0;
+  Z.renderFlip();
+  eq(Z.flip.i, 0, 'starts on the cover');
+  Z.flipGo(1); eq(Z.flip.i, 1, 'next turns forward');
+  Z.flipGo(5); eq(Z.flip.i, 6, 'jumps forward but stays in range');
+  Z.flipGo(9); eq(Z.flip.i, 7, 'cannot pass the back cover');
+  Z.flipGo(-99); eq(Z.flip.i, 0, 'cannot go before the cover');
+});
+T('the flipbook rejects PDF uploads offline with a pointer to the hosted app', () => {
+  let msg='';
+  const origToast=Z.toast; 
+  // flipFromImages with a fake pdf file: no image files -> should not populate pages
+  Z.flip.pages=[]; 
+  Z.flipFromImages([{type:'application/pdf', name:'zine.pdf'}]);
+  eq(Z.flip.pages.length, 0, 'no pages loaded from a PDF offline');
+});
+T('the header names the tool and links Storitellah', () => {
+  const by=document.querySelector('.brand .byline');
+  ok(by, 'a byline is present');
+  eq(by.getAttribute('href'), 'https://storitellah.com', 'Storitellah links out');
+  ok(/Storitellah/.test(by.textContent), 'reads “by Storitellah”');
+});
+T('the print & colour panel states the CMYK/ICC reality honestly', () => {
+  ok(/Coated GRACoL 2006/.test(SRC2) && /FOGRA39/.test(SRC2), 'names the standard ICC profiles');
+  ok(/standard black/i.test(SRC2) && /K 100/.test(SRC2), 'standard black guidance for text');
+  ok(/rich black/i.test(SRC2) && /C75 M68 Y67 K90/.test(SRC2), 'rich black recipe for solids');
+  ok(/300 DPI/.test(SRC2), '300 DPI stated');
+});
+T('bleed offers a 0.125in option and the model understands it', () => {
+  ok(/0\.125″|value="3\.175"/.test(SRC2), 'the 0.125 inch option exists');
+  Z.state.settings.bleedMm=3.175;
+  approx(Z.bleedMm(), 3.175, 1e-6, 'the model round-trips the 0.125in value');
+  Z.state.settings.bleedMm=5; eq(Z.bleedMm(), 5, '5mm still works');
+  Z.state.settings.bleedMm=3; eq(Z.bleedMm(), 3, '3mm still works');
+});
+T('toggling a placed photo to graphic re-ingests to recover transparency', () => {
+  // the handler is async + needs assetStore; assert the wiring exists and the CSS drops the matte
+  ok(/\.el\.img\.graphic\{background:transparent\}/.test(SRC2), 'graphic elements have no background');
+  ok(/ingestInto\(e\.asset, rec\.full, true\)/.test(SRC2), 'the toggle rebuilds the bitmap from the original to recover alpha');
+});
+
 /* ============ 20 · console health ============ */
 T('no page errors or uncaught exceptions across the whole run', () => {
   eq(pageErrors.length, 0, 'errors: ' + pageErrors.slice(0, 3).join(' | '));

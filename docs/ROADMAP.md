@@ -1,3 +1,9 @@
+> **v5.2** shipped a real one-click A4 PDF export (300 DPI, hand-built, project-named), a
+> flipbook reader tab, a print & colour (CMYK) guidance panel with a 0.125" bleed option,
+> the transparent-graphic toggle fix, and the "by Storitellah" byline linking to
+> storitellah.com. True in-browser CMYK/ICC conversion remains out of scope (browsers are
+> RGB-only); the panel directs to prepress tools for GRACoL/FOGRA39.
+>
 # ZineIt v4 roadmap
 
 The v4 brief describes a professional print application. It is a genuinely good

@@ -1,4 +1,4 @@
-ZineIt v5.1 test run — 2026-07-23T06:10:40.061Z
+ZineIt v5.2 test run — 2026-07-23T15:01:08.236Z
 PASS  boots into a valid A4 mini-zine project — borderless by default
 PASS  the classic US Letter mini zine is still available (the dimension tests below use it)
 PASS  spread model: cover alone · 3 interior pairs · back alone
@@ -214,6 +214,14 @@ PASS  the canvas centres its page even when it overflows (mobile fix)
 PASS  opening the timeline re-fits the canvas and reserves its space on mobile
 PASS  the right-panel tabs render full labels, not truncated icons
 PASS  the two side panels are balanced by default
+PASS  the one-click PDF builder emits a valid single-image PDF
+PASS  the imposed A4 sheet targets a true 300 DPI on A4 paper
+PASS  the flipbook steps through pages and clamps at the ends
+PASS  the flipbook rejects PDF uploads offline with a pointer to the hosted app
+PASS  the header names the tool and links Storitellah
+PASS  the print & colour panel states the CMYK/ICC reality honestly
+PASS  bleed offers a 0.125in option and the model understands it
+PASS  toggling a placed photo to graphic re-ingests to recover transparency
 PASS  no page errors or uncaught exceptions across the whole run
 
-216 passed · 0 failed
+224 passed · 0 failed
