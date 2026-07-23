@@ -963,6 +963,12 @@ T('physical favicon files ship in the repo with valid signatures', () => {
   ok(/^<svg /.test(svg), 'favicon.svg is an SVG');
   ok(/<image[^>]+href="data:image\/png;base64,/.test(svg), 'favicon.svg wraps the official ZineIt logo bitmap');
   ok(fs.existsSync(path.join(root, 'logo.png')), 'the full-resolution logo ships in the repo');
+  // the icon must have a WHITE background for visibility on dark tabs/home screens, not transparency.
+  // A white-backed tile has near-white pixels around the centre; a transparent one has alpha 0 there.
+  const png = fs.readFileSync(path.join(root, 'icon-192.png'));
+  ok(png.length > 1000 && png[0] === 0x89 && png[1] === 0x50, 'icon-192.png is a real PNG');
+  // crude but effective: a transparent-centre tile is much smaller than a white-filled one
+  ok(png.length > 12000, 'icon-192.png carries a filled (white) tile, not a mostly-transparent logo');
   for (const f of ['apple-touch-icon.png', 'icon-192.png', 'icon-512.png']) {
     const b = fs.readFileSync(path.join(root, f));
     ok(b.length > 1000 && b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4E && b[3] === 0x47, f + ' is a real PNG');

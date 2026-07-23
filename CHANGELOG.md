@@ -8,6 +8,9 @@ The official logo becomes the icon, and the layout is tightened on both phone an
   the dotted "i" — in the browser tab, the home-screen icon and the app header. Generated
   at every size (`.ico`, 180/192/512 PNG, plus an SVG that wraps the artwork) and checked
   for legibility down to 16px. The header shows the logo beside the wordmark.
+- The favicon and app icons sit on a **white rounded tile** rather than transparency, so the
+  dark logo stays visible against dark browser tabs and dark home screens. The header logo
+  keeps its transparent background, since it sits on the app's own dark bar by design.
 
 ### Fixed — mobile preview centring
 - On phones and tablets the page preview **now sits centred by default**, both across and
